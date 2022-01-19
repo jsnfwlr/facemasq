@@ -1,0 +1,85 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+// body:not(.dark) {
+//   :root {
+//     --bg-color: hsl(163, 51%, 88%);
+//     --bg-gradient:
+//     --avatar: hsl(207, 100%, 18%);
+//     --link:
+//     --link-contrast: #ffffff;
+//     --button: hsl(186, 100%, 38%);
+//     --button-contrast: #ffffff;
+//     --footer: #eeeeee;
+//     --content:
+//   }
+// }
+// body.dark {
+//   :root {
+//     --bg-color: hsl(207, 100%, 4%);
+//     --bg-gradient:
+
+//     --avatar: hsl(207, 100%, 18%);
+//     --link: hsl(173, 100%, 29%);
+//     --link-contrast: #ffffff;
+//     --button: hsl(186, 100%, 38%);
+//     --button-contrast: #ffffff;
+//     --footer: #eeeeee;
+//     --content: hsl(186, 30%, 80%);
+//   }
+// }
+
+html,
+body {
+  & {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    max-width: 100%;
+
+    // color: var(--content);
+    font-size: 13px;
+    @apply text-gray-900 dark:text-gray-300;
+  }
+
+  #app {
+    & {
+      @apply mt-[64px] lg:mt-14;
+    }
+    & > main {
+      & {
+        min-height: calc(100vh - 45.5px);
+      }
+
+      &.dark {
+        & {
+          background-attachment: fixed;
+          background: linear-gradient(
+            135deg,
+            hsl(207, 25%, 18%) 0%,
+            hsl(207, 50%, 7%) 100%
+          );
+          color: hsl(186, 30%, 80%);
+        }
+
+        // a {
+        //   color: hsl(173, 100%, 29%);
+        // }
+      }
+      &.light {
+        & {
+          background-attachment: fixed;
+          background: linear-gradient(
+            135deg,
+            hsl(163, 51%, 98%) 0%,
+            hsl(163, 51%, 78%) 100%
+          );
+          color: hsl(186, 30%, 10%);
+        }
+        // a {
+        //   color: hsl(173, 100%, 29%);
+        // }
+      }
+    }
+  }
+}

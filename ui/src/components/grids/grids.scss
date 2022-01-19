@@ -1,0 +1,190 @@
+.datagrid {
+  & > table {
+    & {
+      @apply w-full text-gray-900 dark:text-gray-300;
+    }
+    & > thead {
+      & {
+        @apply hidden lg:table-header-group;
+      }
+      & > tr > th {
+        & {
+          @apply lg:text-left lg:py-2 lg:px-3;
+        }
+
+        &.sortable {
+          &:not(.stealth) {
+            cursor: pointer;
+          }
+          &.stealth {
+            cursor: no-drop;
+          }
+          & {
+            position: relative;
+          }
+          &.asc:after {
+            content: "";
+            position: absolute;
+            width: 0;
+            height: 0;
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+            border-bottom: 5px solid white;
+            top: 12px;
+          }
+          &.desc:after {
+            content: "";
+            position: absolute;
+            width: 0;
+            height: 0;
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+            border-top: 5px solid white;
+            bottom: 10px;
+          }
+        }
+      }
+    }
+
+    & > thead,
+    & > tbody {
+      & > tr {
+        & {
+          @apply max-w-full block relative border-b-4 border-gray-100 lg:table-row lg:border-b-0 dark:border-gray-700;
+        }
+        & > td,
+        & > th {
+          /*
+          @media (max-width: 1023px) {
+            &:not(.connectivity) > div:not(.icon):not(.grid) {
+              width: 60%;
+            }
+          }
+          */
+          & > div.icon {
+            display: flex;
+            flex-flow: column;
+            justify-content: center;
+            margin-right: 0.5em;
+          }
+        }
+      }
+    }
+    & > tbody {
+      & > tr {
+        &.editing > td, &.focused.editing > td {
+          @apply bg-blue-100 bg-opacity-50 dark:bg-blue-800 dark:bg-opacity-50;
+        }
+        &.focused > td {
+          @apply bg-cyan-100 bg-opacity-50 dark:bg-cyan-800 dark:bg-opacity-50;
+        }
+        &.deleting > td, &.deleting.focused > td {
+          @apply bg-red-100 bg-opacity-50 dark:bg-red-800 dark:bg-opacity-50;
+        }
+        & > td {
+          @apply flex justify-between py-3 px-4 align-top border-b border-gray-100 lg:table-cell lg:text-left lg:py-2 lg:px-3 lg:align-middle lg:border-b-0 dark:border-gray-700;
+        }
+        & > td.right {
+          text-align: right;
+        }
+        & > td:last-child {
+          @apply border-b-0;
+        }
+        & > td.id > div {
+          opacity: 0.5;
+        }
+      }
+    }
+    &:not(.multibody) {
+      & > tbody {
+        & > tr {
+          &:last-child {
+            @apply border-b-0;
+          }
+          &:nth-child(odd) {
+            & {
+              @apply lg:bg-white lg:dark:bg-gray-900;
+            }
+          }
+          &:nth-child(even) {
+            & {
+              @apply lg:bg-gray-50 lg:dark:bg-gray-800;
+            }
+          }
+          &:nth-child(even),
+          &:nth-child(odd) {
+            &.editing.focused > td,
+            &.editing > td {
+              @apply bg-blue-100 bg-opacity-50 dark:bg-blue-800 dark:bg-opacity-50;
+            }
+            &.focused > td {
+              @apply bg-cyan-100 bg-opacity-50 dark:bg-cyan-800 dark:bg-opacity-50;
+            }
+            &.deleting.focused > td,
+            &.deleting > td {
+              @apply bg-red-100 bg-opacity-50 dark:bg-red-800 dark:bg-opacity-50;
+            }
+            &:not(.editing):not(.deleting):not(.focused):hover > td {
+              @apply lg:bg-teal-100 lg:bg-opacity-50 lg:dark:bg-teal-800 lg:dark:bg-opacity-50;
+              &:not(.actions):not(.expand) {
+                cursor: pointer
+              }
+            }
+          }
+        }
+      }
+    }
+    &.multibody {
+      & > tbody {
+        &:nth-child(even) > tr:not(.editing):not(.deleting):not(.focused) > td {
+          @apply lg:bg-gray-50 lg:dark:bg-gray-800;
+        }
+
+        &:nth-child(odd) > tr:not(.editing):not(.deleting):not(.focused) > td {
+          @apply lg:bg-white lg:dark:bg-gray-900;
+        }
+
+        & > tr {
+          & {
+            @apply bg-opacity-0;
+          }
+          &.editing > td,
+          &.editing.focused > td  {
+            @apply bg-blue-100 bg-opacity-50 dark:bg-blue-800 dark:bg-opacity-50;
+          }
+          &.deleting > td,
+          &.deleting.focused > td {
+            @apply bg-red-100 bg-opacity-50 dark:bg-red-800 dark:bg-opacity-50;
+          }
+          &.focused > td {
+            @apply bg-cyan-100 bg-opacity-50 dark:bg-cyan-800 dark:bg-opacity-50;
+          }
+        }
+      }
+    }
+    &:not(.cardify) {
+      & > tbody {
+        & > tr {
+          & > td:not(.actions):before {
+            content: attr(data-label);
+            white-space: nowrap;
+            width: 40%;
+            @apply pr-3 font-semibold text-left lg:hidden;
+          }
+        }
+      }
+    }
+    &.cardify {
+      & {
+        @apply block lg:table;
+      }
+      & > tbody {
+        @apply block lg:table-row-group;
+      }
+      & > tbody > tr {
+        display: grid;
+        @apply lg:table-row;
+      }
+    }
+  }
+}

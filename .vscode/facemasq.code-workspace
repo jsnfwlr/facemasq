@@ -1,0 +1,28 @@
+{
+	"folders": [
+		{
+			"path": ".."
+		}
+	],
+	"settings": {
+		"editor.codeActionsOnSave": {
+			"source.fixAll.eslint": true
+		},
+		"eslint.validate": [
+			"javascript",
+			"typescript"
+		],
+		"css.customData": [
+			"./facemasq.css-data.json"
+		],
+		"html.format.indentInnerHtml": true,
+		"html.format.wrapAttributes": "preserve",
+		"html.format.wrapLineLength": 0,
+		"prettier.semi": false,
+		"prettier.vueIndentScriptAndStyle": true,
+		"css.validate": false, // Disable css built-in lint
+		"stylelint.enable": true, // Enable sytlelint
+		"scss.validate": false,
+		"editor.tabSize": 2, // Disable scss lint (optional if using scss)
+	}
+}
