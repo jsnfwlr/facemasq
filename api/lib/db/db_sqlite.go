@@ -14,82 +14,76 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-const DBTargetVer = 1
-
-var (
-	Conn                                      *sqlx.DB
-	DBPATH, DataFile, DataRoot, adminPassword string
-)
-
-func init() {
-	adminPassword = os.Getenv("ADMINPASSWORD")
-	if adminPassword == "" {
-		adminPassword = "ResetMe"
-	}
+type SQLite struct {
+    DataRoot      string
+    DataFile      string
+    CurrentVer    int
+    Conn          *sqlx.DB
 }
 
-func Connect(dataRoot, dbFile string) (err error) {
-	var failedQuery string
+func (DBX *SQLite) GetPath() (path string) {
+	return fmt.Sprintf("%s%s", DBX.DataRoot, DBX.DataFile)
+}
 
-	DataRoot = dataRoot
-	DataFile = dbFile
+func CreateSQLite(DataRoot, DataFile string) (DBX SQLite) {
+    DBX.DataRoot = DataRoot
+    DBX.DataFile = DataFile
+    return DBX
+}
 
-	DBPATH = fmt.Sprintf("%s%s", DataRoot, DataFile)
-
-	if _, err = os.Stat(DBPATH); err == nil {
+func (DBX *SQLite) Connect() (Conn *sqlx.DB, err error) {
+	if _, err = os.Stat(DBX.GetPath()); err == nil {
 		log.Println("Database exists, connecting")
-		Conn, err = sqlx.Connect("sqlite3", DBPATH)
+		Conn, err = sqlx.Connect("sqlite3", DBX.GetPath())
 		if err != nil {
 			return
 		}
 
 	} else if os.IsNotExist(err) {
 		log.Println("Creating database")
-		Conn, err = sqlx.Connect("sqlite3", DBPATH)
+		Conn, err = sqlx.Connect("sqlite3", DBX.GetPath())
 		if err != nil {
 			return
 		}
 		log.Println("Connecting to database")
-		failedQuery, err = prepareDB()
+		err = DBX.prepare()
 		if err != nil {
-			err = fmt.Errorf("%q: %s", err, failedQuery)
 			return
 		}
 	}
 
-	err = checkDBVersion()
+	err = DBX.checkVersion()
 
 	return
 }
 
-func checkDBVersion() (err error) {
+func (DBX *SQLite) checkVersion() (err error) {
 	var name string
 	var dbVerStr string
-	var dbCurrentVer int
 	sql := `SELECT name FROM sqlite_master WHERE type='table' AND name='Meta';`
-	err = Conn.Get(&name, sql)
+	err = DBX.Conn.Get(&name, sql)
 	if err != nil {
 		if err.Error() != "sql: no rows in result set" {
 			return
 		}
-		dbCurrentVer = 0
+		DBX.CurrentVer = 0
 	}
 	if name == "Meta" {
 		sql = `SELECT Value FROM Meta WHERE Name = 'DBVersion' AND UserID IS NULL;`
-		err = Conn.Get(&dbVerStr, sql)
+		err = DBX.Conn.Get(&dbVerStr, sql)
 		if err != nil {
 			return
 		}
-		dbCurrentVer, _ = strconv.Atoi(dbVerStr)
+		DBX.CurrentVer, _ = strconv.Atoi(dbVerStr)
 	}
-	if (DBTargetVer - dbCurrentVer) > 0 {
-		log.Printf("Current DB is %d versions behind required version (v%d -> v%d)\n", (DBTargetVer - dbCurrentVer), dbCurrentVer, DBTargetVer)
+	if (DBTargetVer - DBX.CurrentVer) > 0 {
+		log.Printf("Current DB is %d versions behind required version (v%d -> v%d)\n", (DBTargetVer - DBX.CurrentVer), DBX.CurrentVer, DBTargetVer)
 	} else {
-		log.Printf("Current DB version is up to date (v%d -> v%d)\n", dbCurrentVer, DBTargetVer)
+		log.Printf("Current DB version is up to date (v%d -> v%d)\n", DBX.CurrentVer, DBTargetVer)
 	}
-	for i := 1; i <= (DBTargetVer - dbCurrentVer); i++ {
+	for i := 1; i <= (DBTargetVer - DBX.CurrentVer); i++ {
 		log.Printf("Upgrading DB to Version %d\n", i)
-		err = upgradeDBTo(i)
+		err = DBX.upgrade(i)
 		if err != nil {
 			return
 		}
@@ -98,30 +92,30 @@ func checkDBVersion() (err error) {
 
 }
 
-func upgradeDBTo(dbUpgradeVer int) (err error) {
+func (DBX *SQLite) upgrade(newVersion int) (err error) {
 	var fileContents []byte
 
-	backupFileName := fmt.Sprintf("%s_ver%d.sqlite", strings.Replace(DBPATH, ".sqlite", "", -1), (dbUpgradeVer - 1))
+	backupFileName := fmt.Sprintf("%s_ver%d.sqlite", strings.Replace(DBX.GetPath(), ".sqlite", "", -1), (newVersion - 1))
 	log.Printf("Creating backup of DB  %s\n", backupFileName)
-	_, err = files.Copy(DBPATH, backupFileName)
+	_, err = files.Copy(DBX.GetPath(), backupFileName)
 	if err != nil {
 		return
 	}
 
-	sqlFileLocation := fmt.Sprintf("%s/ver_%d.sql", strings.Replace(DataRoot, "data", "upgrades", -1), dbUpgradeVer)
+	sqlFileLocation := fmt.Sprintf("%s/ver_%d.sql", strings.Replace(DBX.DataRoot, "data", "upgrades", -1), newVersion)
 	if _, err = os.Stat(sqlFileLocation); err == nil {
 		fileContents, err = ioutil.ReadFile(sqlFileLocation)
 		if err != nil {
 			return
 		}
-		_, err = Conn.Exec(string(fileContents))
+		_, err = DBX.Conn.Exec(string(fileContents))
 	} else if os.IsNotExist(err) {
 		err = fmt.Errorf("could not find db upgrade file %s", sqlFileLocation)
 	}
 	return
 }
 
-func prepareDB() (query string, err error) {
+func (DBX *SQLite) prepare() (err error) {
 	var newPassword string
 	log.Println("Initializing database")
 	newPassword, err = password.HashPassword(adminPassword)
@@ -144,7 +138,7 @@ func prepareDB() (query string, err error) {
 		`CREATE TABLE "Users" ("ID" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, "Username" TEXT UNIQUE, "Password" TEXT, "Label" TEXT NOT NULL UNIQUE, "CanAuthenticate" BOOLEAN DEFAULT FALSE NOT NULL, "AccessLevel" INTEGER DEFAULT 0 NOT NULL, "IsInternal" BOOLEAN DEFAULT FALSE NOT NULL, "Notes" TEXT, "IsLocked" BOOLEAN DEFAULT FALSE NOT NULL);`,
 
 		// MetaData   - App settings & User preferences
-		`CREATE TABLE "Meta" ("Name" TEXT NOT NULL, "Value" TEXT NOT NULL, "UserID" INTEGER,  FOREIGN KEY("UserID") REFERENCES "Users"("ID"), UNIQUE("Name", "UserID"));`,
+		`CREATE TABLE "Meta" ("Name" TEXT NOT NULL, "Value" TEXT NOT NULL, "UserID" INTEGER, FOREIGN KEY("UserID") REFERENCES "Users"("ID"), UNIQUE("Name", "UserID"));`,
 
 		// DeviceData - Tables that define the devices, their interfaces, addresses, and hostnames
 		`CREATE TABLE "Devices" ("ID" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, "MachineName" TEXT DEFAULT "Unknown" NOT NULL, "Brand" TEXT, "Model" TEXT, "Purchased" DATETIME, "Serial" TEXT, "IsTracked" BOOLEAN DEFAULT FALSE NOT NULL, "FirstSeen" DATETIME NOT NULL, "IsGuest" BOOLEAN DEFAULT FALSE NOT NULL, "IsOnline" BOOLEAN DEFAULT FALSE NOT NULL, "Label" TEXT, "Notes" TEXT, "CategoryID" INTEGER DEFAULT 1 NOT NULL, "StatusID" INTEGER DEFAULT 1 NOT NULL, "MaintainerID" INTEGER DEFAULT 1 NOT NULL, "LocationID" INTEGER DEFAULT 1 NOT NULL, "DeviceTypeID" INTEGER DEFAULT 1 NOT NULL, "OperatingSystemID" INTEGER DEFAULT 1 NOT NULL, "ArchitectureID" INTEGER DEFAULT 1 NOT NULL, FOREIGN KEY("CategoryID") REFERENCES "Categories"("ID"), FOREIGN KEY("StatusID") REFERENCES "Status"("ID"), FOREIGN KEY("MaintainerID") REFERENCES "Maintainers"("ID"), FOREIGN KEY("LocationID") REFERENCES "Locations"("ID"), FOREIGN KEY("DeviceTypeID") REFERENCES "DeviceTypes"("ID"), FOREIGN KEY("OperatingSystemID") REFERENCES "OperatingSystems"("ID"), FOREIGN KEY("ArchitectureID") REFERENCES "Architectures"("ID"));`,
@@ -155,6 +149,7 @@ func prepareDB() (query string, err error) {
 		// ScanData   - Tables that record the times that addresses were online
 		`CREATE TABLE "Scans" ("ID" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, "Time" DATETIME NOT NULL UNIQUE);`,
 		`CREATE TABLE "History" ("AddressID" INTEGER NOT NULL, "ScanID" TEXT NOT NULL, UNIQUE("AddressID", "ScanID"), FOREIGN KEY("AddressID") REFERENCES "Addresses"("ID"), FOREIGN KEY("ScanID") REFERENCES "Scans"("ID"));`,
+		`CREATE TABLE "Ports" ("AddressID" INTEGER NOT NULL, "ScanID" TEXT NOT NULL, "Protocol" TEXT NOT NULL, "Port" INTEGER NOT NULL, UNIQUE("AddressID", "ScanID", "Protocol", "Port"), FOREIGN KEY("AddressID") REFERENCES "Addresses"("ID"), FOREIGN KEY("ScanID") REFERENCES "Scans"("ID"));`,
 	}
 
 	insert := []string{
@@ -172,16 +167,18 @@ func prepareDB() (query string, err error) {
 		`INSERT INTO "Meta" ("Name", "Value") VALUES ("DBVersion", "1");`,
 	}
 
-	for _, query = range create {
-		_, err = Conn.Exec(query)
+	for _, query := range create {
+		_, err = DBX.Conn.Exec(query)
 		if err != nil {
+			err = fmt.Errorf("%v\n%s\n", err.Error(), query)
 			return
 		}
 	}
 
-	for _, query = range insert {
-		_, err = Conn.Exec(query)
+	for _, query := range insert {
+		_, err = DBX.Conn.Exec(query)
 		if err != nil {
+			err = fmt.Errorf("%v\n%s\n", err.Error(), query)
 			return
 		}
 	}

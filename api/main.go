@@ -12,22 +12,45 @@ import (
 	"github.com/jsnfwlr/facemasq/api/routes"
 )
 
-var port string
+var (
+  port string
+  dbEngine db.Engine
+)
 
 func init() {
+	var err error
 	port = os.Getenv("PORT")
 	if port == "" {
 		port = "6135"
 	}
+	dbEngineType := os.Getenv("DBENGINE")
+	switch dbEngineType {
+		case "", "sqlite":
+			dbEngine = db.Engine{
+				EngineType: "sqlite",
+				DataRoot: "../data",
+				DataFile: "network.sqlite",
+			}
+//		case "mysql", "mariadb":
+//			log.Fatal("Not yet supported")
+//		case "postgresql":
+//			log.Fatal("Not yet supported")
+		default:
+			log.Fatal("Not yet supported")
+	}
+	if err != nil {
+	    log.Fatalf("%v", err.Error())
+	}
 }
 
 func main() {
-	log.Println("Starting facemasq")
-	err := db.Connect("../data/", "network.sqlite")
+	var err error
+	log.Println("Running faceMasq as a daemon")
+	db.Conn, err = dbEngine.Connect()
 	if err != nil {
 		log.Fatalf("%v", err)
 	}
-
+//	db.Conn = dbEngine.Conn
 	netscan.Schedule()
 
 	err = runServer()

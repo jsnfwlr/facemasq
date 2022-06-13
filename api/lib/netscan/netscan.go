@@ -17,6 +17,7 @@ import (
 	"github.com/volatiletech/null"
 
 	"github.com/jsnfwlr/facemasq/api/lib/db"
+	"github.com/jsnfwlr/facemasq/api/lib/portscan"
 	"github.com/jsnfwlr/facemasq/api/models/Addresses"
 	"github.com/jsnfwlr/facemasq/api/models/Netfaces"
 )
@@ -211,6 +212,34 @@ func ScanAndStore() (err error) {
 		fmt.Println("Error updating Interfaces statuses")
 		return
 	}
+
+	type PortScan struct {
+		AddressID int    `db:"AddressID"`
+		IPv4      string `db:"IPv4"`
+	}
+	var portScans []PortScan
+	sql = `SELECT Addresses.ID AS AddressID, IPv4 FROM Addresses JOIN Interfaces ON Interfaces.ID = InterfaceID JOIN Devices ON Devices.ID = DeviceID WHERE Devices.StatusID = 1 AND Devices.IsOnline = true;`
+	err = db.Conn.Select(&portScans, sql)
+	if err != nil {
+		if err.Error() != "sql: no rows in result set" {
+			fmt.Printf("%v\n", err)
+			return
+		}
+	}
+	for _, scan := range portScans {
+		result := portscan.ScanAsync(scan.IPv4)
+		for _, result := range result.Ports {
+			if result.State == "open" {
+				sql = `INSERT INTO Ports (AddressID, ScanID, Port, Protocol) VALUES (?,?,?,?);`
+				_, err = db.Conn.Exec(sql, scan.AddressID, scanID, result.Number, result.Protocol)
+				if err != nil {
+					fmt.Println("Error recording port state")
+					return
+				}
+			}
+		}
+	}
+
 	return
 }
 

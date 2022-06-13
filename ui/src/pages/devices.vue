@@ -4,7 +4,7 @@
   import { useUser } from "@/stores/user"
   import { useDevices, Device } from "@/stores/devices"
   import { useParams } from "@/stores/params"
-  
+ 
   import { parse, differenceInWeeks, differenceInHours, differenceInDays, differenceInMinutes } from 'date-fns'
 
   import Btn from '@/components/elements/Btn.vue'
@@ -12,7 +12,7 @@
   import Control from "@/components/elements/Control.vue"
   import DeviceGrid from "@/components/grids/Devices.vue"
   import Field from "@/components/containers/Field.vue"
-import DevicesVue from "@/components/grids/Devices.vue"
+  import DevicesVue from "@/components/grids/Devices.vue"
 
 
   // const userStore = useUser()
@@ -210,3 +210,13 @@ import DevicesVue from "@/components/grids/Devices.vue"
   </card>
 </template>
 
+
+<style lang="scss">
+  .filters {
+    .control {
+      select {
+
+      }
+    }
+  }
+</style>
