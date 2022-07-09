@@ -40,8 +40,8 @@ type Model struct {
 }
 
 func Get() (records []Model, err error) {
-	sql := `SELECT * FROM ` + TABLENAME + `;`
-	err = db.Conn.Select(&records, sql)
+	query := `SELECT * FROM ` + TABLENAME + `;`
+	err = db.Conn.Select(&records, query)
 	return
 }
 
@@ -54,22 +54,22 @@ func (records Models) Save() {
 func (record *Model) Save() (err error) {
 	var result sql.Result
 	if record.ID == 0 {
-		sql := `INSERT INTO ` + TABLENAME + ` (MachineName, Brand,        Model,        Purchased,        Serial,        IsTracked,        FirstSeen,        IsGuest,        IsOnline       , Label,        Notes,        CategoryID,        StatusID,        MaintainerID,        LocationID,        DeviceTypeID,        OperatingSystemID,        ArchitectureID) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);`
-		result, err = db.Conn.Exec(sql, record.MachineName, record.Brand, record.Model, record.Purchased, record.Serial, record.IsTracked, record.FirstSeen, record.IsGuest, record.IsOnline, record.Label, record.Notes, record.CategoryID, record.StatusID, record.MaintainerID, record.LocationID, record.DeviceTypeID, record.OperatingSystemID, record.ArchitectureID)
+		query := `INSERT INTO ` + TABLENAME + ` (MachineName, Brand,        Model,        Purchased,        Serial,        IsTracked,        FirstSeen,        IsGuest,        IsOnline       , Label,        Notes,        CategoryID,        StatusID,        MaintainerID,        LocationID,        DeviceTypeID,        OperatingSystemID,        ArchitectureID) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);`
+		result, err = db.Conn.Exec(query, record.MachineName, record.Brand, record.Model, record.Purchased, record.Serial, record.IsTracked, record.FirstSeen, record.IsGuest, record.IsOnline, record.Label, record.Notes, record.CategoryID, record.StatusID, record.MaintainerID, record.LocationID, record.DeviceTypeID, record.OperatingSystemID, record.ArchitectureID)
 		if err != nil {
 			return
 		}
 		record.ID, err = result.LastInsertId()
 	} else {
-		sql := `UPDATE ` + TABLENAME + ` SET
+		query := `UPDATE ` + TABLENAME + ` SET
 		                           MachineName = ?, 	 Brand = ?,    Model = ?,    Purchased = ?,    Serial = ?,    IsTracked = ?,    FirstSeen = ?,    IsGuest = ?,    IsOnline = ?,    Label = ?,    Notes = ?,    CategoryID = ?,    StatusID = ?,    MaintainerID = ?,    LocationID = ?,    DeviceTypeID = ?,    OperatingSystemID = ?,    ArchitectureID = ?     WHERE ID = ?;`
-		_, err = db.Conn.Exec(sql, record.MachineName, record.Brand, record.Model, record.Purchased, record.Serial, record.IsTracked, record.FirstSeen, record.IsGuest, record.IsOnline, record.Label, record.Notes, record.CategoryID, record.StatusID, record.MaintainerID, record.LocationID, record.DeviceTypeID, record.OperatingSystemID, record.ArchitectureID, record.ID)
+		_, err = db.Conn.Exec(query, record.MachineName, record.Brand, record.Model, record.Purchased, record.Serial, record.IsTracked, record.FirstSeen, record.IsGuest, record.IsOnline, record.Label, record.Notes, record.CategoryID, record.StatusID, record.MaintainerID, record.LocationID, record.DeviceTypeID, record.OperatingSystemID, record.ArchitectureID, record.ID)
 	}
 	return
 }
 
 func (record *Model) Delete() (err error) {
-	sql := `DELETE FROM ` + TABLENAME + ` WHERE ID = ?;`
-	_, err = db.Conn.Exec(sql, record.ID)
+	query := `DELETE FROM ` + TABLENAME + ` WHERE ID = ?;`
+	_, err = db.Conn.Exec(query, record.ID)
 	return
 }

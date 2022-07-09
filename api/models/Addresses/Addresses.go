@@ -33,8 +33,8 @@ type Model struct {
 type Models []Model
 
 func Get() (records []Model, err error) {
-	sql := `SELECT * FROM ` + TABLENAME + `;`
-	err = db.Conn.Select(&records, sql)
+	query := `SELECT * FROM ` + TABLENAME + `;`
+	err = db.Conn.Select(&records, query)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -53,21 +53,21 @@ func (records Models) Save() {
 func (record *Model) Save() (err error) {
 	var result sql.Result
 	if record.ID == 0 {
-		sql := `INSERT INTO ` + TABLENAME + ` (IPv4, IPv6, IsPrimary, IsVirtual, IsReserved, LastSeen, Label, Notes, InterfaceID) VALUES (?,?,?,?,?,?,?,?,?);`
-		result, err = db.Conn.Exec(sql, record.IPv4, record.IPv6, record.IsPrimary, record.IsVirtual, record.IsReserved, record.LastSeen, record.Label, record.Notes, record.InterfaceID)
+		query := `INSERT INTO ` + TABLENAME + ` (IPv4, IPv6, IsPrimary, IsVirtual, IsReserved, LastSeen, Label, Notes, InterfaceID) VALUES (?,?,?,?,?,?,?,?,?);`
+		result, err = db.Conn.Exec(query, record.IPv4, record.IPv6, record.IsPrimary, record.IsVirtual, record.IsReserved, record.LastSeen, record.Label, record.Notes, record.InterfaceID)
 		if err != nil {
 			return
 		}
 		record.ID, err = result.LastInsertId()
 	} else {
-		sql := `UPDATE ` + TABLENAME + ` SET IPv4 = ?, IPv6 = ?, IsPrimary = ?, IsVirtual = ?, IsReserved = ?, LastSeen = ?, Label = ?, Notes = ?, InterfaceID = ? WHERE ID = ?;`
-		_, err = db.Conn.Exec(sql, record.IPv4, record.IPv6, record.IsPrimary, record.IsVirtual, record.IsReserved, record.LastSeen, record.Label, record.Notes, record.InterfaceID, record.ID)
+		query := `UPDATE ` + TABLENAME + ` SET IPv4 = ?, IPv6 = ?, IsPrimary = ?, IsVirtual = ?, IsReserved = ?, LastSeen = ?, Label = ?, Notes = ?, InterfaceID = ? WHERE ID = ?;`
+		_, err = db.Conn.Exec(query, record.IPv4, record.IPv6, record.IsPrimary, record.IsVirtual, record.IsReserved, record.LastSeen, record.Label, record.Notes, record.InterfaceID, record.ID)
 	}
 	return
 }
 
 func (record *Model) Delete() (err error) {
-	sql := `DELETE FROM ` + TABLENAME + ` WHERE ID = ?;`
-	_, err = db.Conn.Exec(sql, record.ID)
+	query := `DELETE FROM ` + TABLENAME + ` WHERE ID = ?;`
+	_, err = db.Conn.Exec(query, record.ID)
 	return
 }
