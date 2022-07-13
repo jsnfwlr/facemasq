@@ -4,7 +4,6 @@ type: docker
 name: default
 
 steps:
-
 - name: frontend
   image: node
   commands:
