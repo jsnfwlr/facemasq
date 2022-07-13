@@ -9,6 +9,7 @@ steps:
   commands:
   - cd ui
   - npm install -g pnpm
+  - npx browserslist@latest --update-db
   - pnpm install
   - pnpm build
 
