@@ -8,8 +8,9 @@ steps:
   image: node
   commands:
   - cd ui
-  - npm install
-  - npm run build
+  - curl -fsSL https://get.pnpm.io/install.sh | sh -
+  - pnpm install
+  - pnpm build
 
 - name: backend
   image: golang
