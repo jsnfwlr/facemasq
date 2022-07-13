@@ -15,3 +15,8 @@ steps:
   commands:
   - cd ui
   - npm install
+
+trigger:
+  event:
+  - push
+  - pull_request
