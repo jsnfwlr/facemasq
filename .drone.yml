@@ -9,6 +9,7 @@ steps:
   commands:
   - cd ui
   - npm install
+  - npm build
 
 - name: backend
   image: golang
