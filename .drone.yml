@@ -8,7 +8,7 @@ steps:
   image: node
   commands:
   - cd ui
-  - curl -fsSL https://get.pnpm.io/install.sh | sh -
+  - npm install -g pnpm
   - pnpm install
   - pnpm build
 
