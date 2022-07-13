@@ -7,9 +7,11 @@ steps:
 - name: backend
   image: golang
   commands:
+  - cd api
   - go build
 
 - name: frontend
   image: node
   commands:
+  - cd ui
   - npm install
