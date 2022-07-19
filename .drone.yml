@@ -17,7 +17,10 @@ steps:
   image: golang
   commands:
   - cd api
-  - go build
+  - wget https://www.tcpdump.org/release/libpcap-1.10.1.tar.gz
+  - tar xvf libpcap-1.10.1.tar.gz && cd libpcap-1.10.1 && ./configure --with-pcap=linux && make
+  - go mod tidy
+  - CGO_ENABLED=1 LD_LIBRARY_PATH="-L/build/libpcap-1.10.1" CGO_LDFLAGS="-L/build/libpcap-1.10.1" CGO_CPPFLAGS="-I/build/libpcap-1.10.1" go build -ldflags '-linkmode external -extldflags -static' --tags "linux sqlite_foreign_keys=1" ./
 
 trigger:
   event:
