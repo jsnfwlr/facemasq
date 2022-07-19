@@ -1,6 +1,6 @@
 #ARG PCAPV="1.10.1"
 
-FROM golang:1.17-alpine  as godeps
+FROM golang:1.18-alpine  as godeps
 USER root
 RUN mkdir -p /build/dist/data /build/dist/api
 COPY ./api /build

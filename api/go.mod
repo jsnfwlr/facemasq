@@ -1,6 +1,6 @@
 module github.com/jsnfwlr/facemasq/api
 
-go 1.17
+go 1.18
 
 require (
 	github.com/auth0/go-jwt-middleware v1.0.1
