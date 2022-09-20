@@ -15,19 +15,19 @@ test-api-coverage:
 
 tag-alpha:
 	git tag $(ALPHAVERSION)
-	git push --tags
+	git push upstream --tags
 
 tag-beta:
 	git tag $(BETAVERSION)
-	git push --tags
+	git push upstream --tags
 
 tag-rc:
 	git tag $(RCVERSION)
-	git push --tags
+	git push upstream --tags
 
 tag-release:
 	git tag $(RELEASEVERSION)
-	git push --tags
+	git push upstream --tags
 
 build-container:
 	docker buildx build --platform linux/arm64,linux/amd64 -t jsnfwlr/facemasq:dev -t jsnfwlr/facemasq:$(CURRENTVERSION) --push -f docker/Dockerfile .
