@@ -1,0 +1,37 @@
+# syntax=docker/dockerfile:1
+
+FROM --platform=$BUILDPLATFORM crazymax/goxx:1.19 AS godeps
+ARG TARGETPLATFORM
+ARG TARGETARCH
+ARG TARGETOS
+RUN --mount=type=cache,sharing=private,target=/var/cache/apt --mount=type=cache,sharing=private,target=/var/lib/apt/lists goxx-apt-get install -y binutils gcc g++ pkg-config make wget ca-certificates tzdata flex bison libpcap-dev
+RUN mkdir -p /dist/api
+WORKDIR /build
+COPY ./api /build
+COPY ./upgrades /dist/upgrades
+COPY ./templates /dist/templates
+RUN --mount=type=cache,target=/root/.cache --mount=type=cache,target=/go/pkg/mod CGO_ENABLED=1 goxx-go build -ldflags "-linkmode external -extldflags -static" --tags "linux sqlite_foreign_keys=1" -o /dist/api/facemasq .
+RUN chmod +x /dist/api/facemasq
+
+FROM --platform=$BUILDPLATFORM node:16 as vuedeps
+RUN curl -f https://get.pnpm.io/v6.16.js | node - add --global pnpm
+RUN mkdir -p /build/dist/ui /build/ui
+COPY ./ui /build/ui
+WORKDIR /build/ui
+RUN pnpm install --frozen-lockfile
+RUN pnpm list
+RUN pnpm build
+
+FROM scratch
+WORKDIR /app/data
+WORKDIR /app/config
+COPY --from=godeps /dist /app
+COPY --from=vuedeps /build/dist/ui /app/ui
+COPY --from=godeps /etc/ssl/certs /etc/ssl/certs
+COPY --from=godeps /usr/share/zoneinfo /usr/share/zoneinfo
+COPY ./upgrades /app/upgrades
+COPY ./templates /app/templates
+
+ENV TZ=Etc/UTC
+WORKDIR /app/api
+CMD ["/app/api/facemasq"]

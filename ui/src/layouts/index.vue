@@ -1,21 +1,22 @@
 <script setup lang="ts">
-  import { ref, watch, defineAsyncComponent, computed } from "vue"
+  import { ref, watch, computed } from "vue"
   import { useRoute } from "vue-router"
 
   import { useUser } from "@/stores/user"
 
-  const Standard = defineAsyncComponent(() => import("@/layouts/Standard.vue"))
-  const Authentication = defineAsyncComponent(() => import("@/layouts/Authentication.vue"))
+  import Standard from "@/layouts/Standard.vue"
+  import Authentication from "@/layouts/Authentication.vue"
 
   const route = useRoute()
   const userStore = useUser()
 
-  const routeLayout = ref<string|unknown>(Standard)
+  const routeLayout = ref<string | unknown>(Standard)
   const layoutName = ref<string>("Standard")
 
-  const theme = computed(() => userStore.theme() )
+  const theme = computed(() => userStore.theme())
 
-  watch(() => route.meta.layout,
+  watch(
+    () => route.meta.layout,
     (layout) => {
       switch (layout || "Standard") {
         case "Authentication":
@@ -27,7 +28,7 @@
           layoutName.value = "standard"
           break
       }
-    }
+    },
   )
 </script>
 

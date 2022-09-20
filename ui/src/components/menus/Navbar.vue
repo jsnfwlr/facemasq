@@ -1,52 +1,60 @@
 <script setup lang="ts">
-  import { computed, ref } from 'vue'
+  import { computed, ref } from "vue"
 
-  import { useUser } from '@/stores/user'
-  import { useApp } from '@/stores/app'
-  import { storeToRefs } from 'pinia'
+  import { useUser } from "@/stores/user"
+  import { useApp } from "@/stores/app"
+  import { storeToRefs } from "pinia"
 
-  import NavbarItem from '@/components/menus/NavbarItem.vue'
-  import NavbarItemLabel from '@/components/menus/NavbarItemLabel.vue'
-  import NavbarMenu from '@/components/menus/NavbarMenu.vue'
-  import mdIcon from '@/components/elements/MDIcon.vue'
+  import NavbarItem from "@/components/menus/NavbarItem.vue"
+  import NavbarItemLabel from "@/components/menus/NavbarItemLabel.vue"
+  import NavbarMenu from "@/components/menus/NavbarMenu.vue"
+  import mdIcon from "@/components/elements/MDIcon.vue"
 
-  import UserAvatar from '@/components/justboil/UserAvatar.vue'
+  import UserAvatar from "@/components/justboil/UserAvatar.vue"
 
   const userStore = useUser()
   const appStore = useApp()
-  const { settings, account } = storeToRefs(userStore)
+  const { account } = storeToRefs(userStore)
 
   const userName = account.value.Username
 
   const isNavBarVisible = computed(() => !appStore.toggles.isFullScreen)
   const isSidebarActive = computed(() => appStore.toggles.isSidebarActive)
-  const isDark = computed(() => { return userStore.isDarkMode() })
+  const isDark = computed(() => {
+    return userStore.isDarkMode()
+  })
   const isMenuNavBarActive = ref(false)
-
 
   const lightBorderStyle = computed(() => appStore.styles.lightBorderStyle)
 
-  const menuToggleMobileIcon = computed(() => isSidebarActive.value ? "Backburger" : "Forwardburger")
-  const menuNavBarToggleIcon = computed(() => isMenuNavBarActive.value ? "Close" : "DotsVertical")
+  const menuToggleMobileIcon = computed(() => (isSidebarActive.value ? "Backburger" : "Forwardburger"))
+  const menuNavBarToggleIcon = computed(() => (isMenuNavBarActive.value ? "Close" : "DotsVertical"))
 
-  const menuToggleMobile = () => { appStore.$patch((state) => { state.toggles.isSidebarActive = !state.toggles.isSidebarActive }) }
+  const menuToggleMobile = () => {
+    appStore.$patch((state) => {
+      state.toggles.isSidebarActive = !state.toggles.isSidebarActive
+    })
+  }
 
-  const darkModeToggle = () => { userStore.toggleDarkMode() }
-  const menuNavBarToggle = () => { isMenuNavBarActive.value = !isMenuNavBarActive.value }
+  const darkModeToggle = () => {
+    userStore.toggleDarkMode()
+  }
+  const menuNavBarToggle = () => {
+    isMenuNavBarActive.value = !isMenuNavBarActive.value
+  }
+  const mode = import.meta.env.DEV
 </script>
 
 <template>
-  <nav v-show="isNavBarVisible" class="topnav top-0 left-0 right-0 fixed flex bg-white h-[64px] lg:h-14 border-b z-30 w-screen transition-position xl:pl-60 lg:w-auto lg:items-stretch dark:bg-gray-900 dark:border-gray-700 ml-0" :class="[lightBorderStyle, isSidebarActive ? 'lg:ml-60' : 'lg:ml-12']" >
+  <nav v-show="isNavBarVisible" class="topnav top-0 left-0 right-0 fixed flex bg-white h-[64px] lg:h-14 border-b z-30 w-screen transition-position xl:pl-60 lg:w-auto lg:items-stretch dark:bg-gray-900 dark:border-gray-700 ml-0" :class="[lightBorderStyle, isSidebarActive ? 'lg:ml-60' : 'lg:ml-12']">
     <div class="flex-1 items-stretch flex h-[64px] lg:h-14">
-      <navbar-item type="flex lg:hidden" @click.prevent="menuToggleMobile" >
+      <navbar-item type="flex lg:hidden" @click.prevent="menuToggleMobile">
         <mdIcon :icon="menuToggleMobileIcon" h="h-[48px] lg:h-10" w="w-[48px] lg:w-10" p="p-3 lg:p-0" />
       </navbar-item>
 
-      <navbar-item to="/" class="flex-1 px-3 lg:hidden text-xl lg:text-lg">
-          <span>face</span><b class="font-black">Masq</b>
-      </navbar-item>
+      <navbar-item to="/" class="flex-1 px-3 lg:hidden text-xl lg:text-lg"> <span>face</span><b class="font-black">Masq</b> </navbar-item>
     </div>
-    <div class="flex-none items-stretch flex  h-[64px] lg:h-14 lg:hidden">
+    <div class="flex-none items-stretch flex h-[64px] lg:h-14 lg:hidden">
       <navbar-item @click.prevent="menuNavBarToggle">
         <mdIcon :icon="menuNavBarToggleIcon" h="h-[48px] lg:h-10" w="w-[48px] lg:w-10" p="p-3 lg:p-0" />
       </navbar-item>
@@ -60,19 +68,19 @@
         <navbar-menu has-divider>
           <user-avatar class="w-10 h-10 lg:w-6 lg:h-6 mr-3 inline-flex" :username="userName" />
           <div class="text-xl lg:text-lg leading-8">
-            <span>{{ userName }}</span>
+            <span>{{ userName }} - {{ mode }}</span>
           </div>
 
           <template #dropdown>
-            <navbar-item to="/settings" >
+            <navbar-item to="/settings">
               <navbar-item-label icon="CogOutline" label="Settings" />
             </navbar-item>
-            <hr class="hidden lg:block lg:my-2 border-t border-gray-100 dark:border-gray-700">
-            <navbar-item @click.prevent="darkModeToggle" >
+            <hr class="hidden lg:block lg:my-2 border-t border-gray-100 dark:border-gray-700" />
+            <navbar-item @click.prevent="darkModeToggle">
               <navbar-item-label icon="ThemeLightDark" :label="isDark ? 'Go Light' : 'Go Dark'" />
             </navbar-item>
-            <hr class="hidden lg:block lg:my-2 border-t border-gray-100 dark:border-gray-700">
-            <navbar-item to="/auth/logout" >
+            <hr class="hidden lg:block lg:my-2 border-t border-gray-100 dark:border-gray-700" />
+            <navbar-item to="/auth/logout">
               <navbar-item-label icon="Logout" label="Log Out" />
             </navbar-item>
           </template>
@@ -83,7 +91,6 @@
 </template>
 
 <style lang="scss">
- nav.topnav {
-
- }
+  nav.topnav {
+  }
 </style>

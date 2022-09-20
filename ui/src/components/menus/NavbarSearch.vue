@@ -1,5 +1,5 @@
 <script setup lang="ts">
-  import Control from '@/components/justboil/Control.vue'
+  import Control from "@/components/justboil/Control.vue"
 </script>
 
 <template>

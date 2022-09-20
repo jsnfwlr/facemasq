@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -14,7 +15,11 @@ var salt string
 const currentCost = 14
 
 func init() {
-	salt = os.Getenv("PASSWORDSALT")
+	if strings.HasSuffix(os.Args[0], ".test") {
+		salt = "testsalt"
+	} else {
+		salt = os.Getenv("PASSWORDSALT")
+	}
 	if salt == "" {
 		log.Fatalln("A password salt is required. See https://jsnfwlr.github.io/facemasq/errors/#PasswordSalt for more details")
 	}

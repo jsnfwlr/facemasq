@@ -1,0 +1,36 @@
+CURRENTVERSION != git describe --tags --abbrev=0
+RELEASEVERSION != semver -p $(CURRENTVERSION)
+ALPHAVERSION != semver -d "alpha" $(RELEASEVERSION)
+BETAVERSION != semver -d "beta" $(RELEASEVERSION)
+RCVERSION != semver -d "rc" $(RELEASEVERSION)
+
+test-api:
+	cd api; go test ./...
+
+test-api-coverage:
+	rm data/test.sqlite data/test2.sqlite; cd api; go test -v ./... -covermode=count -coverpkg=./... -coverprofile ../dist/coverage.out; go tool cover -html ../dist/coverage.out -o ../dist/coverage.html
+
+# test-api-integration:
+# 	cd api; go test --tags integration ./...
+
+tag-alpha:
+	git tag $(ALPHAVERSION)
+	git push --tags
+
+tag-beta:
+	git tag $(BETAVERSION)
+	git push --tags
+
+tag-rc:
+	git tag $(RCVERSION)
+	git push --tags
+
+tag-release:
+	git tag $(RELEASEVERSION)
+	git push --tags
+
+build-container:
+	docker buildx build --platform linux/arm64,linux/amd64 -t jsnfwlr/facemasq:dev -t jsnfwlr/facemasq:$(CURRENTVERSION) --push -f docker/Dockerfile .
+
+build-ui:
+	cd ui; pnpm build

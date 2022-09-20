@@ -1,5 +1,4 @@
-<script setup lang="ts">
-</script>
+<script setup lang="ts"></script>
 <template>
   <div class="button-group">
     <slot />
@@ -10,7 +9,7 @@
     & > button:first-child {
       border-top-right-radius: 0;
       border-bottom-right-radius: 0;
-    }    
+    }
     & > button:not(:last-child):not(:first-child) {
       border-radius: 0;
     }

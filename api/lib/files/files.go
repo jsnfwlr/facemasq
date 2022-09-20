@@ -4,16 +4,19 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strings"
+
+	"facemasq/lib/utils"
 )
 
 func WriteOut(fileLocation, content string) (err error) {
 	var fileHandler *os.File
 	if _, err = os.Stat(fileLocation); err == nil {
-		os.Remove(fileLocation)
-		fileHandler, err = os.Create(fileLocation)
+		err = os.Remove(fileLocation)
 		if err != nil {
 			return
 		}
+		fileHandler, _ = os.Create(fileLocation)
 
 	} else if os.IsNotExist(err) {
 		fileHandler, err = os.Create(fileLocation)
@@ -21,7 +24,7 @@ func WriteOut(fileLocation, content string) (err error) {
 			return
 		}
 	}
-	fileHandler.WriteString(content)
+	_, err = fileHandler.WriteString(content)
 	return
 }
 
@@ -59,5 +62,30 @@ func Copy(src, dst string) (size int64, err error) {
 	}
 	defer destination.Close()
 	size, err = io.Copy(destination, source)
+	return
+}
+
+func GetAppRoot() (rootDir string, err error) {
+	rootDir, err = os.Getwd()
+	if err != nil {
+		return
+	}
+	return
+}
+
+func GetDir(which string) (dir string, err error) {
+	var rootDir string
+	rootDir, err = GetAppRoot()
+	if err != nil {
+		return
+	}
+	lowerWhich := strings.ToLower(which)
+	switch lowerWhich {
+	default:
+		dir = utils.Ternary(rootDir == "/app", fmt.Sprintf("%[1]c%[2]s", os.PathSeparator, lowerWhich), fmt.Sprintf("%[1]s%[2]s", rootDir[0:strings.Index(rootDir, "api")], lowerWhich)).(string)
+	}
+	if !FileExists(dir) {
+		err = fmt.Errorf("could not find %s", which)
+	}
 	return
 }

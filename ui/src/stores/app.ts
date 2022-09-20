@@ -1,103 +1,96 @@
-import { defineStore } from 'pinia'
-import { format } from 'date-fns'
-import { mande } from 'mande'
-
-
-const params = mande('/')
+import { defineStore } from "pinia"
 
 export interface AppStore {
-  styles: AppStyles;
-  toggles: AppToggles;
+  styles: AppStyles
+  toggles: AppToggles
   values: AppValues
 }
 export interface AppStyles {
-  lightBorderStyle: string;
-  lightBgStyle: string;
-  sidebarStyle: string;
-  sidebarBrandStyle: string;
-  sidebarMenuCloseLgStyle: string;
-  sidebarMenuLabelStyle: string;
-  sidebarMenuItemStyle: string;
-  sidebarMenuItemActiveStyle: string;
-  sidebarMenuItemInactiveStyle: string;
-  sidebarSubmenuListStyle: string;
-  navBarItemLabelStyle: string;
-  navBarItemLabelHoverStyle: string;
-  navBarItemLabelActiveColorStyle: string;
-  navBarMenuListUpperLabelStyle: string;
-  tableTrStyle: string;
-  tableTrOddStyle: string;
-  overlayStyle: string;
+  lightBorderStyle: string
+  lightBgStyle: string
+  sidebarStyle: string
+  sidebarBrandStyle: string
+  sidebarMenuCloseLgStyle: string
+  sidebarMenuLabelStyle: string
+  sidebarMenuItemStyle: string
+  sidebarMenuItemActiveStyle: string
+  sidebarMenuItemInactiveStyle: string
+  sidebarSubmenuListStyle: string
+  navBarItemLabelStyle: string
+  navBarItemLabelHoverStyle: string
+  navBarItemLabelActiveColorStyle: string
+  navBarMenuListUpperLabelStyle: string
+  tableTrStyle: string
+  tableTrOddStyle: string
+  overlayStyle: string
 }
 
 export interface AppToggles {
-  isFullScreen: boolean;
-  isSidebarActive: boolean;
-  isFieldFocusRegistered: boolean;
-  sidebarLgToggle: boolean;
+  isFullScreen: boolean
+  isSidebarActive: boolean
+  isFieldFocusRegistered: boolean
+  sidebarLgToggle: boolean
 }
 
 export interface AppValues {
-  perPage: number;
-  pageSizes: Array<PageSize>;
+  perPage: number
+  pageSizes: Array<PageSize>
 }
 
 export interface PageSize {
-  label: string;
-  value: number;
+  label: string
+  value: number
 }
 
-export const useApp = defineStore('app', {
+export const useApp = defineStore("app", {
   state: () => {
-    return ({
+    return {
       styles: {
-        lightBorderStyle: '',
-        lightBgStyle: '',
-        sidebarStyle: '',
-        sidebarBrandStyle: '',
-        sidebarMenuCloseLgStyle: '',
-        sidebarMenuLabelStyle: '',
-        sidebarMenuItemStyle: '',
-        sidebarMenuItemActiveStyle: '',
-        sidebarMenuItemInactiveStyle: '',
-        sidebarSubmenuListStyle: '',
-        navBarItemLabelStyle: '',
-        navBarItemLabelHoverStyle: '',
-        navBarItemLabelActiveColorStyle: '',
-        navBarMenuListUpperLabelStyle: '',
-        tableTrStyle: '',
-        tableTrOddStyle: '',
-        overlayStyle: ''
+        lightBorderStyle: "",
+        lightBgStyle: "",
+        sidebarStyle: "",
+        sidebarBrandStyle: "",
+        sidebarMenuCloseLgStyle: "",
+        sidebarMenuLabelStyle: "",
+        sidebarMenuItemStyle: "",
+        sidebarMenuItemActiveStyle: "",
+        sidebarMenuItemInactiveStyle: "",
+        sidebarSubmenuListStyle: "",
+        navBarItemLabelStyle: "",
+        navBarItemLabelHoverStyle: "",
+        navBarItemLabelActiveColorStyle: "",
+        navBarMenuListUpperLabelStyle: "",
+        tableTrStyle: "",
+        tableTrOddStyle: "",
+        overlayStyle: "",
       },
       toggles: {
         isFullScreen: false,
         isSidebarActive: false,
-        isFieldFocusRegistered: false
+        isFieldFocusRegistered: false,
       },
       values: {
         perPage: 10,
         pageSizes: [
           {
             label: "10",
-            value: 10
+            value: 10,
           },
           {
             label: "20",
-            value: 20
+            value: 20,
           },
           {
             label: "50",
-            value: 50
+            value: 50,
           },
           {
             label: "All",
-            value: 0
-          }
-        ]
-      }
-
-    } as AppStore)
+            value: 0,
+          },
+        ],
+      },
+    } as AppStore
   },
-  actions: {
-  }
+  actions: {},
 })

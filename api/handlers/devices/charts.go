@@ -8,13 +8,13 @@ import (
 	"strings"
 	"time"
 
-	"github.com/jsnfwlr/facemasq/api/lib/db"
-	"github.com/jsnfwlr/facemasq/api/lib/formats"
+	"facemasq/lib/db"
+	"facemasq/lib/formats"
 )
 
 type DevicesOverTime struct {
-	Time      time.Time `db:"Time"`
-	Addresses int       `db:"Addresses"`
+	Time      time.Time `db:"time"`
+	Addresses int       `db:"addresses"`
 }
 
 var frequency time.Duration
@@ -49,16 +49,17 @@ func GetDashboardChartData(out http.ResponseWriter, in *http.Request) {
 }
 
 func getAddressCountPerScan(overallTimeSpan time.Duration) (data []DevicesOverTime, err error) {
-	sql := `SELECT Scans.Time, Count(History.AddressID) as Addresses FROM Scans JOIN History ON History.ScanID = Scans.ID WHERE Time > ? GROUP BY Time ORDER BY Time ASC;`
-	err = db.Conn.Select(&data, sql, time.Now().Add(overallTimeSpan).Format("2006-01-02 15:04"))
+	sql := `SELECT scans.time, Count(histories.address_id) as addresses FROM scans JOIN histories ON histories.scan_id = scans.id WHERE time > ? GROUP BY time ORDER BY time ASC;`
+	err = db.Conn.NewRaw(sql, time.Now().Add(overallTimeSpan).Format("2006-01-02 15:04")).Scan(db.Context, &data)
+
 	return
 }
 
 func getAverageAddressCountPerPeriod(overallTimeSpan, averageIntervalSize time.Duration) (data []DevicesOverTime, err error) {
 	var averageIntervals int
 	var rawData []DevicesOverTime
-	sql := `SELECT Scans.Time, Count(History.AddressID) as Addresses FROM Scans JOIN History ON History.ScanID = Scans.ID WHERE Time > ? GROUP BY Time ORDER BY Time ASC;`
-	err = db.Conn.Select(&rawData, sql, time.Now().Add(overallTimeSpan))
+	sql := `SELECT scans.time, Count(histories.address_id) as addresses FROM scans JOIN histories ON histories.scan_id = scans.id WHERE time > ? GROUP BY time ORDER BY time ASC;`
+	err = db.Conn.NewRaw(sql, time.Now().Add(overallTimeSpan)).Scan(db.Context, &rawData)
 	if err != nil {
 		return
 	}

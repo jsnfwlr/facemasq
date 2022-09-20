@@ -1,184 +1,181 @@
-import { defineStore } from 'pinia'
-import { mande } from 'mande'
-import { useStorage } from '@vueuse/core'
-import { format } from 'date-fns'
-import internal from 'stream'
+import { defineStore } from "pinia"
+import { mande } from "mande"
+import { useStorage } from "@vueuse/core"
+import { format } from "date-fns"
 
-
-const deviceRecords = mande('/records')
-
+const deviceRecords = import.meta.env.DEV ? mande("http://192.168.0.41:6135/api/records") : mande("/api/records")
 
 export interface Device {
-  ID: number | null;
-  MachineName: string;
-  Brand: string | null;
-  Model: string | null;
-  Purchased: string | null;
-  Serial: string | null;
-  IsTracked: boolean;
-  FirstSeen: string | null;
-  IsGuest: boolean;
-  IsOnline: boolean;
-  Label: string | null;
-  Notes: string | null;
-  CategoryID: number;
-  StatusID: number;
-  MaintainerID: number;
-  LocationID: number;
-  DeviceTypeID: number;
-  OperatingSystemID: number;
-  ArchitectureID: number;
+  ID: number | null
+  MachineName: string
+  Brand: string | null
+  Model: string | null
+  Purchased: string | null
+  Serial: string | null
+  IsTracked: boolean
+  FirstSeen: string | null
+  IsGuest: boolean
+  IsOnline: boolean
+  Label: string | null
+  Notes: string | null
+  CategoryID: number
+  StatusID: number
+  MaintainerID: number
+  LocationID: number
+  DeviceTypeID: number
+  OperatingSystemID: number
+  ArchitectureID: number
   Interfaces: Array<Netface>
-  Primary: PrimaryConnection;
-  SortOrder: string;
+  Primary: PrimaryConnection
+  SortOrder: string
 }
 
 export interface Netface {
-  ID: number;
-  MAC: string;
-  IsPrimary: boolean;
-  IsVirtual: boolean;
-  IsOnline: boolean;
-  Label: string | null;
-  Notes: string | null;
-  LastSeen: string;
-  StatusID: number;
-  InterfaceTypeID: number;
-  VLANID: number;
-  DeviceID: number;
-  Primary: PrimaryConnection;
-  Addresses: Array<Address>;
+  ID: number
+  MAC: string
+  IsPrimary: boolean
+  IsVirtual: boolean
+  IsOnline: boolean
+  Label: string | null
+  Notes: string | null
+  LastSeen: string
+  StatusID: number
+  InterfaceTypeID: number
+  VlanID: number
+  DeviceID: number | null
+  Primary: PrimaryConnection
+  Addresses: Array<Address>
 }
 
 export interface Address {
-  ID: number;
-  IPv4: string | null;
-  IPv6: string | null;
-  IsPrimary: boolean;
-  IsVirtual: boolean;
-  IsReserved: boolean;
-  LastSeen: string | null;
-  Label: string | null;
-  Notes: string | null;
-  InterfaceID: number;
-  Connectivity: Array<Connection> | null;
-  Hostnames: Array<Hostname>;
+  ID: number
+  IPv4: string | null
+  IPv6: string | null
+  IsPrimary: boolean
+  IsVirtual: boolean
+  IsReserved: boolean
+  LastSeen: string | null
+  Label: string | null
+  Notes: string | null
+  InterfaceID: number
+  Connectivity: Array<Connection> | null
+  Hostnames: Array<DomainName>
 }
 
 export interface Connection {
-  State: boolean;
-  Time: string;
+  State: boolean
+  Time: string
 }
 
-export interface Hostname {
-  ID: number;
-  Hostname: string;
-  IsDNS: boolean;
-  IsSelfSet: boolean;
-  Notes: string | null;
-  AddressID: number | null;
+export interface DomainName {
+  ID: number
+  Hostname: string
+  IsDNS: boolean
+  IsSelfSet: boolean
+  Notes: string | null
+  AddressID: number | null
 }
 
-export interface ChartData {
-  full: Array<TimeLog>;
-  averaged: Array<TimeLog>;
+export interface ChartValues {
+  full: Array<TimeLog>
+  averaged: Array<TimeLog>
 }
 
 export interface TimeLog {
-  Time: string;
-  Addresses: number;
+  Time: string
+  Addresses: number
 }
 
 export interface Trend {
-  Label: string;
-  Current: number;
-  Compare: number;
+  Label: string
+  Current: number
+  Compare: number
 }
 
 export interface ColumnSort {
-  column: string;
+  column: string
   direction: string
 }
 
 export interface DeviceState {
-  columnSort: ColumnSort;
-  allDevices: Array<Device>;
-  activeDevices: Array<Device>;
-  unknownDevices: Array<Device>;
-  devicesOverTime: ChartData;
-  trends: Array<Trend>;
-  lastUnknown: string;
-  editingItems: EditSets;
-  focusedItems: FocusSets;
-  deletingItems: DeleteSets;
-  investigations: Map<number, Array<Investigation>>;
+  columnSort: ColumnSort
+  allDevices: Array<Device>
+  activeDevices: Array<Device>
+  unknownDevices: Array<Device>
+  devicesOverTime: ChartValues
+  trends: Array<Trend>
+  lastUnknown: string
+  editingItems: EditSets
+  focusedItems: FocusSets
+  deletingItems: DeleteSets
+  investigations: Map<number, Array<Investigation>>
 }
 
 export interface PrimaryConnection {
-  IPv4: string | null;
-  IPv6: string | null;
-  InterfaceTypeID: number;
-  VLANID: number;
-  MAC: string | null;
-  IsReservedIP: string | null;
-  IsVirtualIP: string | null;
-  IsVirtualIFace: string | null;
+  IPv4: string | null
+  IPv6: string | null
+  InterfaceTypeID: number
+  VlanID: number
+  MAC: string | null
+  IsReservedIP: boolean | null
+  IsVirtualIP: boolean | null
+  IsVirtualIFace: boolean | null
 }
 
 export interface EditSets {
-  devices: Map<string, Device>;
-  interfaces: Map<string, Netface>;
-  addresses: Map<string, Address>;
-  hostnames: Map<string, Hostname>;
+  devices: Map<string, Device>
+  interfaces: Map<string, Netface>
+  addresses: Map<string, Address>
+  hostnames: Map<string, DomainName>
 }
 
 export interface FocusSets {
-  devices: Map<string, Device>;
-  interfaces: Map<string, Netface>;
-  addresses: Map<string, Address>;
-  hostnames: Map<string, Hostname>;
+  devices: Map<string, Device>
+  interfaces: Map<string, Netface>
+  addresses: Map<string, Address>
+  hostnames: Map<string, DomainName>
 }
 
 export interface DeleteSets {
-  devices: Array<number>;
-  interfaces: Array<number>;
-  addresses: Array<number>;
-  hostnames: Array<number>;
+  devices: Array<number>
+  interfaces: Array<number>
+  addresses: Array<number>
+  hostnames: Array<number>
 }
 
 export interface Investigation {
-  AddressID: number;
-  Connectivity: Array<Connection> | null;
+  AddressID: number
+  Connectivity: Array<Connection> | null
 }
 
-export const useDevices = defineStore('devices', {
+export const useDevices = defineStore("devices", {
   state: () => {
-    return ({
+    return {
       columnSort: {
         column: "SortOrder",
-        direction: "asc"
+        direction: "asc",
       },
       // allDevices: [],
       activeDevices: [],
       unknownDevices: [],
       devicesOverTime: {
         full: [],
-        averaged: []
+        averaged: [],
       },
       trends: [],
-      lastUnknown: '2021-12-31 08:55:00',
+      lastUnknown: "2021-12-31 08:55:00",
       investigations: new Map<number, Array<Investigation>>(),
       editingItems: {
         devices: new Map<string, Device>(),
         interfaces: new Map<string, Netface>(),
         addresses: new Map<string, Address>(),
-        hostnames: new Map<string, Hostname>(),
+        hostnames: new Map<string, DomainName>(),
       },
       focusedItems: {
         devices: new Map<string, Device>(),
         interfaces: new Map<string, Netface>(),
         addresses: new Map<string, Address>(),
-        hostnames: new Map<string, Hostname>(),
+        hostnames: new Map<string, DomainName>(),
       },
       deletingItems: {
         devices: [],
@@ -187,15 +184,19 @@ export const useDevices = defineStore('devices', {
         hostnames: [],
       },
       allDevices: useStorage("allDevices", []) as unknown as Array<Device>,
-    } as DeviceState)
+    } as DeviceState
   },
   getters: {
-    canChangeSort: (state) => { return (state.editingItems.devices.size === 0 && state.editingItems.interfaces.size === 0 && state.editingItems.addresses.size === 0 && state.editingItems.hostnames.size === 0) },
-    edItems: (state) => { return state.editingItems.devices.size + ", " + state.editingItems.interfaces.size + ", " + state.editingItems.addresses.size + ", " + state.editingItems.hostnames.size }
+    canChangeSort: (state) => {
+      return state.editingItems.devices.size === 0 && state.editingItems.interfaces.size === 0 && state.editingItems.addresses.size === 0 && state.editingItems.hostnames.size === 0
+    },
+    edItems: (state) => {
+      return state.editingItems.devices.size + ", " + state.editingItems.interfaces.size + ", " + state.editingItems.addresses.size + ", " + state.editingItems.hostnames.size
+    },
   },
   actions: {
     getTrends() {
-      deviceRecords.get<Array<Trend>>('/trends').then((response) => {
+      deviceRecords.get<Array<Trend>>("/trends").then((response) => {
         this.trends = response
         // for (let i = 0; i < response.length; i++) {
         //   for (let j = 0; j < this.trends.length; j++) {
@@ -209,7 +210,7 @@ export const useDevices = defineStore('devices', {
       })
     },
     getCharts() {
-      deviceRecords.get<ChartData>('/chart').then((response) => {
+      deviceRecords.get<ChartValues>("/chart").then((response) => {
         // this.devicesOverTime = []
         // for (let i = 1400; i < response.length; i++) {
         //   this.devicesOverTime.push(response[i])
@@ -218,7 +219,7 @@ export const useDevices = defineStore('devices', {
       })
     },
     getAll() {
-      deviceRecords.get<Array<Device>>('/all').then((response) => {
+      deviceRecords.get<Array<Device>>("/all").then((response) => {
         if (this.canChangeSort) {
           this.allDevices = response
           this.SortDevices()
@@ -226,24 +227,46 @@ export const useDevices = defineStore('devices', {
       })
     },
     investigateDevice(deviceID: number) {
-      let addresses = [] as Array<number>
-      this.allDevices.find(dev => dev.ID === deviceID)?.Interfaces.forEach(Netface => {
-        Netface.Addresses.forEach(address => {
-          addresses.push(address.ID)
+      const addresses = [] as Array<number>
+      this.allDevices
+        .find((dev) => dev.ID === deviceID)
+        ?.Interfaces.forEach((Netface) => {
+          Netface.Addresses.forEach((address) => {
+            addresses.push(address.ID)
+          })
         })
-      })
-      deviceRecords.post('/investigate', addresses).then((response) => {
+      deviceRecords.post("/investigate", addresses).then((response) => {
         this.investigations.set(deviceID, response as Array<Investigation>)
       })
-
-
     },
     Add(indexes: Array<number>) {
-      const hostname = { ID: 0, Hostname: "", IsDNS: false, IsSelfSet: false, Notes: null, AddressID: 0 } as Hostname
-      const address = { ID: 0, IPv4: null, IPv6: null, IsPrimary: false, IsVirtual: false, IsReserved: false, LastSeen: format(new Date, "yyyy-MM-dd") + "T" + format(new Date, "HH:mm:ss") + "Z", Label: "", Notes: null, InterfaceID: 0, Connectivity: null, Hostnames: [hostname] } as Address
-      const primary = { IPv4: null, IPv6: null, InterfaceTypeID: 0, VLANID: 0, MAC: null, IsReservedIP: null, IsVirtualIP: null, IsVirtualIFace: null } as PrimaryConnection
-      const iFace = { ID: 0, MAC: "", IsPrimary: true, IsVirtual: false, Label: "", Notes: null, InterfaceTypeID: 1, VLANID: 1, LastSeen: format(new Date, "yyyy-MM-dd") + "T" + format(new Date, "HH:mm:ss") + "Z", StatusID: 1, DeviceID: 0, Primary: primary, Addresses: [address] } as Netface
-      const device = { ID: 0, Label: "", MachineName: "", FirstSeen: format(new Date, "yyyy-MM-dd") + "T" + format(new Date, "HH:mm:ss") + "Z", CategoryID: 1, StatusID: 1, MaintainerID: 1, LocationID: 1, DeviceTypeID: 1, OperatingSystemID: 1, ArchitectureID: 1, Notes: null, Brand: null, Model: null, Purchased: null, Serial: null, IsGuest: false, IsTracked: true, SortOrder: "", Interfaces: [iFace], Primary: primary } as Device
+      const hostname = { ID: 0, Hostname: "", IsDNS: false, IsSelfSet: false, Notes: null, AddressID: 0 } as DomainName
+      const address = { ID: 0, IPv4: null, IPv6: null, IsPrimary: false, IsVirtual: false, IsReserved: false, LastSeen: format(new Date(), "yyyy-MM-dd") + "T" + format(new Date(), "HH:mm:ss") + "Z", Label: "", Notes: null, InterfaceID: 0, Connectivity: null, Hostnames: [hostname] } as Address
+      const primary = { IPv4: null, IPv6: null, InterfaceTypeID: 0, VlanID: 0, MAC: null, IsReservedIP: null, IsVirtualIP: null, IsVirtualIFace: null } as PrimaryConnection
+      const iFace = { ID: 0, MAC: "", IsPrimary: true, IsVirtual: false, Label: "", Notes: null, InterfaceTypeID: 1, VlanID: 1, LastSeen: format(new Date(), "yyyy-MM-dd") + "T" + format(new Date(), "HH:mm:ss") + "Z", StatusID: 1, DeviceID: 0, Primary: primary, Addresses: [address] } as Netface
+      const device = {
+        ID: 0,
+        Label: "",
+        MachineName: "",
+        FirstSeen: format(new Date(), "yyyy-MM-dd") + "T" + format(new Date(), "HH:mm:ss") + "Z",
+        CategoryID: 1,
+        StatusID: 1,
+        MaintainerID: 1,
+        LocationID: 1,
+        DeviceTypeID: 1,
+        OperatingSystemID: 1,
+        ArchitectureID: 1,
+        Notes: null,
+        Brand: null,
+        Model: null,
+        Purchased: null,
+        Serial: null,
+        IsGuest: false,
+        IsTracked: true,
+        SortOrder: "",
+        Interfaces: [iFace],
+        Primary: primary,
+      } as Device
 
       switch (indexes.length) {
         case 0: // Device []
@@ -273,7 +296,6 @@ export const useDevices = defineStore('devices', {
           }
           break
       }
-
     },
     setColumnSort(colSort: ColumnSort) {
       if (this.editingItems.devices.size === 0 && this.editingItems.interfaces.size === 0 && this.editingItems.addresses.size === 0 && this.editingItems.hostnames.size === 0) {
@@ -287,87 +309,87 @@ export const useDevices = defineStore('devices', {
             if (a.MachineName === b.MachineName) {
               return 0
             } else if (a.MachineName < b.MachineName) {
-              return (this.columnSort.direction === "asc") ? -1 : 1
+              return this.columnSort.direction === "asc" ? -1 : 1
             }
-            return (this.columnSort.direction === "asc") ? 1 : -1
+            return this.columnSort.direction === "asc" ? 1 : -1
 
           case "Label":
             if (a.Label === b.Label) {
               return 0
             } else if ((a.Label ?? "") < (b.Label ?? "")) {
-              return (this.columnSort.direction === "asc") ? -1 : 1
+              return this.columnSort.direction === "asc" ? -1 : 1
             }
-            return (this.columnSort.direction === "asc") ? 1 : -1
+            return this.columnSort.direction === "asc" ? 1 : -1
           case "MAC":
             if (a.Interfaces[0].MAC === b.Interfaces[0].MAC) {
               return 0
             } else if ((a.Interfaces[0].MAC ?? "") < (b.Interfaces[0].MAC ?? "")) {
-              return (this.columnSort.direction === "asc") ? -1 : 1
+              return this.columnSort.direction === "asc" ? -1 : 1
             }
-            return (this.columnSort.direction === "asc") ? 1 : -1
+            return this.columnSort.direction === "asc" ? 1 : -1
 
           case "FirstSeen":
             if (a.FirstSeen === b.FirstSeen) {
               return 0
             } else if ((a.FirstSeen ?? "") < (b.FirstSeen ?? "")) {
-              return (this.columnSort.direction === "asc") ? -1 : 1
+              return this.columnSort.direction === "asc" ? -1 : 1
             }
-            return (this.columnSort.direction === "asc") ? 1 : -1
+            return this.columnSort.direction === "asc" ? 1 : -1
 
           case "LastSeen":
             if (a.Interfaces[0].LastSeen === b.Interfaces[0].LastSeen) {
               return 0
             } else if ((a.Interfaces[0].LastSeen ?? "") < (b.Interfaces[0].LastSeen ?? "")) {
-              return (this.columnSort.direction === "asc") ? -1 : 1
+              return this.columnSort.direction === "asc" ? -1 : 1
             }
-            return (this.columnSort.direction === "asc") ? 1 : -1
+            return this.columnSort.direction === "asc" ? 1 : -1
           case "Serial":
             if (a.Serial === b.Serial) {
               return 0
             } else if ((a.Serial ?? "") < (b.Serial ?? "")) {
-              return (this.columnSort.direction === "asc") ? -1 : 1
+              return this.columnSort.direction === "asc" ? -1 : 1
             }
-            return (this.columnSort.direction === "asc") ? 1 : -1
+            return this.columnSort.direction === "asc" ? 1 : -1
 
           case "Location":
             if (a.LocationID === b.LocationID) {
               return 0
             } else if (a.LocationID < b.LocationID) {
-              return (this.columnSort.direction === "asc") ? -1 : 1
+              return this.columnSort.direction === "asc" ? -1 : 1
             }
-            return (this.columnSort.direction === "asc") ? 1 : -1
+            return this.columnSort.direction === "asc" ? 1 : -1
           case "Maintainer":
             if (a.MaintainerID === b.MaintainerID) {
               return 0
             } else if (a.MaintainerID < b.MaintainerID) {
-              return (this.columnSort.direction === "asc") ? -1 : 1
+              return this.columnSort.direction === "asc" ? -1 : 1
             }
-            return (this.columnSort.direction === "asc") ? 1 : -1
+            return this.columnSort.direction === "asc" ? 1 : -1
           case "OS":
             if (a.OperatingSystemID === b.OperatingSystemID) {
               return 0
             } else if (a.OperatingSystemID < b.OperatingSystemID) {
-              return (this.columnSort.direction === "asc") ? -1 : 1
+              return this.columnSort.direction === "asc" ? -1 : 1
             }
-            return (this.columnSort.direction === "asc") ? 1 : -1
+            return this.columnSort.direction === "asc" ? 1 : -1
           case "Brand":
             if (a.Brand === b.Brand) {
               if (a.Model === b.Model) {
                 return 0
               } else if ((a.Model ?? "") < (b.Model ?? "")) {
-                return (this.columnSort.direction === "asc") ? -1 : 1
+                return this.columnSort.direction === "asc" ? -1 : 1
               }
             } else if ((a.Brand ?? "") < (b.Brand ?? "")) {
-              return (this.columnSort.direction === "asc") ? -1 : 1
+              return this.columnSort.direction === "asc" ? -1 : 1
             }
-            return (this.columnSort.direction === "asc") ? 1 : -1
+            return this.columnSort.direction === "asc" ? 1 : -1
           default:
             if (a.SortOrder === b.SortOrder) {
               return 0
             } else if (a.SortOrder < b.SortOrder) {
-              return (this.columnSort.direction === "asc") ? -1 : 1
+              return this.columnSort.direction === "asc" ? -1 : 1
             }
-            return (this.columnSort.direction === "asc") ? 1 : -1
+            return this.columnSort.direction === "asc" ? 1 : -1
         }
       })
     },
@@ -406,7 +428,7 @@ export const useDevices = defineStore('devices', {
                     this.allDevices[indexes[0]].Interfaces[i].Addresses[a].Hostnames.splice(h, 1)
                   } else {
                     if (this.editingItems.hostnames.has(indexes[0] + "." + i + "." + a + "." + h)) {
-                      this.allDevices[indexes[0]].Interfaces[i].Addresses[a].Hostnames[h] = this.editingItems.hostnames.get(indexes[0] + "." + i + "." + a + "." + h) as Hostname
+                      this.allDevices[indexes[0]].Interfaces[i].Addresses[a].Hostnames[h] = this.editingItems.hostnames.get(indexes[0] + "." + i + "." + a + "." + h) as DomainName
                       this.editingItems.hostnames.delete(indexes[0] + "." + i + "." + a + "." + h)
                     }
                   }
@@ -440,7 +462,7 @@ export const useDevices = defineStore('devices', {
                   this.allDevices[indexes[0]].Interfaces[indexes[1]].Addresses[a].Hostnames.splice(h, 1)
                 } else {
                   if (this.editingItems.hostnames.has(indexes[0] + "." + indexes[1] + "." + a + "." + h)) {
-                    this.allDevices[indexes[0]].Interfaces[indexes[1]].Addresses[a].Hostnames[h] = this.editingItems.hostnames.get(indexes[0] + "." + indexes[1] + "." + a + "." + h) as Hostname
+                    this.allDevices[indexes[0]].Interfaces[indexes[1]].Addresses[a].Hostnames[h] = this.editingItems.hostnames.get(indexes[0] + "." + indexes[1] + "." + a + "." + h) as DomainName
                     this.editingItems.hostnames.delete(indexes[0] + "." + indexes[1] + "." + a + "." + h)
                   }
                 }
@@ -464,7 +486,7 @@ export const useDevices = defineStore('devices', {
                 this.allDevices[indexes[0]].Interfaces[indexes[1]].Addresses[indexes[2]].Hostnames.splice(h, 1)
               } else {
                 if (this.editingItems.hostnames.has(indexes[0] + "." + indexes[1] + "." + indexes[2] + "." + h)) {
-                  this.allDevices[indexes[0]].Interfaces[indexes[1]].Addresses[indexes[2]].Hostnames[h] = this.editingItems.hostnames.get(indexes[0] + "." + indexes[1] + "." + indexes[2] + "." + h) as Hostname
+                  this.allDevices[indexes[0]].Interfaces[indexes[1]].Addresses[indexes[2]].Hostnames[h] = this.editingItems.hostnames.get(indexes[0] + "." + indexes[1] + "." + indexes[2] + "." + h) as DomainName
                   this.editingItems.hostnames.delete(indexes[0] + "." + indexes[1] + "." + indexes[2] + "." + h)
                 }
               }
@@ -476,7 +498,7 @@ export const useDevices = defineStore('devices', {
             this.allDevices[indexes[0]].Interfaces[indexes[1]].Addresses[indexes[2]].Hostnames.splice(indexes[3], 1)
           } else {
             if (this.editingItems.hostnames.has(indexes[0] + "." + indexes[1] + "." + indexes[2] + "." + indexes[3])) {
-              this.allDevices[indexes[0]].Interfaces[indexes[1]].Addresses[indexes[2]].Hostnames[indexes[3]] = this.editingItems.hostnames.get(indexes[0] + "." + indexes[1] + "." + indexes[2] + "." + indexes[3]) as Hostname
+              this.allDevices[indexes[0]].Interfaces[indexes[1]].Addresses[indexes[2]].Hostnames[indexes[3]] = this.editingItems.hostnames.get(indexes[0] + "." + indexes[1] + "." + indexes[2] + "." + indexes[3]) as DomainName
               this.editingItems.hostnames.delete(indexes[0] + "." + indexes[1] + "." + indexes[2] + "." + indexes[3])
             }
           }
@@ -506,7 +528,6 @@ export const useDevices = defineStore('devices', {
           }
           break
       }
-
     },
     InitiateDelete(indexes: Array<number>) {
       switch (indexes.length) {
@@ -551,145 +572,145 @@ export const useDevices = defineStore('devices', {
     Save(indexes: Array<number>) {
       return new Promise((resolve, reject) => {
         let isNew = false
-        switch (indexes.length) {
-          case 1: // Device
-            isNew = (this.allDevices[indexes[0]].ID === null || this.allDevices[indexes[0]].ID === 0)
-            // @FIXME: if isNew, run tests on all the interfaces, addresses, and hostnames before attempting to save
-            const deviceOnly = {
-              ID: this.allDevices[indexes[0]].ID,
-              MachineName: this.allDevices[indexes[0]].MachineName,
-              Brand: this.allDevices[indexes[0]].Brand,
-              Model: this.allDevices[indexes[0]].Model,
-              Purchased: this.allDevices[indexes[0]].Purchased,
-              Serial: this.allDevices[indexes[0]].Serial,
-              IsTracked: this.allDevices[indexes[0]].IsTracked,
-              IsGuest: this.allDevices[indexes[0]].IsGuest,
-              Label: this.allDevices[indexes[0]].Label,
-              FirstSeen: this.allDevices[indexes[0]].FirstSeen,
-              Notes: this.allDevices[indexes[0]].Notes,
-              CategoryID: this.allDevices[indexes[0]].CategoryID,
-              StatusID: this.allDevices[indexes[0]].StatusID,
-              MaintainerID: this.allDevices[indexes[0]].MaintainerID,
-              LocationID: this.allDevices[indexes[0]].LocationID,
-              DeviceTypeID: this.allDevices[indexes[0]].DeviceTypeID,
-              OperatingSystemID: this.allDevices[indexes[0]].OperatingSystemID,
-              ArchitectureID: this.allDevices[indexes[0]].ArchitectureID
-            }
-            deviceRecords.post('/device', deviceOnly).then((response: any) => {
-              this.allDevices[indexes[0]].ID = response.ID
-              if (isNew) {
-                this.allDevices[indexes[0]].Interfaces.forEach((_, n) => {
-                  this.allDevices[indexes[0]].Interfaces[n].DeviceID = response.ID
-                  this.Save([indexes[0], n]).then(() => {
-                    const move = this.allDevices.splice(indexes[0], 1)
-                    move.forEach((item => {
-                      this.allDevices.push(item)
-                    }))
-                    resolve(response)
+        if (indexes.length === 1) {
+          // Device
+          isNew = this.allDevices[indexes[0]].ID === null || this.allDevices[indexes[0]].ID === 0
+          // @FIXME: if isNew, run tests on all the interfaces, addresses, and hostnames before attempting to save
+          const deviceOnly = {
+            ID: this.allDevices[indexes[0]].ID,
+            MachineName: this.allDevices[indexes[0]].MachineName,
+            Brand: this.allDevices[indexes[0]].Brand,
+            Model: this.allDevices[indexes[0]].Model,
+            Purchased: this.allDevices[indexes[0]].Purchased,
+            Serial: this.allDevices[indexes[0]].Serial,
+            IsTracked: this.allDevices[indexes[0]].IsTracked,
+            IsGuest: this.allDevices[indexes[0]].IsGuest,
+            Label: this.allDevices[indexes[0]].Label,
+            FirstSeen: this.allDevices[indexes[0]].FirstSeen,
+            Notes: this.allDevices[indexes[0]].Notes,
+            CategoryID: this.allDevices[indexes[0]].CategoryID,
+            StatusID: this.allDevices[indexes[0]].StatusID,
+            MaintainerID: this.allDevices[indexes[0]].MaintainerID,
+            LocationID: this.allDevices[indexes[0]].LocationID,
+            DeviceTypeID: this.allDevices[indexes[0]].DeviceTypeID,
+            OperatingSystemID: this.allDevices[indexes[0]].OperatingSystemID,
+            ArchitectureID: this.allDevices[indexes[0]].ArchitectureID,
+          }
+          deviceRecords.post("/device", deviceOnly).then((response) => {
+            this.allDevices[indexes[0]].ID = (response as Device).ID
+            if (isNew) {
+              this.allDevices[indexes[0]].Interfaces.forEach((_, n) => {
+                this.allDevices[indexes[0]].Interfaces[n].DeviceID = (response as Device).ID
+                this.Save([indexes[0], n]).then(() => {
+                  const move = this.allDevices.splice(indexes[0], 1)
+                  move.forEach((item) => {
+                    this.allDevices.push(item)
                   })
-                })
-
-              } else {
-                resolve(response)
-              }
-            })
-            this.editingItems.devices.delete(indexes[0].toString())
-            break
-          case 2: //Interface
-            isNew = (this.allDevices[indexes[0]].Interfaces[indexes[1]].ID === null || this.allDevices[indexes[0]].Interfaces[indexes[1]].ID === 0)
-            const interfaceOnly = {
-              ID: this.allDevices[indexes[0]].Interfaces[indexes[1]].ID,
-              MAC: this.allDevices[indexes[0]].Interfaces[indexes[1]].MAC,
-              IsPrimary: this.allDevices[indexes[0]].Interfaces[indexes[1]].IsPrimary,
-              IsVirtual: this.allDevices[indexes[0]].Interfaces[indexes[1]].IsVirtual,
-              IsOnline: this.allDevices[indexes[0]].Interfaces[indexes[1]].IsOnline,
-              LastSeen: this.allDevices[indexes[0]].Interfaces[indexes[1]].LastSeen,
-              Label: this.allDevices[indexes[0]].Interfaces[indexes[1]].Label,
-              Notes: this.allDevices[indexes[0]].Interfaces[indexes[1]].Notes,
-              StatusID: this.allDevices[indexes[0]].Interfaces[indexes[1]].StatusID,
-              InterfaceTypeID: this.allDevices[indexes[0]].Interfaces[indexes[1]].InterfaceTypeID,
-              VLANID: this.allDevices[indexes[0]].Interfaces[indexes[1]].VLANID,
-              DeviceID: this.allDevices[indexes[0]].ID
-            }
-            deviceRecords.post('/interface', interfaceOnly).then((response: any) => {
-              this.allDevices[indexes[0]].Interfaces[indexes[1]].ID = response.ID
-              if (isNew) {
-                this.allDevices[indexes[0]].Interfaces[indexes[1]].Addresses.forEach((_, a) => {
-                  this.allDevices[indexes[0]].Interfaces[indexes[1]].Addresses[a].InterfaceID = response.ID
-                  this.Save([indexes[0], indexes[1], a]).then(() => {
-                    const move = this.allDevices[indexes[0]].Interfaces.splice(indexes[1], 1)
-                    move.forEach((item => {
-                      this.allDevices[indexes[0]].Interfaces.push(item)
-                    }))
-                    resolve(response)
-                  })
-                })
-
-              } else {
-                resolve(response)
-              }
-            })
-            this.editingItems.interfaces.delete(indexes[0].toString() + "." + indexes[1].toString())
-            break
-          case 3: //Address
-            isNew = (this.allDevices[indexes[0]].Interfaces[indexes[1]].Addresses[indexes[2]].ID === null || this.allDevices[indexes[0]].Interfaces[indexes[1]].Addresses[indexes[2]].ID === 0)
-            const addressOnly = {
-              ID: this.allDevices[indexes[0]].Interfaces[indexes[1]].Addresses[indexes[2]].ID,
-              IPv4: this.allDevices[indexes[0]].Interfaces[indexes[1]].Addresses[indexes[2]].IPv4,
-              IPv6: this.allDevices[indexes[0]].Interfaces[indexes[1]].Addresses[indexes[2]].IPv6,
-              IsPrimary: this.allDevices[indexes[0]].Interfaces[indexes[1]].Addresses[indexes[2]].IsPrimary,
-              IsVirtual: this.allDevices[indexes[0]].Interfaces[indexes[1]].Addresses[indexes[2]].IsVirtual,
-              IsReserved: this.allDevices[indexes[0]].Interfaces[indexes[1]].Addresses[indexes[2]].IsReserved,
-              LastSeen: this.allDevices[indexes[0]].Interfaces[indexes[1]].Addresses[indexes[2]].LastSeen,
-              Label: this.allDevices[indexes[0]].Interfaces[indexes[1]].Addresses[indexes[2]].Label,
-              Notes: this.allDevices[indexes[0]].Interfaces[indexes[1]].Addresses[indexes[2]].Notes,
-              InterfaceID: this.allDevices[indexes[0]].Interfaces[indexes[1]].ID
-            }
-            deviceRecords.post('/address', addressOnly).then((response: any) => {
-              this.allDevices[indexes[0]].Interfaces[indexes[1]].Addresses[indexes[2]].ID = response.ID
-              if (isNew) {
-                this.allDevices[indexes[0]].Interfaces[indexes[1]].Addresses[indexes[2]].Hostnames.forEach((_, h) => {
-                  this.allDevices[indexes[0]].Interfaces[indexes[1]].Addresses[indexes[2]].Hostnames[h].AddressID = response.ID
-                  this.Save([indexes[0], indexes[1], indexes[2], h]).then(() => {
-                    const move = this.allDevices[indexes[0]].Interfaces[indexes[1]].Addresses.splice(indexes[2], 1)
-                    move.forEach((item => {
-                      this.allDevices[indexes[0]].Interfaces[indexes[1]].Addresses.push(item)
-                    }))
-                    resolve(response)
-                  })
-                })
-              } else {
-                resolve(response)
-              }
-            })
-            this.editingItems.addresses.delete(indexes[0].toString() + "." + indexes[1].toString() + "." + indexes[2].toString())
-            break
-          case 4: //Hostname
-            if (this.allDevices[indexes[0]].Interfaces[indexes[1]].Addresses[indexes[2]].Hostnames[indexes[3]].Hostname !== null && this.allDevices[indexes[0]].Interfaces[indexes[1]].Addresses[indexes[2]].Hostnames[indexes[3]].Hostname !== "") {
-              isNew = (this.allDevices[indexes[0]].Interfaces[indexes[1]].Addresses[indexes[2]].Hostnames[indexes[3]].ID === null || this.allDevices[indexes[0]].Interfaces[indexes[1]].Addresses[indexes[2]].Hostnames[indexes[3]].ID === 0)
-              const hostnameOnly = {
-                ID: this.allDevices[indexes[0]].Interfaces[indexes[1]].Addresses[indexes[2]].Hostnames[indexes[3]].ID,
-                Hostname: this.allDevices[indexes[0]].Interfaces[indexes[1]].Addresses[indexes[2]].Hostnames[indexes[3]].Hostname,
-                IsDNS: this.allDevices[indexes[0]].Interfaces[indexes[1]].Addresses[indexes[2]].Hostnames[indexes[3]].IsDNS,
-                IsSelfSet: this.allDevices[indexes[0]].Interfaces[indexes[1]].Addresses[indexes[2]].Hostnames[indexes[3]].IsSelfSet,
-                Notes: this.allDevices[indexes[0]].Interfaces[indexes[1]].Addresses[indexes[2]].Hostnames[indexes[3]].Notes,
-                AddressID: this.allDevices[indexes[0]].Interfaces[indexes[1]].Addresses[indexes[2]].ID
-              }
-              deviceRecords.post('/hostname', hostnameOnly).then((response: any) => {
-                this.allDevices[indexes[0]].Interfaces[indexes[1]].Addresses[indexes[2]].Hostnames[indexes[3]].ID = response.ID
-                if (isNew) {
-                  const move = this.allDevices[indexes[0]].Interfaces[indexes[1]].Addresses[indexes[2]].Hostnames.splice(indexes[3], 1)
-                  move.forEach((item => {
-                    this.allDevices[indexes[0]].Interfaces[indexes[1]].Addresses[indexes[2]].Hostnames.push(item)
-                  }))
                   resolve(response)
-                } else {
-                  resolve(response)
-                }
+                })
               })
-              this.editingItems.hostnames.delete(indexes[0].toString() + "." + indexes[1].toString() + "." + indexes[2].toString() + "." + indexes[3].toString())
+            } else {
+              resolve(response)
             }
-            break
+          })
+          this.editingItems.devices.delete(indexes[0].toString())
+        } else if (indexes.length === 2) {
+          //Interface
+          isNew = this.allDevices[indexes[0]].Interfaces[indexes[1]].ID === null || this.allDevices[indexes[0]].Interfaces[indexes[1]].ID === 0
+          const interfaceOnly = {
+            ID: this.allDevices[indexes[0]].Interfaces[indexes[1]].ID,
+            MAC: this.allDevices[indexes[0]].Interfaces[indexes[1]].MAC,
+            IsPrimary: this.allDevices[indexes[0]].Interfaces[indexes[1]].IsPrimary,
+            IsVirtual: this.allDevices[indexes[0]].Interfaces[indexes[1]].IsVirtual,
+            IsOnline: this.allDevices[indexes[0]].Interfaces[indexes[1]].IsOnline,
+            LastSeen: this.allDevices[indexes[0]].Interfaces[indexes[1]].LastSeen,
+            Label: this.allDevices[indexes[0]].Interfaces[indexes[1]].Label,
+            Notes: this.allDevices[indexes[0]].Interfaces[indexes[1]].Notes,
+            StatusID: this.allDevices[indexes[0]].Interfaces[indexes[1]].StatusID,
+            InterfaceTypeID: this.allDevices[indexes[0]].Interfaces[indexes[1]].InterfaceTypeID,
+            VlanID: this.allDevices[indexes[0]].Interfaces[indexes[1]].VlanID,
+            DeviceID: this.allDevices[indexes[0]].ID,
+          }
+          deviceRecords.post("/interface", interfaceOnly).then((response) => {
+            this.allDevices[indexes[0]].Interfaces[indexes[1]].ID = (response as Netface).ID
+            if (isNew) {
+              this.allDevices[indexes[0]].Interfaces[indexes[1]].Addresses.forEach((_, a) => {
+                this.allDevices[indexes[0]].Interfaces[indexes[1]].Addresses[a].InterfaceID = (response as Netface).ID
+                this.Save([indexes[0], indexes[1], a]).then(() => {
+                  const move = this.allDevices[indexes[0]].Interfaces.splice(indexes[1], 1)
+                  move.forEach((item) => {
+                    this.allDevices[indexes[0]].Interfaces.push(item)
+                  })
+                  resolve(response)
+                })
+              })
+            } else {
+              resolve(response)
+            }
+          })
+          this.editingItems.interfaces.delete(indexes[0].toString() + "." + indexes[1].toString())
+        } else if (indexes.length === 3) {
+          //Address
+          isNew = this.allDevices[indexes[0]].Interfaces[indexes[1]].Addresses[indexes[2]].ID === null || this.allDevices[indexes[0]].Interfaces[indexes[1]].Addresses[indexes[2]].ID === 0
+
+          const addressOnly = {
+            ID: this.allDevices[indexes[0]].Interfaces[indexes[1]].Addresses[indexes[2]].ID,
+            IPv4: this.allDevices[indexes[0]].Interfaces[indexes[1]].Addresses[indexes[2]].IPv4,
+            IPv6: this.allDevices[indexes[0]].Interfaces[indexes[1]].Addresses[indexes[2]].IPv6,
+            IsPrimary: this.allDevices[indexes[0]].Interfaces[indexes[1]].Addresses[indexes[2]].IsPrimary,
+            IsVirtual: this.allDevices[indexes[0]].Interfaces[indexes[1]].Addresses[indexes[2]].IsVirtual,
+            IsReserved: this.allDevices[indexes[0]].Interfaces[indexes[1]].Addresses[indexes[2]].IsReserved,
+            LastSeen: this.allDevices[indexes[0]].Interfaces[indexes[1]].Addresses[indexes[2]].LastSeen,
+            Label: this.allDevices[indexes[0]].Interfaces[indexes[1]].Addresses[indexes[2]].Label,
+            Notes: this.allDevices[indexes[0]].Interfaces[indexes[1]].Addresses[indexes[2]].Notes,
+            InterfaceID: this.allDevices[indexes[0]].Interfaces[indexes[1]].ID,
+          }
+          deviceRecords.post("/address", addressOnly).then((response) => {
+            this.allDevices[indexes[0]].Interfaces[indexes[1]].Addresses[indexes[2]].ID = (response as Address).ID
+            if (isNew) {
+              this.allDevices[indexes[0]].Interfaces[indexes[1]].Addresses[indexes[2]].Hostnames.forEach((_, h) => {
+                this.allDevices[indexes[0]].Interfaces[indexes[1]].Addresses[indexes[2]].Hostnames[h].AddressID = (response as Address).ID
+                this.Save([indexes[0], indexes[1], indexes[2], h]).then(() => {
+                  const move = this.allDevices[indexes[0]].Interfaces[indexes[1]].Addresses.splice(indexes[2], 1)
+                  move.forEach((item) => {
+                    this.allDevices[indexes[0]].Interfaces[indexes[1]].Addresses.push(item)
+                  })
+                  resolve(response)
+                })
+              })
+            } else {
+              resolve(response)
+            }
+          })
+          this.editingItems.addresses.delete(indexes[0].toString() + "." + indexes[1].toString() + "." + indexes[2].toString())
+        } else if (indexes.length === 4) {
+          //Hostname
+          if (this.allDevices[indexes[0]].Interfaces[indexes[1]].Addresses[indexes[2]].Hostnames[indexes[3]].Hostname !== null && this.allDevices[indexes[0]].Interfaces[indexes[1]].Addresses[indexes[2]].Hostnames[indexes[3]].Hostname !== "") {
+            isNew = this.allDevices[indexes[0]].Interfaces[indexes[1]].Addresses[indexes[2]].Hostnames[indexes[3]].ID === null || this.allDevices[indexes[0]].Interfaces[indexes[1]].Addresses[indexes[2]].Hostnames[indexes[3]].ID === 0
+            const hostnameOnly = {
+              ID: this.allDevices[indexes[0]].Interfaces[indexes[1]].Addresses[indexes[2]].Hostnames[indexes[3]].ID,
+              Hostname: this.allDevices[indexes[0]].Interfaces[indexes[1]].Addresses[indexes[2]].Hostnames[indexes[3]].Hostname,
+              IsDNS: this.allDevices[indexes[0]].Interfaces[indexes[1]].Addresses[indexes[2]].Hostnames[indexes[3]].IsDNS,
+              IsSelfSet: this.allDevices[indexes[0]].Interfaces[indexes[1]].Addresses[indexes[2]].Hostnames[indexes[3]].IsSelfSet,
+              Notes: this.allDevices[indexes[0]].Interfaces[indexes[1]].Addresses[indexes[2]].Hostnames[indexes[3]].Notes,
+              AddressID: this.allDevices[indexes[0]].Interfaces[indexes[1]].Addresses[indexes[2]].ID,
+            }
+            deviceRecords.post("/hostname", hostnameOnly).then((response) => {
+              this.allDevices[indexes[0]].Interfaces[indexes[1]].Addresses[indexes[2]].Hostnames[indexes[3]].ID = (response as DomainName).ID
+              if (isNew) {
+                const move = this.allDevices[indexes[0]].Interfaces[indexes[1]].Addresses[indexes[2]].Hostnames.splice(indexes[3], 1)
+                move.forEach((item) => {
+                  this.allDevices[indexes[0]].Interfaces[indexes[1]].Addresses[indexes[2]].Hostnames.push(item)
+                })
+                resolve(response)
+              } else {
+                resolve(response)
+              }
+            })
+            this.editingItems.hostnames.delete(indexes[0].toString() + "." + indexes[1].toString() + "." + indexes[2].toString() + "." + indexes[3].toString())
+          }
+        } else {
+          reject("incorrect number of indexes")
         }
       })
     },
@@ -752,6 +773,6 @@ export const useDevices = defineStore('devices', {
           })
         }
       */
-    }
-  }
+    },
+  },
 })

@@ -3,7 +3,7 @@
 
   import { useApp } from "@/stores/app"
   import { Item } from "@/data/menu"
-  
+
   import mdIcon from "@/components/elements/MDIcon.vue"
 
   const appStore = useApp()
@@ -13,22 +13,15 @@
   }>()
 
   const emit = defineEmits(["clickMenu"])
-  const linkType = computed(() => props.item.Route ? "router-link": "a")
+  const linkType = computed(() => (props.item.Route ? "router-link" : "a"))
   const itemTo = computed(() => props.item.To || null)
-  const itemTarget = computed(() => linkType.value === "a" && props.item.Target ? props.item.Target : null)
+  const itemTarget = computed(() => (linkType.value === "a" && props.item.Target ? props.item.Target : null))
   const showLabels = computed(() => appStore.toggles.isSidebarActive || appStore.toggles.isSidebarActive)
-  const tooltip = computed(() => props.item.Tooltip ? props.item.Tooltip : null)
-
+  const tooltip = computed(() => (props.item.Tooltip ? props.item.Tooltip : null))
 
   const menuClick = (event: Event) => {
     emit("clickMenu", event, props.item)
   }
-
-  
-
-  const styleActive = ""
-
-  const styleInactive = ""
 </script>
 
 <template>
@@ -45,10 +38,9 @@
 <style scoped lang="scss">
   li {
     .item {
-      
       div {
-        & { 
-          @apply flex cursor-pointer py-2; 
+        & {
+          @apply flex cursor-pointer py-2;
         }
         &:hover {
           @apply bg-teal-700 bg-opacity-50;
@@ -64,11 +56,11 @@
         & {
           @apply bg-gray-500 bg-opacity-50 dark:bg-gray-700 dark:bg-opacity-50;
         }
-        .icon, .label {
+        .icon,
+        .label {
           @apply font-bold text-white;
         }
       }
     }
   }
-
 </style>

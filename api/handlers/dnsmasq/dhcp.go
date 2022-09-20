@@ -4,12 +4,13 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"sort"
 	"strconv"
 	"strings"
 
-	"github.com/jsnfwlr/facemasq/api/lib/db"
-	"github.com/jsnfwlr/facemasq/api/lib/files"
+	"facemasq/lib/db"
+	"facemasq/lib/files"
 )
 
 type DHCP struct {
@@ -22,8 +23,9 @@ type DHCP struct {
 
 func WriteDHCPConfig(out http.ResponseWriter, in *http.Request) {
 	var records []DHCP
-	sql := `SELECT Interfaces.MAC, Addresses.IPv4, Devices.Label, Devices.MachineName FROM Addresses JOIN Interfaces ON Interfaces.ID = Addresses.InterfaceID JOIN Devices ON Devices.ID = Interfaces.DeviceID WHERE Addresses.IsReserved = 1;`
-	err := db.Conn.Select(&records, sql)
+	var exportDir string
+	sql := `SELECT interfaces.mac, addresses.ipv4, devices.label, devices.machine_name FROM addresses JOIN interfaces ON interfaces.id = addresses.interface_id JOIN devices ON devices.id = interfaces.device_id WHERE addresses.is_reserved = 1;`
+	err := db.Conn.NewRaw(sql).Scan(db.Context, &records)
 	if err != nil {
 		log.Printf("Error getting DHCP Records: %v", err)
 		http.Error(out, "Unable to retrieve DHCP Records", http.StatusInternalServerError)
@@ -46,9 +48,14 @@ func WriteDHCPConfig(out http.ResponseWriter, in *http.Request) {
 
 	contents += FileHeader
 	for r := range records {
-		contents += fmt.Sprintf("dhcp-host=%s,%s # %s - %s\n", records[r].MAC, records[r].IPv4, records[r].MachineName, records[r].Label)
+		contents += fmt.Sprintf("dhcp-host=%s,%s # %s (%s)\n", records[r].MAC, records[r].IPv4, records[r].MachineName, records[r].Label)
 	}
-	err = files.WriteOut("../config/01.dhcp.conf", contents)
+	exportDir, err = files.GetDir("export")
+	if err != nil {
+		http.Error(out, "Unable to determine where to export the DHCP config file", http.StatusInternalServerError)
+	}
+
+	err = files.WriteOut(fmt.Sprintf("%[2]s%[1]c%[3]s", os.PathSeparator, exportDir, DHCPFilename), contents)
 	if err != nil {
 		http.Error(out, "Unable to write DHCP config file", http.StatusInternalServerError)
 	}

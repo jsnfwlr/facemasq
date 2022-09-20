@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/jsnfwlr/facemasq/api/lib/db"
-	"github.com/jsnfwlr/facemasq/api/lib/formats"
+	"facemasq/lib/db"
+	"facemasq/lib/formats"
 )
 
 type TrendWindow struct {
@@ -64,13 +64,13 @@ func GetTrendData(out http.ResponseWriter, in *http.Request) {
 		switch durations[d].Label {
 		case "Historic":
 			sql = `SELECT Count(active) FROM (SELECT DISTINCT Devices.ID as Active, 1 as Merge FROM Devices JOIN Interfaces ON Interfaces.DeviceID = Devices.ID JOIN Addresses ON Addresses.InterfaceID = Interfaces.ID) as Period GROUP BY Merge;`
-			err = db.Conn.Get(&durations[d].Compare, sql)
+			err = db.Conn.NewRaw(sql).Scan(db.Context, &durations[d].Compare)
 		case "Concurrent":
 			sql = `SELECT COUNT(AddressID) FROM History GROUP BY ScanID ORDER BY COUNT(AddressID) DESC LIMIT 1 OFFSET 1;`
-			err = db.Conn.Get(&durations[d].Compare, sql)
+			err = db.Conn.NewRaw(sql).Scan(db.Context, &durations[d].Compare)
 		default:
 			sql = `SELECT Count(active) FROM (SELECT DISTINCT addressID as active, 1 as Merge FROM History JOIN Scans ON History.ScanID = Scans.ID WHERE Time > ? AND Time < ?) as Period GROUP BY Merge;`
-			err = db.Conn.Get(&durations[d].Compare, sql, durations[d].from.Format("2006-01-02 15:04"), durations[d].to.Format("2006-01-02 15:04"))
+			err = db.Conn.NewRaw(sql, durations[d].from.Format("2006-01-02 15:04"), durations[d].to.Format("2006-01-02 15:04")).Scan(db.Context, &durations[d].Compare)
 		}
 
 		if err != nil {
@@ -88,10 +88,10 @@ func GetTrendData(out http.ResponseWriter, in *http.Request) {
 			durations[d].Current = durations[d].Compare
 		case "Concurrent":
 			sql = `SELECT COUNT(AddressID) FROM History GROUP BY ScanID ORDER BY COUNT(AddressID) DESC LIMIT 1;`
-			err = db.Conn.Get(&durations[d].Current, sql)
+			err = db.Conn.NewRaw(sql).Scan(db.Context, &durations[d].Current)
 		default:
 			sql = `SELECT Count(active) FROM (SELECT DISTINCT addressID as active, 1 as Merge FROM History JOIN Scans ON History.ScanID = Scans.ID WHERE Time > ? AND Time < ?) as Period GROUP BY Merge;`
-			err = db.Conn.Get(&durations[d].Current, sql, durations[d].to.Format("2006-01-02 15:04"), time.Now().Format("2006-01-02 15:04"))
+			err = db.Conn.NewRaw(sql, durations[d].to.Format("2006-01-02 15:04"), time.Now().Format("2006-01-02 15:04")).Scan(db.Context, &durations[d].Current)
 		}
 
 		if err != nil {

@@ -1,21 +1,15 @@
 <script setup lang="ts">
-  import { onMounted, computed } from 'vue'
-  import { storeToRefs } from 'pinia'
-  import { useUser } from '@/stores/user'
-  import { useParams, Category, Status, DeviceType, Location, Maintainer, OperatingSystem, Architecture, VLAN, User} from '@/stores/params'
-  import { useRoute, onBeforeRouteUpdate } from 'vue-router'
+  import { onMounted, computed } from "vue"
 
+  import { useParams } from "@/stores/params"
+  import { useRoute } from "vue-router"
 
-  import Card from '@/components/containers/Card.vue'
-    import ParamGrid from '@/components/grids/Params.vue'
+  import Card from "@/components/containers/Card.vue"
+  import ParamGrid from "@/components/grids/Params.vue"
 
   const route = useRoute()
 
   const paramsStore = useParams()
-  const { Categories, Statuses, DeviceTypes, Locations, Maintainers, OperatingSystems, Architectures, VLANs, Users } = storeToRefs(paramsStore)
-
-  const userStore = useUser()
-  const { settings } = storeToRefs(userStore)
 
   const getIcon = computed(() => {
     switch (route.params.param) {
@@ -37,6 +31,8 @@
         return "Vpn"
       case "users":
         return "AccountCircle"
+      default:
+        return "HelpCircle"
     }
   })
 
@@ -60,30 +56,9 @@
         return "Virtual LANs"
       case "users":
         return "Users"
+      default:
+        return ""
     }
-    return ""
-  })
-
-  const getItems = computed<Array<Category|Status|DeviceType|Location|Maintainer|OperatingSystem|Architecture|VLAN|User>>(() => {
-    switch (route.params.param) {
-      case "categories":
-        return Categories.value
-      case "status":
-        return Statuses.value
-      case "maintainers":
-        return Maintainers.value
-      case "locations":
-        return Locations.value
-      case "devicetypes":
-        return DeviceTypes.value
-      case "operatingsystems":
-        return OperatingSystems.value
-      case "architectures":
-        return Architectures.value
-      case "vlans":
-        return VLANs.value
-    }
-    return Users.value
   })
 
   const routeParam = computed(() => {
@@ -215,7 +190,6 @@
       case "users":
         paramsStore.SaveUser(index)
         break
-
     }
   }
 
@@ -226,6 +200,6 @@
 
 <template>
   <card :icon="getIcon" :headingTitle="getTitle" has-table class="mb-6" headerIcon="PlusBox" @header-icon-click="addItem">
-    <param-grid :items="getItems" :mode="routeParam" @save-item="saveItem" @drop-item="dropItem" @deleteItem="deleteItem" />
+    <param-grid :mode="routeParam" @save-item="saveItem" @drop-item="dropItem" @deleteItem="deleteItem" />
   </card>
 </template>

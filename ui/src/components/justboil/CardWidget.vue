@@ -1,58 +1,49 @@
 <script setup>
-import { mdiCog } from '@mdi/js'
-import { computed } from 'vue'
-import CardComponent from '@/components/justboil/CardComponent.vue'
-import GrowingNumber from '@/components/justboil/GrowingNumber.vue'
-import Icon from '@/components/justboil/Icon.vue'
-import Level from '@/components/containers/Level.vue'
-import TrendPill from '@/components/justboil/TrendPill.vue'
-import JbButton from '@/components/justboil/JbButton.vue'
-import { useUser } from '@/stores/user'
-import { storeToRefs } from 'pinia'
+  import CardComponent from "@/components/justboil/CardComponent.vue"
+  import GrowingNumber from "@/components/justboil/GrowingNumber.vue"
+  import Icon from "@/components/justboil/Icon.vue"
+  import Level from "@/components/containers/Level.vue"
+  import TrendPill from "@/components/justboil/TrendPill.vue"
 
-const userStore = useUser()
-const { darkMode } = storeToRefs(userStore)
-
-defineProps({
-  number: {
-    type: Number,
-    default: 0
-  },
-  icon: {
-    type: String,
-    default: null
-  },
-  prefix: {
-    type: String,
-    default: null
-  },
-  suffix: {
-    type: String,
-    default: null
-  },
-  label: {
-    type: String,
-    default: null
-  },
-  color: {
-    type: String,
-    default: null
-  },
-  trend: {
-    type: String,
-    default: null
-  },
-  trendType: {
-    type: String,
-    default: null
-  }
-})
-
+  defineProps({
+    number: {
+      type: Number,
+      default: 0,
+    },
+    icon: {
+      type: String,
+      default: null,
+    },
+    prefix: {
+      type: String,
+      default: null,
+    },
+    suffix: {
+      type: String,
+      default: null,
+    },
+    label: {
+      type: String,
+      default: null,
+    },
+    color: {
+      type: String,
+      default: null,
+    },
+    trend: {
+      type: String,
+      default: null,
+    },
+    trendType: {
+      type: String,
+      default: null,
+    },
+  })
 </script>
 
 <template>
   <card-component>
-    <level v-if="trend" class="mb-3" mobile >
+    <level v-if="trend" class="mb-3" mobile>
       <trend-pill :trend="trend" :trend-type="trendType" small />
     </level>
     <level mobile>

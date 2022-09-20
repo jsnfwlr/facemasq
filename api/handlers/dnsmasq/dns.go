@@ -4,12 +4,13 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"sort"
 	"strconv"
 	"strings"
 
-	"github.com/jsnfwlr/facemasq/api/lib/db"
-	"github.com/jsnfwlr/facemasq/api/lib/files"
+	"facemasq/lib/db"
+	"facemasq/lib/files"
 )
 
 type DNS struct {
@@ -21,8 +22,9 @@ type DNS struct {
 
 func WriteDNSConfig(out http.ResponseWriter, in *http.Request) {
 	var records []DNS
+	var exportDir string
 	sql := `SELECT Hostname, IPv4, Devices.Label FROM Hostnames JOIN Addresses ON Hostnames.AddressID = Addresses.ID JOIN Interfaces ON Addresses.InterfaceID = Interfaces.ID JOIN Devices ON Devices.ID = Interfaces.DeviceID WHERE IsDNS = 1;`
-	err := db.Conn.Select(&records, sql)
+	err := db.Conn.NewRaw(sql).Scan(db.Context, &records)
 	if err != nil {
 		log.Printf("Error getting DNS Records: %v", err)
 		http.Error(out, "Unable to retrieve DNS Records", http.StatusInternalServerError)
@@ -45,9 +47,13 @@ func WriteDNSConfig(out http.ResponseWriter, in *http.Request) {
 	contents += FileHeader
 	for r := range records {
 		contents += fmt.Sprintf("address=/%s/%s # %s\n", records[r].Hostname, records[r].IPv4, records[r].Label)
-
 	}
-	err = files.WriteOut("../config/02.dns.conf", contents)
+	exportDir, err = files.GetDir("export")
+	if err != nil {
+		http.Error(out, "Unable to determine where to export the DNS config file", http.StatusInternalServerError)
+	}
+
+	err = files.WriteOut(fmt.Sprintf("%[2]s%[1]c%[3]s", os.PathSeparator, exportDir, DNSFilename), contents)
 	if err != nil {
 		http.Error(out, "Unable to write DNS config file", http.StatusInternalServerError)
 	}

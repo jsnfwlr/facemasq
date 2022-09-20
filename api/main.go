@@ -2,48 +2,44 @@ package main
 
 import (
 	"log"
-	"net/http"
 	"os"
 
-	"github.com/urfave/negroni"
-
-	"github.com/jsnfwlr/facemasq/api/lib/db"
-	"github.com/jsnfwlr/facemasq/api/lib/netscan"
-	"github.com/jsnfwlr/facemasq/api/routes"
+	"facemasq/lib/db"
+	"facemasq/lib/netscan"
+	"facemasq/lib/network"
+	"facemasq/routes"
 )
 
-var port string
+var verbose bool
 
 func init() {
-	port = os.Getenv("PORT")
-	if port == "" {
-		port = "6135"
+	beVerbose := os.Getenv("VERBOSE")
+	if beVerbose != "" {
+		verbose = true
 	}
 }
 
 func main() {
-	log.Println("Starting facemasq")
-	err := db.Connect("../data/", "network.sqlite")
+	log.Println("Running faceMasq as a daemon")
+	err := db.Connect()
+	if err != nil {
+		panic(err)
+	}
+
 	if err != nil {
 		log.Fatalf("%v", err)
 	}
+	log.Printf("Connected: %+v\n", db.DBEngine)
 
-	netscan.Schedule()
+	network.ShowNetworkSummary()
 
-	err = runServer()
+	if os.Getenv("NETMASK") != "" {
+		log.Printf("Active Net scan running every %v", netscan.Frequency)
+		netscan.Schedule(verbose)
+	}
+
+	err = routes.Run()
 	if err != nil {
 		log.Fatalf("%v", err)
 	}
-}
-
-func runServer() (err error) {
-	cwd, _ := os.Getwd()
-	log.Printf("Starting API server in %s\n", cwd)
-
-	server := negroni.New()
-	router := routes.BuildRoutes()
-
-	server.UseHandler(router.Mux)
-	err = http.ListenAndServe(":"+port, server)
-	return
 }

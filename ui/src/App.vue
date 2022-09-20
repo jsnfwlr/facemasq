@@ -1,5 +1,5 @@
 <script setup>
-import layout from '@/layouts/index.vue'
+  import layout from "@/layouts/index.vue"
 </script>
 
 <template>

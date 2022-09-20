@@ -1,0 +1,35 @@
+---
+kind: pipeline
+type: docker
+name: default
+
+steps:
+- name: frontend
+  network_mode: host
+  image: node
+  commands:
+  - cd ui
+  - npm install -g pnpm
+  - npx browserslist@latest --update-db
+  - pnpm install
+  - pnpm build
+
+- name: backend
+  network_mode: host
+  image: golang:1.18-alpine
+  commands:
+  - apk add -U --no-cache build-base wget ca-certificates tzdata flex bison linux-headers
+  - export BUILDDIR=$(pwd)
+  - mkdir /build && cd /build
+  - wget https://www.tcpdump.org/release/libpcap-1.10.1.tar.gz
+  - tar xvf libpcap-1.10.1.tar.gz && cd libpcap-1.10.1 && ./configure --with-pcap=linux && make
+  - cd /drone/src/api
+  - go mod tidy
+  - CGO_ENABLED=1 LD_LIBRARY_PATH="-L/build/libpcap-1.10.1" CGO_LDFLAGS="-L/build/libpcap-1.10.1" CGO_CPPFLAGS="-I/build/libpcap-1.10.1" go build -ldflags '-linkmode external -extldflags -static' --tags "linux sqlite_foreign_keys=1" ./
+
+trigger:
+  event:
+  - custom
+  - push
+  - pull_request
+

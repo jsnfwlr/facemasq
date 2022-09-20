@@ -5,82 +5,75 @@ import (
 	"net/http"
 	"strconv"
 
+	"facemasq/lib/db"
+	"facemasq/lib/formats"
+	"facemasq/models"
+
 	"github.com/gorilla/mux"
-	"github.com/jsnfwlr/facemasq/api/lib/formats"
-	"github.com/jsnfwlr/facemasq/api/models/Architectures"
-	"github.com/jsnfwlr/facemasq/api/models/Categories"
-	"github.com/jsnfwlr/facemasq/api/models/DeviceTypes"
-	"github.com/jsnfwlr/facemasq/api/models/InterfaceTypes"
-	"github.com/jsnfwlr/facemasq/api/models/Locations"
-	"github.com/jsnfwlr/facemasq/api/models/Maintainers"
-	"github.com/jsnfwlr/facemasq/api/models/OperatingSystems"
-	"github.com/jsnfwlr/facemasq/api/models/Status"
-	"github.com/jsnfwlr/facemasq/api/models/Users"
-	"github.com/jsnfwlr/facemasq/api/models/VLANs"
 )
 
 type Params struct {
-	Categories       []Categories.Model
-	Statuses         []Status.Model
-	Locations        []Locations.Model
-	Maintainers      []Maintainers.Model
-	Architectures    []Architectures.Model
-	OperatingSystems []OperatingSystems.Model
-	InterfaceTypes   []InterfaceTypes.Model
-	DeviceTypes      []DeviceTypes.Model
-	VLANs            []VLANs.Model
-	Users            []Users.Model
+	Categories       []models.Category
+	Statuses         []models.Status
+	Locations        []models.Location
+	Maintainers      []models.Maintainer
+	Architectures    []models.Architecture
+	OperatingSystems []models.OperatingSystem
+	InterfaceTypes   []models.InterfaceType
+	DeviceTypes      []models.DeviceType
+	VLANs            []models.VLAN
+	Users            []models.User
 }
 
 func GetAll(out http.ResponseWriter, in *http.Request) {
 	var params Params
 	var err error
-	params.Categories, err = Categories.Get()
+	err = db.Conn.NewSelect().Model(&params.Categories).Scan(db.Context)
 	if err != nil {
 		http.Error(out, "Unable to Category data", http.StatusInternalServerError)
 	}
 
-	params.Statuses, err = Status.Get()
+	err = db.Conn.NewSelect().Model(&params.Statuses).Scan(db.Context)
 	if err != nil {
 		http.Error(out, "Unable to Status data", http.StatusInternalServerError)
 	}
 
-	params.Locations, err = Locations.Get()
+	err = db.Conn.NewSelect().Model(&params.Locations).Scan(db.Context)
 	if err != nil {
 		http.Error(out, "Unable to Location data", http.StatusInternalServerError)
 	}
 
-	params.Maintainers, err = Maintainers.Get()
+	err = db.Conn.NewSelect().Model(&params.Maintainers).Scan(db.Context)
 	if err != nil {
 		http.Error(out, "Unable to Maintainer data", http.StatusInternalServerError)
 	}
 
-	params.Architectures, err = Architectures.Get()
+	err = db.Conn.NewSelect().Model(&params.Architectures).Scan(db.Context)
 	if err != nil {
 		http.Error(out, "Unable to Architecture data", http.StatusInternalServerError)
 	}
 
-	params.OperatingSystems, err = OperatingSystems.Get()
+	err = db.Conn.NewSelect().Model(&params.OperatingSystems).Scan(db.Context)
 	if err != nil {
 		http.Error(out, "Unable to OperatingSystem data", http.StatusInternalServerError)
 	}
 
-	params.InterfaceTypes, err = InterfaceTypes.Get()
+	err = db.Conn.NewSelect().Model(&params.InterfaceTypes).Scan(db.Context)
 	if err != nil {
 		http.Error(out, "Unable to InterfaceType data", http.StatusInternalServerError)
 	}
 
-	params.DeviceTypes, err = DeviceTypes.Get()
+	err = db.Conn.NewSelect().Model(&params.DeviceTypes).Scan(db.Context)
 	if err != nil {
 		http.Error(out, "Unable to DeviceType data", http.StatusInternalServerError)
 	}
 
-	params.VLANs, err = VLANs.Get()
+	err = db.Conn.NewSelect().Model(&params.VLANs).Scan(db.Context)
 	if err != nil {
 		http.Error(out, "Unable to VLAN data", http.StatusInternalServerError)
 	}
 
-	params.Users, err = Users.Get()
+	err = db.Conn.NewSelect().Model(&params.Users).Scan(db.Context)
 	if err != nil {
 		http.Error(out, "Unable to User data", http.StatusInternalServerError)
 	}
@@ -89,14 +82,19 @@ func GetAll(out http.ResponseWriter, in *http.Request) {
 }
 
 func SaveCategory(out http.ResponseWriter, in *http.Request) {
-	var input Categories.Model
+	var input models.Category
 	err := formats.ReadJSON(in, &input)
 	if err != nil {
 		log.Printf("Unable to save Category: %v", err)
 		http.Error(out, "Unable to save Category", http.StatusInternalServerError)
 		return
 	}
-	err = input.Save()
+
+	if input.ID > 0 {
+		_, err = db.Conn.NewUpdate().Model(&input).Exec(db.Context)
+	} else {
+		_, err = db.Conn.NewInsert().Model(&input).Exec(db.Context)
+	}
 	if err != nil {
 		log.Printf("Unable to save Category: %v", err)
 		http.Error(out, "Unable to save Category", http.StatusInternalServerError)
@@ -105,8 +103,9 @@ func SaveCategory(out http.ResponseWriter, in *http.Request) {
 	}
 	formats.PublishJSON(input, out, in)
 }
+
 func DeleteCategory(out http.ResponseWriter, in *http.Request) {
-	var input Categories.Model
+	var input models.Category
 	id, err := strconv.ParseInt(mux.Vars(in)["ID"], 10, 64)
 	if err != nil {
 		log.Printf("Unable to delete Category: %v", err)
@@ -116,7 +115,7 @@ func DeleteCategory(out http.ResponseWriter, in *http.Request) {
 	}
 	input.ID = id
 
-	err = input.Delete()
+	_, err = db.Conn.NewDelete().Model(&input).WherePK().Exec(db.Context)
 	if err != nil {
 		log.Printf("Unable to delete Category: %v", err)
 		http.Error(out, "Unable to delete Category", http.StatusInternalServerError)
@@ -126,14 +125,19 @@ func DeleteCategory(out http.ResponseWriter, in *http.Request) {
 }
 
 func SaveStatus(out http.ResponseWriter, in *http.Request) {
-	var input Status.Model
+	var input models.Status
 	err := formats.ReadJSON(in, &input)
 	if err != nil {
 		log.Printf("Unable to save Status: %v", err)
 		http.Error(out, "Unable to save Status", http.StatusInternalServerError)
 		return
 	}
-	err = input.Save()
+
+	if input.ID > 0 {
+		_, err = db.Conn.NewUpdate().Model(&input).Exec(db.Context)
+	} else {
+		_, err = db.Conn.NewInsert().Model(&input).Exec(db.Context)
+	}
 	if err != nil {
 		log.Printf("Unable to save Status: %v", err)
 		http.Error(out, "Unable to save Status", http.StatusInternalServerError)
@@ -142,8 +146,9 @@ func SaveStatus(out http.ResponseWriter, in *http.Request) {
 	}
 	formats.PublishJSON(input, out, in)
 }
+
 func DeleteStatus(out http.ResponseWriter, in *http.Request) {
-	var input Status.Model
+	var input models.Status
 	id, err := strconv.ParseInt(mux.Vars(in)["ID"], 10, 64)
 	if err != nil {
 		log.Printf("Unable to delete Status: %v", err)
@@ -153,7 +158,7 @@ func DeleteStatus(out http.ResponseWriter, in *http.Request) {
 	}
 	input.ID = id
 
-	err = input.Delete()
+	_, err = db.Conn.NewDelete().Model(&input).WherePK().Exec(db.Context)
 	if err != nil {
 		log.Printf("Unable to delete Status: %v", err)
 		http.Error(out, "Unable to delete Status", http.StatusInternalServerError)
@@ -163,14 +168,19 @@ func DeleteStatus(out http.ResponseWriter, in *http.Request) {
 }
 
 func SaveLocation(out http.ResponseWriter, in *http.Request) {
-	var input Locations.Model
+	var input models.Location
 	err := formats.ReadJSON(in, &input)
 	if err != nil {
 		log.Printf("Unable to save Location: %v", err)
 		http.Error(out, "Unable to save Location", http.StatusInternalServerError)
 		return
 	}
-	err = input.Save()
+
+	if input.ID > 0 {
+		_, err = db.Conn.NewUpdate().Model(&input).Exec(db.Context)
+	} else {
+		_, err = db.Conn.NewInsert().Model(&input).Exec(db.Context)
+	}
 	if err != nil {
 		log.Printf("Unable to save Location: %v", err)
 		http.Error(out, "Unable to save Location", http.StatusInternalServerError)
@@ -179,8 +189,9 @@ func SaveLocation(out http.ResponseWriter, in *http.Request) {
 	}
 	formats.PublishJSON(input, out, in)
 }
+
 func DeleteLocation(out http.ResponseWriter, in *http.Request) {
-	var input Locations.Model
+	var input models.Location
 	id, err := strconv.ParseInt(mux.Vars(in)["ID"], 10, 64)
 	if err != nil {
 		log.Printf("Unable to delete Location: %v", err)
@@ -190,7 +201,7 @@ func DeleteLocation(out http.ResponseWriter, in *http.Request) {
 	}
 	input.ID = id
 
-	err = input.Delete()
+	_, err = db.Conn.NewDelete().Model(&input).WherePK().Exec(db.Context)
 	if err != nil {
 		log.Printf("Unable to delete Location: %v", err)
 		http.Error(out, "Unable to delete Location", http.StatusInternalServerError)
@@ -200,14 +211,19 @@ func DeleteLocation(out http.ResponseWriter, in *http.Request) {
 }
 
 func SaveMaintainer(out http.ResponseWriter, in *http.Request) {
-	var input Maintainers.Model
+	var input models.Maintainer
 	err := formats.ReadJSON(in, &input)
 	if err != nil {
 		log.Printf("Unable to save Maintainer: %v", err)
 		http.Error(out, "Unable to save Maintainer", http.StatusInternalServerError)
 		return
 	}
-	err = input.Save()
+
+	if input.ID > 0 {
+		_, err = db.Conn.NewUpdate().Model(&input).Exec(db.Context)
+	} else {
+		_, err = db.Conn.NewInsert().Model(&input).Exec(db.Context)
+	}
 	if err != nil {
 		log.Printf("Unable to save Maintainer: %v", err)
 		http.Error(out, "Unable to save Maintainer", http.StatusInternalServerError)
@@ -216,8 +232,9 @@ func SaveMaintainer(out http.ResponseWriter, in *http.Request) {
 	}
 	formats.PublishJSON(input, out, in)
 }
+
 func DeleteMaintainer(out http.ResponseWriter, in *http.Request) {
-	var input Maintainers.Model
+	var input models.Maintainer
 	id, err := strconv.ParseInt(mux.Vars(in)["ID"], 10, 64)
 	if err != nil {
 		log.Printf("Unable to delete Maintainer: %v", err)
@@ -227,7 +244,7 @@ func DeleteMaintainer(out http.ResponseWriter, in *http.Request) {
 	}
 	input.ID = id
 
-	err = input.Delete()
+	_, err = db.Conn.NewDelete().Model(&input).WherePK().Exec(db.Context)
 	if err != nil {
 		log.Printf("Unable to delete Maintainer: %v", err)
 		http.Error(out, "Unable to delete Maintainer", http.StatusInternalServerError)
@@ -237,14 +254,18 @@ func DeleteMaintainer(out http.ResponseWriter, in *http.Request) {
 }
 
 func SaveArchitecture(out http.ResponseWriter, in *http.Request) {
-	var input Architectures.Model
+	var input models.Architecture
 	err := formats.ReadJSON(in, &input)
 	if err != nil {
 		log.Printf("Unable to save Architecture: %v", err)
 		http.Error(out, "Unable to save Architecture", http.StatusInternalServerError)
 		return
 	}
-	err = input.Save()
+	if input.ID > 0 {
+		_, err = db.Conn.NewUpdate().Model(&input).Exec(db.Context)
+	} else {
+		_, err = db.Conn.NewInsert().Model(&input).Exec(db.Context)
+	}
 	if err != nil {
 		log.Printf("Unable to save Architecture: %v", err)
 		http.Error(out, "Unable to save Architecture", http.StatusInternalServerError)
@@ -253,8 +274,9 @@ func SaveArchitecture(out http.ResponseWriter, in *http.Request) {
 	}
 	formats.PublishJSON(input, out, in)
 }
+
 func DeleteArchitecture(out http.ResponseWriter, in *http.Request) {
-	var input Architectures.Model
+	var input models.Architecture
 	id, err := strconv.ParseInt(mux.Vars(in)["ID"], 10, 64)
 	if err != nil {
 		log.Printf("Unable to delete Architecture: %v", err)
@@ -264,7 +286,7 @@ func DeleteArchitecture(out http.ResponseWriter, in *http.Request) {
 	}
 	input.ID = id
 
-	err = input.Delete()
+	_, err = db.Conn.NewDelete().Model(&input).WherePK().Exec(db.Context)
 	if err != nil {
 		log.Printf("Unable to delete Architecture: %v", err)
 		http.Error(out, "Unable to delete Architecture", http.StatusInternalServerError)
@@ -274,14 +296,19 @@ func DeleteArchitecture(out http.ResponseWriter, in *http.Request) {
 }
 
 func SaveOperatingSystem(out http.ResponseWriter, in *http.Request) {
-	var input OperatingSystems.Model
+	var input models.OperatingSystem
 	err := formats.ReadJSON(in, &input)
 	if err != nil {
 		log.Printf("Unable to save OperatingSystem: %v", err)
 		http.Error(out, "Unable to save OperatingSystem", http.StatusInternalServerError)
 		return
 	}
-	err = input.Save()
+
+	if input.ID > 0 {
+		_, err = db.Conn.NewUpdate().Model(&input).Exec(db.Context)
+	} else {
+		_, err = db.Conn.NewInsert().Model(&input).Exec(db.Context)
+	}
 	if err != nil {
 		log.Printf("Unable to save OperatingSystem: %v", err)
 		http.Error(out, "Unable to save OperatingSystem", http.StatusInternalServerError)
@@ -290,8 +317,9 @@ func SaveOperatingSystem(out http.ResponseWriter, in *http.Request) {
 	}
 	formats.PublishJSON(input, out, in)
 }
+
 func DeleteOperatingSystem(out http.ResponseWriter, in *http.Request) {
-	var input OperatingSystems.Model
+	var input models.OperatingSystem
 	id, err := strconv.ParseInt(mux.Vars(in)["ID"], 10, 64)
 	if err != nil {
 		log.Printf("Unable to delete OperatingSystem: %v", err)
@@ -301,7 +329,7 @@ func DeleteOperatingSystem(out http.ResponseWriter, in *http.Request) {
 	}
 	input.ID = id
 
-	err = input.Delete()
+	_, err = db.Conn.NewDelete().Model(&input).WherePK().Exec(db.Context)
 	if err != nil {
 		log.Printf("Unable to delete OperatingSystem: %v", err)
 		http.Error(out, "Unable to delete OperatingSystem", http.StatusInternalServerError)
@@ -311,14 +339,19 @@ func DeleteOperatingSystem(out http.ResponseWriter, in *http.Request) {
 }
 
 func SaveInterfaceType(out http.ResponseWriter, in *http.Request) {
-	var input InterfaceTypes.Model
+	var input models.InterfaceType
 	err := formats.ReadJSON(in, &input)
 	if err != nil {
 		log.Printf("Unable to save InterfaceType: %v", err)
 		http.Error(out, "Unable to save InterfaceType", http.StatusInternalServerError)
 		return
 	}
-	err = input.Save()
+
+	if input.ID > 0 {
+		_, err = db.Conn.NewUpdate().Model(&input).Exec(db.Context)
+	} else {
+		_, err = db.Conn.NewInsert().Model(&input).Exec(db.Context)
+	}
 	if err != nil {
 		log.Printf("Unable to save InterfaceType: %v", err)
 		http.Error(out, "Unable to save InterfaceType", http.StatusInternalServerError)
@@ -327,8 +360,9 @@ func SaveInterfaceType(out http.ResponseWriter, in *http.Request) {
 	}
 	formats.PublishJSON(input, out, in)
 }
+
 func DeleteInterfaceType(out http.ResponseWriter, in *http.Request) {
-	var input InterfaceTypes.Model
+	var input models.InterfaceType
 	id, err := strconv.ParseInt(mux.Vars(in)["ID"], 10, 64)
 	if err != nil {
 		log.Printf("Unable to delete InterfaceType: %v", err)
@@ -338,7 +372,7 @@ func DeleteInterfaceType(out http.ResponseWriter, in *http.Request) {
 	}
 	input.ID = id
 
-	err = input.Delete()
+	_, err = db.Conn.NewDelete().Model(&input).WherePK().Exec(db.Context)
 	if err != nil {
 		log.Printf("Unable to delete InterfaceType: %v", err)
 		http.Error(out, "Unable to delete InterfaceType", http.StatusInternalServerError)
@@ -348,14 +382,19 @@ func DeleteInterfaceType(out http.ResponseWriter, in *http.Request) {
 }
 
 func SaveDeviceType(out http.ResponseWriter, in *http.Request) {
-	var input DeviceTypes.Model
+	var input models.DeviceType
 	err := formats.ReadJSON(in, &input)
 	if err != nil {
 		log.Printf("Unable to save DeviceType: %v", err)
 		http.Error(out, "Unable to save DeviceType", http.StatusInternalServerError)
 		return
 	}
-	err = input.Save()
+
+	if input.ID > 0 {
+		_, err = db.Conn.NewUpdate().Model(&input).Exec(db.Context)
+	} else {
+		_, err = db.Conn.NewInsert().Model(&input).Exec(db.Context)
+	}
 	if err != nil {
 		log.Printf("Unable to save DeviceType: %v", err)
 		http.Error(out, "Unable to save DeviceType", http.StatusInternalServerError)
@@ -364,8 +403,9 @@ func SaveDeviceType(out http.ResponseWriter, in *http.Request) {
 	}
 	formats.PublishJSON(input, out, in)
 }
+
 func DeleteDeviceType(out http.ResponseWriter, in *http.Request) {
-	var input DeviceTypes.Model
+	var input models.DeviceType
 	id, err := strconv.ParseInt(mux.Vars(in)["ID"], 10, 64)
 	if err != nil {
 		log.Printf("Unable to delete DeviceType: %v", err)
@@ -375,7 +415,7 @@ func DeleteDeviceType(out http.ResponseWriter, in *http.Request) {
 	}
 	input.ID = id
 
-	err = input.Delete()
+	_, err = db.Conn.NewDelete().Model(&input).WherePK().Exec(db.Context)
 	if err != nil {
 		log.Printf("Unable to delete DeviceType: %v", err)
 		http.Error(out, "Unable to delete DeviceType", http.StatusInternalServerError)
@@ -385,14 +425,19 @@ func DeleteDeviceType(out http.ResponseWriter, in *http.Request) {
 }
 
 func SaveVLAN(out http.ResponseWriter, in *http.Request) {
-	var input VLANs.Model
+	var input models.VLAN
 	err := formats.ReadJSON(in, &input)
 	if err != nil {
 		log.Printf("Unable to save VLAN: %v", err)
 		http.Error(out, "Unable to save VLAN", http.StatusInternalServerError)
 		return
 	}
-	err = input.Save()
+
+	if input.ID > 0 {
+		_, err = db.Conn.NewUpdate().Model(&input).Exec(db.Context)
+	} else {
+		_, err = db.Conn.NewInsert().Model(&input).Exec(db.Context)
+	}
 	if err != nil {
 		log.Printf("Unable to save VLAN: %v", err)
 		http.Error(out, "Unable to save VLAN", http.StatusInternalServerError)
@@ -401,8 +446,9 @@ func SaveVLAN(out http.ResponseWriter, in *http.Request) {
 	}
 	formats.PublishJSON(input, out, in)
 }
+
 func DeleteVLAN(out http.ResponseWriter, in *http.Request) {
-	var input VLANs.Model
+	var input models.VLAN
 	id, err := strconv.ParseInt(mux.Vars(in)["ID"], 10, 64)
 	if err != nil {
 		log.Printf("Unable to delete VLAN: %v", err)
@@ -412,7 +458,7 @@ func DeleteVLAN(out http.ResponseWriter, in *http.Request) {
 	}
 	input.ID = id
 
-	err = input.Delete()
+	_, err = db.Conn.NewDelete().Model(&input).WherePK().Exec(db.Context)
 	if err != nil {
 		log.Printf("Unable to delete VLAN: %v", err)
 		http.Error(out, "Unable to delete VLAN", http.StatusInternalServerError)
@@ -422,14 +468,19 @@ func DeleteVLAN(out http.ResponseWriter, in *http.Request) {
 }
 
 func SaveUser(out http.ResponseWriter, in *http.Request) {
-	var input Users.Model
+	var input models.User
 	err := formats.ReadJSON(in, &input)
 	if err != nil {
 		log.Printf("Unable to save User: %v", err)
 		http.Error(out, "Unable to save User", http.StatusInternalServerError)
 		return
 	}
-	err = input.Save()
+
+	if input.ID > 0 {
+		_, err = db.Conn.NewUpdate().Model(&input).Exec(db.Context)
+	} else {
+		_, err = db.Conn.NewInsert().Model(&input).Exec(db.Context)
+	}
 	if err != nil {
 		log.Printf("Unable to save User: %v", err)
 		http.Error(out, "Unable to save User", http.StatusInternalServerError)
@@ -438,8 +489,9 @@ func SaveUser(out http.ResponseWriter, in *http.Request) {
 	}
 	formats.PublishJSON(input, out, in)
 }
+
 func DeleteUser(out http.ResponseWriter, in *http.Request) {
-	var input Users.Model
+	var input models.User
 	id, err := strconv.ParseInt(mux.Vars(in)["ID"], 10, 64)
 	if err != nil {
 		log.Printf("Unable to delete User: %v", err)
@@ -449,7 +501,7 @@ func DeleteUser(out http.ResponseWriter, in *http.Request) {
 	}
 	input.ID = id
 
-	err = input.Delete()
+	_, err = db.Conn.NewDelete().Model(&input).WherePK().Exec(db.Context)
 	if err != nil {
 		log.Printf("Unable to delete User: %v", err)
 		http.Error(out, "Unable to delete User", http.StatusInternalServerError)

@@ -1,14 +1,13 @@
 <script setup lang="ts">
   // Libraries
-  import { computed, ref, onMounted, onBeforeUnmount, watch } from "vue"
+  import { computed, onMounted, onBeforeUnmount } from "vue"
   import { storeToRefs } from "pinia"
-  import { parse, format, subHours, subDays, subMinutes } from "date-fns"
-  import clonedeep from "lodash.clonedeep"
+  import { parse, subMinutes } from "date-fns"
 
   // Stores & Data
   import { useUser } from "@/stores/user"
-  import { Trend, Device, useDevices } from "@/stores/devices"
-  
+  import { useDevices } from "@/stores/devices"
+
   // Components
   import Chart from "@/components/charts/LineChart.vue"
   import TrendIndicator from "@/components/indicators/Trend.vue"
@@ -16,7 +15,6 @@
   import Card from "@/components/containers/Card.vue"
   import Banner from "@/components/indicators/Banner.vue"
   import Btn from "@/components/elements/Btn.vue"
-  import { min } from ".pnpm/@types+lodash@4.14.178/node_modules/@types/lodash"
 
   const userStore = useUser()
   const deviceStore = useDevices()
@@ -24,7 +22,7 @@
   const { settings } = storeToRefs(userStore)
   const { allDevices, trends, devicesOverTime, lastUnknown } = storeToRefs(deviceStore)
 
-  let timer: any
+  let timer: ReturnType<typeof setInterval>
 
   const updateDevices = () => {
     deviceStore.getAll()
@@ -34,7 +32,9 @@
 
   onMounted(() => {
     updateDevices()
-    timer = setInterval(() => { updateDevices() }, 0.5 * 60 * 1000)
+    timer = setInterval(() => {
+      updateDevices()
+    }, 0.5 * 60 * 1000)
   })
 
   onBeforeUnmount(() => {
@@ -47,34 +47,41 @@
     { Label: "30 days", Compare: 0, Current: 0 },
     { Label: "7 days", Compare: 0, Current: 0 },
     { Label: "24 hours", Compare: 0, Current: 0 },
-    { Label: "30 minutes", Compare: 0, Current: 0 }
+    { Label: "30 minutes", Compare: 0, Current: 0 },
   ]
 
   const getMin = computed(() => {
     if (devicesOverTime.value.full.length == 0) {
       return 0
     }
-    const counts = devicesOverTime.value.full.map(x => x.Addresses)
+    const counts = devicesOverTime.value.full.map((x) => x.Addresses)
     const min = Math.min(...counts)
-    return ((min - 10) >= 0) ? (min - 10) : 0
-
+    return min - 10 >= 0 ? min - 10 : 0
   })
 
   const getMax = computed(() => {
     if (devicesOverTime.value.full.length == 0) {
       return 100
     }
-    const counts = devicesOverTime.value.full.map(x => x.Addresses)
-    const max = Math.max(...counts) 
+    const counts = devicesOverTime.value.full.map((x) => x.Addresses)
+    const max = Math.max(...counts)
     return max + 10
   })
 
-  const newUnknown = computed(() => { return ((allDevices.value.length < 0 && settings.value.lastDismissed && lastUnknown.value) ? (settings.value.lastDismissed < lastUnknown.value) : false) })
-  const dismissUnknown = () => { userStore.lastDismissedUnknown(new Date()) }
-  const showUnknown = () => { console.log("Navigate to unknown") }
+  const newUnknown = computed(() => {
+    return allDevices.value.length < 0 && settings.value.lastDismissed && lastUnknown.value ? settings.value.lastDismissed < lastUnknown.value : false
+  })
+  const dismissUnknown = () => {
+    userStore.lastDismissedUnknown(new Date())
+  }
+  const showUnknown = () => {
+    console.log("Navigate to unknown")
+  }
 
   // Devices seen in the last 30 minutes
-  const recentDevices = computed(() => { return allDevices.value.filter(device => device.Interfaces[0].Addresses[0].LastSeen !== null && parse(device.Interfaces[0].Addresses[0].LastSeen.replace("T", " ").replace("Z", ""), "yyyy-MM-dd HH:mm:ss", new Date()) > subMinutes(new Date(), 30)) }) 
+  const recentDevices = computed(() => {
+    return allDevices.value.filter((device) => device.Interfaces[0].Addresses[0].LastSeen !== null && parse(device.Interfaces[0].Addresses[0].LastSeen.replace("T", " ").replace("Z", ""), "yyyy-MM-dd HH:mm:ss", new Date()) > subMinutes(new Date(), 30))
+  })
 </script>
 
 <template>
@@ -86,10 +93,10 @@
     </template>
   </banner>
   <div v-if="trends.length > 0" class="grid grid-cols-2 gap-6 lg:grid-cols-6 mb-6">
-    <trend-indicator v-for="trend, index in trends" :key="index" :trend="trend" color="text-teal-500" icon="Radar" />
+    <trend-indicator v-for="(trend, index) in trends" :trend="trend" color="text-teal-500" icon="Radar" :key="'trends-' + index" :prefix="''" :suffix="''" />
   </div>
   <div v-else class="grid grid-cols-2 gap-6 lg:grid-cols-6 mb-6">
-    <trend-indicator v-for="trend, index in fakeTrends" :key="index" :trend="trend" color="text-teal-500" icon="Radar" />
+    <trend-indicator v-for="(trend, index) in fakeTrends" :trend="trend" color="text-teal-500" icon="Radar" :key="'fake-trends-' + index" :prefix="''" :suffix="''" />
   </div>
   <div class="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-6">
     <div>
@@ -101,7 +108,7 @@
     </div>
     <div>
       <card icon="MonitorCellphone" :headingTitle="'Recent Devices (' + recentDevices.length + ')'" has-table class="mb-6">
-        <things-grid  :maxHeight="625.5" :items="recentDevices" />
+        <things-grid :maxHeight="625.5" :items="recentDevices" />
       </card>
     </div>
   </div>

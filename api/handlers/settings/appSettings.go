@@ -4,17 +4,16 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/volatiletech/null"
+	"facemasq/lib/db"
+	"facemasq/lib/formats"
+	"facemasq/models"
 
-	"github.com/jsnfwlr/facemasq/api/lib/db"
-	"github.com/jsnfwlr/facemasq/api/lib/formats"
-	"github.com/jsnfwlr/facemasq/api/models/Meta"
+	"github.com/volatiletech/null"
 )
 
 func GetAppSettings(out http.ResponseWriter, in *http.Request) {
-	var settings []Meta.Model
-	sql := `SELECT Name, Value, UserID  FROM Meta WHERE UserID = NULL`
-	err := db.Conn.Select(&settings, sql)
+	var settings []models.Meta
+	err := db.Conn.NewSelect().Model(&settings).Where(`user_id = NULL`).Scan(db.Context)
 	if err != nil {
 		log.Printf("error getting settings: %v", err)
 		http.Error(out, "Unable to retrieve data", http.StatusInternalServerError)
@@ -23,7 +22,7 @@ func GetAppSettings(out http.ResponseWriter, in *http.Request) {
 }
 
 func SaveAppSetting(out http.ResponseWriter, in *http.Request) {
-	var input Meta.Model
+	var input, check models.Meta
 	err := formats.ReadJSON(in, &input)
 	if err != nil {
 		log.Printf("Unable to parse Setting: %v", err)
@@ -31,9 +30,21 @@ func SaveAppSetting(out http.ResponseWriter, in *http.Request) {
 		return
 	}
 
-	input.UserID = null.NewInt64(0, false)
+	input.UserID = null.Int64{Int64: 0, Valid: false}
 
-	err = input.Save()
+	err = db.Conn.NewSelect().Model(&check).Where(`user_id = NULL AND name = ?`, input.Name).Scan(db.Context)
+	newSetting := false
+	if err != nil {
+		if err.Error() != "sql: no rows in result set" {
+			return
+		}
+		newSetting = true
+	}
+	if newSetting {
+		_, err = db.Conn.NewUpdate().Model(&input).Exec(db.Context)
+	} else {
+		_, err = db.Conn.NewInsert().Model(&input).Exec(db.Context)
+	}
 	if err != nil {
 		log.Printf("error saving setting: %v", err)
 		http.Error(out, "Unable to retrieve data", http.StatusInternalServerError)
