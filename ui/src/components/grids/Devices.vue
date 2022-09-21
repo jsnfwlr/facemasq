@@ -224,12 +224,14 @@
   const toggleRowExpand = (deviceIndex: number) => {
     if (isRowExpanded(deviceIndex)) {
       collapseRow(deviceIndex)
-      console.log("remove focus")
       deviceStore.$patch((state) => {
         state.focusedItems.devices.delete(deviceIndex.toString())
       })
     } else {
       expandRow(deviceIndex)
+      deviceStore.$patch((state) => {
+        state.focusedItems.devices.set(deviceIndex.toString(), clonedeep(props.items[deviceIndex]))
+      })
     }
   }
 
@@ -325,12 +327,10 @@
 
   const toggleRowFocus = (deviceIndex: number) => {
     if (isFocused(deviceIndex) && !isRowExpanded(deviceIndex)) {
-      console.log("remove focus")
       deviceStore.$patch((state) => {
         state.focusedItems.devices.delete(deviceIndex.toString())
       })
     } else {
-      console.log("add focus")
       deviceStore.$patch((state) => {
         state.focusedItems.devices.set(deviceIndex.toString(), clonedeep(props.items[deviceIndex]))
       })
@@ -492,7 +492,7 @@
       </thead>
       <tbody v-for="(row, index) in items" :key="row.Interfaces[0].Addresses[0].ID">
         <tr :class="rowClass(index)" @click="toggleRowFocus(index)">
-          <td v-if="hasExpand(index)" class="expand" @click="toggleRowExpand(index)">
+          <td v-if="hasExpand(index)" class="expand" @click.stop="toggleRowExpand(index)">
             <div>
               <mdIcon v-if="isRowExpanded(index)" icon="ChevronDownBox" size="20" />
               <mdIcon v-else icon="ChevronRightBox" size="20" />
@@ -539,12 +539,12 @@
               <btn v-if="rowClass(index).includes('invading') && userStore.hasAccess('details', 'read')" color="danger" title="Investigate" icon="Magnify" :outline="true" small @click="investigate(index)" />
 
               <btngrp>
-                <btn v-if="!filtered && !isEditing(index) && !isDeleting(index) && userStore.hasAccess('devices', 'write')" color="info" icon="Pencil" small @click="edit(index)" />
-                <btn v-if="!filtered && isEditing(index) && userStore.hasAccess('devices', 'write')" color="success" icon="ContentSave" small @click="deviceStore.Save([index])" />
-                <btn v-if="!filtered && isEditing(index) && userStore.hasAccess('devices', 'write')" color="warning" icon="Eraser" small @click="deviceStore.Discard([index])" />
-                <btn v-if="!filtered && !isEditing(index) && !isDeleting(index) && userStore.hasAccess('devices', 'delete')" color="danger" icon="TrashCan" small @click="deviceStore.InitiateDelete([index])" />
-                <btn v-if="!filtered && !isEditing(index) && isDeleting(index) && userStore.hasAccess('devices', 'delete')" color="danger" icon="Check" small @click="deviceStore.PerformDelete([index])" />
-                <btn v-if="!filtered && !isEditing(index) && isDeleting(index) && userStore.hasAccess('devices', 'delete')" color="info" icon="Close" small @click="deviceStore.CancelDelete([index])" />
+                <btn v-if="!filtered && !isEditing(index) && !isDeleting(index) && userStore.hasAccess('devices', 'write')" color="info" icon="Pencil" small @click.stop="edit(index)" />
+                <btn v-if="!filtered && isEditing(index) && userStore.hasAccess('devices', 'write')" color="success" icon="ContentSave" small @click.stop="deviceStore.Save([index])" />
+                <btn v-if="!filtered && isEditing(index) && userStore.hasAccess('devices', 'write')" color="warning" icon="Eraser" small @click.stop="deviceStore.Discard([index])" />
+                <btn v-if="!filtered && !isEditing(index) && !isDeleting(index) && userStore.hasAccess('devices', 'delete')" color="danger" icon="TrashCan" small @click.stop="deviceStore.InitiateDelete([index])" />
+                <btn v-if="!filtered && !isEditing(index) && isDeleting(index) && userStore.hasAccess('devices', 'delete')" color="danger" icon="Check" small @click.stop="deviceStore.PerformDelete([index])" />
+                <btn v-if="!filtered && !isEditing(index) && isDeleting(index) && userStore.hasAccess('devices', 'delete')" color="info" icon="Close" small @click.stop="deviceStore.CancelDelete([index])" />
               </btngrp>
             </div>
           </td>
