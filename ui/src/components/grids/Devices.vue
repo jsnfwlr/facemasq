@@ -229,9 +229,6 @@
       })
     } else {
       expandRow(deviceIndex)
-      deviceStore.$patch((state) => {
-        state.focusedItems.devices.set(deviceIndex.toString(), clonedeep(props.items[deviceIndex]))
-      })
     }
   }
 
@@ -326,7 +323,7 @@
   */
 
   const toggleRowFocus = (deviceIndex: number) => {
-    if (isFocused(deviceIndex)) {
+    if (isFocused(deviceIndex) && !isRowExpanded(deviceIndex)) {
       deviceStore.$patch((state) => {
         state.focusedItems.devices.delete(deviceIndex.toString())
       })
