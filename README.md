@@ -1,4 +1,4 @@
-<p align="center"><img src="raw/branch/main/ui/public/images/mask.png" srcset="ui/public/images/mask.png 1x" /></p>
+<p align="center"><img src="ui/public/images/mask.png" /></p>
 
 <h1 style="color: #00CC99">faceMasq</h1>
 
