@@ -21,11 +21,19 @@ A blend of DNS/DHCP editor, asset registrar, network monitor, and intruder detec
   - System-wide pagination options
   - Page-specific pagination options
 
+# Installation and configuration
+
+faceMasq is intended to be run as a Docker container. Details on how to install and configure it can be found in the [Docker Installation](docs/installation/docker.md) Documents.
+
+If you wish to run it as a bare-metal service, details on how to do that can be found in the [Advanced Installation](advanced.md) Documents.
+
 # Roadmap
 
 ## Release < v1.0.0
 
-### [Codebase] Migrate all JavaScript to TypeScript
+### Codebase
+- Migrate all JavaScript to TypeScript
+- Swap to websockets for data transfer
 
 ### Additional Input sources
 - ARPScan to reduce burden on host device's network interfaces
@@ -111,11 +119,6 @@ Contribution Guide to come.
 # License
 
 [MIT](https://choosealicense.com/licenses/mit/)
-
-
-# Installation
-
-The objective for v0.1.0 will be to use the Dockerfile to build your own container and the docker-compose.yml to run the official container image.
 
 # Notes for considerations
 

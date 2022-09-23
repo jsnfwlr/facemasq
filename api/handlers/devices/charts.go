@@ -21,9 +21,9 @@ var frequency time.Duration
 
 func init() {
 	var err error
-	frequency, err = time.ParseDuration(os.Getenv("FREQUENCY"))
+	frequency, err = time.ParseDuration(os.Getenv("CHART_FREQUENCY"))
 	if err != nil {
-		frequency = time.Duration(1) * time.Minute
+		frequency = time.Duration(60) * time.Second
 	}
 }
 
