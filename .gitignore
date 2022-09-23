@@ -4,10 +4,9 @@ debug.log
 dist/**
 node_modules
 .DS_Store
-dist
-dist-ssr
 *.local
 *.swp
 pkg
 data/**
 build/*.tar.gz
+export/**

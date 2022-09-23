@@ -22,8 +22,8 @@ func init() {
 		timeOut = 2000
 	}
 
-	scanWidth = os.Getenv("SCANWIDTH")
-	if scanWidth == "" {
+	scanWidth = os.Getenv("PORTSCAN_WIDTH")
+	if scanWidth == "" || scanWidth == "narrow" {
 		for i := 1; i <= 1024; i++ {
 			portList = append(portList, i)
 		}

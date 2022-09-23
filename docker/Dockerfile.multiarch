@@ -1,19 +1,19 @@
 # syntax=docker/dockerfile:1
 
-FROM golang:1.19 AS godeps
+FROM --platform=$BUILDPLATFORM crazymax/goxx:1.19 AS godeps
 ARG TARGETPLATFORM
 ARG TARGETARCH
 ARG TARGETOS
-RUN apt-get update && apt-get install -y binutils gcc g++ pkg-config make wget ca-certificates tzdata flex bison libpcap-dev
+RUN --mount=type=cache,sharing=private,target=/var/cache/apt --mount=type=cache,sharing=private,target=/var/lib/apt/lists goxx-apt-get install -y binutils gcc g++ pkg-config make wget ca-certificates tzdata flex bison libpcap-dev
 RUN mkdir -p /dist/api
 WORKDIR /build
 COPY ./api /build
 COPY ./upgrades /dist/upgrades
 COPY ./templates /dist/templates
-RUN CGO_ENABLED=1 go build -ldflags "-linkmode external -extldflags -static" --tags "linux sqlite_foreign_keys=1" -o /dist/api/facemasq .
+RUN --mount=type=cache,target=/root/.cache --mount=type=cache,target=/go/pkg/mod CGO_ENABLED=1 goxx-go build -ldflags "-linkmode external -extldflags -static" --tags "linux sqlite_foreign_keys=1" -o /dist/api/facemasq .
 RUN chmod +x /dist/api/facemasq
 
-FROM node:16 as vuedeps
+FROM --platform=$BUILDPLATFORM node:16 as vuedeps
 RUN curl -f https://get.pnpm.io/v6.16.js | node - add --global pnpm
 RUN mkdir -p /build/dist/ui /build/ui
 COPY ./ui /build/ui

@@ -42,7 +42,7 @@ func (router *Router) masqRoutes() {
 	router.Mux.HandleFunc(`/api/dhcp`, dnsmasq.WriteDHCPConfig).Methods("GET").Name("WriteDHCPConfigGet")
 	router.Mux.HandleFunc(`/api/dhcp`, dnsmasq.WriteDHCPConfig).Methods("PUT").Name("WriteDHCPConfigPut")
 	router.Mux.HandleFunc(`/api/dns`, dnsmasq.WriteDNSConfig).Methods("GET").Name("WriteDNSConfigGet")
-	router.Mux.HandleFunc(`/api/dns`, dnsmasq.WriteDNSConfig).Methods("GET").Name("WriteDNSConfigPut")
+	router.Mux.HandleFunc(`/api/dns`, dnsmasq.WriteDNSConfig).Methods("PUT").Name("WriteDNSConfigPut")
 }
 
 func (router *Router) deviceRoutes() {

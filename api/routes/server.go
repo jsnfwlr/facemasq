@@ -33,6 +33,10 @@ func Run() (err error) {
 		server.Use(corsControl)
 	}
 
+	if os.Getenv("VERBOSE") != "" {
+		server.Use(negroni.NewLogger())
+	}
+
 	server.UseHandler(router.Mux)
 	err = http.ListenAndServe(":"+Port, server)
 	return

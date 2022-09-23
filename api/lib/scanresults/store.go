@@ -7,6 +7,7 @@ import (
 
 	"facemasq/lib/db"
 	"facemasq/lib/devices"
+	"facemasq/lib/macvendor"
 	"facemasq/models"
 
 	"github.com/uptrace/bun"
@@ -134,6 +135,15 @@ func (record *Record) CreateDevice() (err error) {
 		Notes:       null.String{String: record.Notes, Valid: true},
 		StatusID:    1,
 		FirstSeen:   time.Now(),
+	}
+
+	vendor, err := macvendor.Lookup(record.MAC)
+	if err != nil {
+		log.Printf("could not lookup vendor for MAC Address (%s): %v\n", record.MAC, err)
+		err = nil
+	}
+	if vendor != "" {
+		device.Brand = null.StringFrom(vendor)
 	}
 	_, err = db.Conn.NewInsert().Model(&device).Exec(db.Context)
 	if err != nil {

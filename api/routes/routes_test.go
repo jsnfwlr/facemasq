@@ -18,7 +18,7 @@ func TestRoutes(t *testing.T) {
 		{name: "WriteDHCPConfigGet", method: "GET"},
 		{name: "WriteDHCPConfigPut", method: "PUT"},
 		{name: "WriteDNSConfigGet", method: "GET"},
-		{name: "WriteDNSConfigPut", method: "GET"},
+		{name: "WriteDNSConfigPut", method: "PUT"},
 		{name: "GetAllDevices", method: "GET"},
 		{name: "GetActiveDevices", method: "GET"},
 		{name: "GetDashboardChartData", method: "GET"},

@@ -13,7 +13,7 @@ import (
 
 func GetAppSettings(out http.ResponseWriter, in *http.Request) {
 	var settings []models.Meta
-	err := db.Conn.NewSelect().Model(&settings).Where(`user_id = NULL`).Scan(db.Context)
+	err := db.Conn.NewSelect().Model(&settings).Where(`user_id IS NULL`).Scan(db.Context)
 	if err != nil {
 		log.Printf("error getting settings: %v", err)
 		http.Error(out, "Unable to retrieve data", http.StatusInternalServerError)
@@ -32,7 +32,7 @@ func SaveAppSetting(out http.ResponseWriter, in *http.Request) {
 
 	input.UserID = null.Int64{Int64: 0, Valid: false}
 
-	err = db.Conn.NewSelect().Model(&check).Where(`user_id = NULL AND name = ?`, input.Name).Scan(db.Context)
+	err = db.Conn.NewSelect().Model(&check).Where(`user_id IS NULL AND name = ?`, input.Name).Scan(db.Context)
 	newSetting := false
 	if err != nil {
 		if err.Error() != "sql: no rows in result set" {
