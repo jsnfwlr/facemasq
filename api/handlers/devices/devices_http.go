@@ -81,9 +81,9 @@ func SaveDevice(out http.ResponseWriter, in *http.Request) {
 		return
 	}
 	if input.FirstSeen.Format("2006-01-02") == "0001-01-01" {
-		// input.FirstSeen = null.NewString(time.Now().Format("2006-01-02 15:04:05"), true)
 		input.FirstSeen = time.Now()
 	}
+	log.Printf("!! %v", input)
 	if input.ID > 0 {
 		_, err = db.Conn.NewUpdate().Model(&input).Where("id = ?", input.ID).Exec(db.Context)
 	} else {

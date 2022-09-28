@@ -585,6 +585,7 @@ export const useDevices = defineStore("devices", {
             Serial: this.allDevices[indexes[0]].Serial,
             IsTracked: this.allDevices[indexes[0]].IsTracked,
             IsGuest: this.allDevices[indexes[0]].IsGuest,
+            IsOnline: this.allDevices[indexes[0]].IsOnline,
             Label: this.allDevices[indexes[0]].Label,
             FirstSeen: this.allDevices[indexes[0]].FirstSeen,
             Notes: this.allDevices[indexes[0]].Notes,

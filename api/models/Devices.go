@@ -15,10 +15,10 @@ type Device struct {
 	Model             null.String       `bun:",type:varchar(64)" json:"Model"`
 	Purchased         null.String       `bun:",type:varchar(10)" json:"Purchased"`
 	Serial            null.String       `bun:",type:varchar(128)" json:"Serial"`
-	IsTracked         bool              `bun:",notnull,default:false" json:"IsTracked"`
 	FirstSeen         time.Time         `bun:",type:datetime,nullzero,notnull" json:"FirstSeen"`
-	IsGuest           bool              `bun:",notnull,default:false" json:"IsGuest"`
-	IsOnline          bool              `bun:",notnull,default:false" json:"IsOnline"`
+	IsTracked         bool              `bun:",default:false" json:"IsTracked"`
+	IsGuest           bool              `bun:",default:false" json:"IsGuest"`
+	IsOnline          bool              `bun:",default:false" json:"IsOnline"`
 	Label             null.String       `bun:",type:varchar(64),notnull" json:"Label"`
 	Notes             null.String       `bun:",type:text" json:"Notes"`
 	CategoryID        int64             `bun:",nullzero,notnull,default:1" json:"CategoryID"`
