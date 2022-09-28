@@ -78,12 +78,12 @@ func GetAll(out http.ResponseWriter, in *http.Request) {
 		http.Error(out, "Unable to User data", http.StatusInternalServerError)
 	}
 
-	formats.PublishJSON(params, out, in)
+	formats.WriteJSONResponse(params, out, in)
 }
 
 func SaveCategory(out http.ResponseWriter, in *http.Request) {
 	var input models.Category
-	err := formats.ReadJSON(in, &input)
+	err := formats.ReadJSONBody(in, &input)
 	if err != nil {
 		log.Printf("Unable to save Category: %v", err)
 		http.Error(out, "Unable to save Category", http.StatusInternalServerError)
@@ -101,7 +101,7 @@ func SaveCategory(out http.ResponseWriter, in *http.Request) {
 		return
 
 	}
-	formats.PublishJSON(input, out, in)
+	formats.WriteJSONResponse(input, out, in)
 }
 
 func DeleteCategory(out http.ResponseWriter, in *http.Request) {
@@ -121,12 +121,12 @@ func DeleteCategory(out http.ResponseWriter, in *http.Request) {
 		http.Error(out, "Unable to delete Category", http.StatusInternalServerError)
 		return
 	}
-	formats.PublishJSON(input, out, in)
+	formats.WriteJSONResponse(input, out, in)
 }
 
 func SaveStatus(out http.ResponseWriter, in *http.Request) {
 	var input models.Status
-	err := formats.ReadJSON(in, &input)
+	err := formats.ReadJSONBody(in, &input)
 	if err != nil {
 		log.Printf("Unable to save Status: %v", err)
 		http.Error(out, "Unable to save Status", http.StatusInternalServerError)
@@ -144,7 +144,7 @@ func SaveStatus(out http.ResponseWriter, in *http.Request) {
 		return
 
 	}
-	formats.PublishJSON(input, out, in)
+	formats.WriteJSONResponse(input, out, in)
 }
 
 func DeleteStatus(out http.ResponseWriter, in *http.Request) {
@@ -164,12 +164,12 @@ func DeleteStatus(out http.ResponseWriter, in *http.Request) {
 		http.Error(out, "Unable to delete Status", http.StatusInternalServerError)
 		return
 	}
-	formats.PublishJSON(input, out, in)
+	formats.WriteJSONResponse(input, out, in)
 }
 
 func SaveLocation(out http.ResponseWriter, in *http.Request) {
 	var input models.Location
-	err := formats.ReadJSON(in, &input)
+	err := formats.ReadJSONBody(in, &input)
 	if err != nil {
 		log.Printf("Unable to save Location: %v", err)
 		http.Error(out, "Unable to save Location", http.StatusInternalServerError)
@@ -187,7 +187,7 @@ func SaveLocation(out http.ResponseWriter, in *http.Request) {
 		return
 
 	}
-	formats.PublishJSON(input, out, in)
+	formats.WriteJSONResponse(input, out, in)
 }
 
 func DeleteLocation(out http.ResponseWriter, in *http.Request) {
@@ -207,12 +207,12 @@ func DeleteLocation(out http.ResponseWriter, in *http.Request) {
 		http.Error(out, "Unable to delete Location", http.StatusInternalServerError)
 		return
 	}
-	formats.PublishJSON(input, out, in)
+	formats.WriteJSONResponse(input, out, in)
 }
 
 func SaveMaintainer(out http.ResponseWriter, in *http.Request) {
 	var input models.Maintainer
-	err := formats.ReadJSON(in, &input)
+	err := formats.ReadJSONBody(in, &input)
 	if err != nil {
 		log.Printf("Unable to save Maintainer: %v", err)
 		http.Error(out, "Unable to save Maintainer", http.StatusInternalServerError)
@@ -230,7 +230,7 @@ func SaveMaintainer(out http.ResponseWriter, in *http.Request) {
 		return
 
 	}
-	formats.PublishJSON(input, out, in)
+	formats.WriteJSONResponse(input, out, in)
 }
 
 func DeleteMaintainer(out http.ResponseWriter, in *http.Request) {
@@ -250,12 +250,12 @@ func DeleteMaintainer(out http.ResponseWriter, in *http.Request) {
 		http.Error(out, "Unable to delete Maintainer", http.StatusInternalServerError)
 		return
 	}
-	formats.PublishJSON(input, out, in)
+	formats.WriteJSONResponse(input, out, in)
 }
 
 func SaveArchitecture(out http.ResponseWriter, in *http.Request) {
 	var input models.Architecture
-	err := formats.ReadJSON(in, &input)
+	err := formats.ReadJSONBody(in, &input)
 	if err != nil {
 		log.Printf("Unable to save Architecture: %v", err)
 		http.Error(out, "Unable to save Architecture", http.StatusInternalServerError)
@@ -272,7 +272,7 @@ func SaveArchitecture(out http.ResponseWriter, in *http.Request) {
 		return
 
 	}
-	formats.PublishJSON(input, out, in)
+	formats.WriteJSONResponse(input, out, in)
 }
 
 func DeleteArchitecture(out http.ResponseWriter, in *http.Request) {
@@ -292,12 +292,12 @@ func DeleteArchitecture(out http.ResponseWriter, in *http.Request) {
 		http.Error(out, "Unable to delete Architecture", http.StatusInternalServerError)
 		return
 	}
-	formats.PublishJSON(input, out, in)
+	formats.WriteJSONResponse(input, out, in)
 }
 
 func SaveOperatingSystem(out http.ResponseWriter, in *http.Request) {
 	var input models.OperatingSystem
-	err := formats.ReadJSON(in, &input)
+	err := formats.ReadJSONBody(in, &input)
 	if err != nil {
 		log.Printf("Unable to save OperatingSystem: %v", err)
 		http.Error(out, "Unable to save OperatingSystem", http.StatusInternalServerError)
@@ -315,7 +315,7 @@ func SaveOperatingSystem(out http.ResponseWriter, in *http.Request) {
 		return
 
 	}
-	formats.PublishJSON(input, out, in)
+	formats.WriteJSONResponse(input, out, in)
 }
 
 func DeleteOperatingSystem(out http.ResponseWriter, in *http.Request) {
@@ -335,12 +335,12 @@ func DeleteOperatingSystem(out http.ResponseWriter, in *http.Request) {
 		http.Error(out, "Unable to delete OperatingSystem", http.StatusInternalServerError)
 		return
 	}
-	formats.PublishJSON(input, out, in)
+	formats.WriteJSONResponse(input, out, in)
 }
 
 func SaveInterfaceType(out http.ResponseWriter, in *http.Request) {
 	var input models.InterfaceType
-	err := formats.ReadJSON(in, &input)
+	err := formats.ReadJSONBody(in, &input)
 	if err != nil {
 		log.Printf("Unable to save InterfaceType: %v", err)
 		http.Error(out, "Unable to save InterfaceType", http.StatusInternalServerError)
@@ -358,7 +358,7 @@ func SaveInterfaceType(out http.ResponseWriter, in *http.Request) {
 		return
 
 	}
-	formats.PublishJSON(input, out, in)
+	formats.WriteJSONResponse(input, out, in)
 }
 
 func DeleteInterfaceType(out http.ResponseWriter, in *http.Request) {
@@ -378,12 +378,12 @@ func DeleteInterfaceType(out http.ResponseWriter, in *http.Request) {
 		http.Error(out, "Unable to delete InterfaceType", http.StatusInternalServerError)
 		return
 	}
-	formats.PublishJSON(input, out, in)
+	formats.WriteJSONResponse(input, out, in)
 }
 
 func SaveDeviceType(out http.ResponseWriter, in *http.Request) {
 	var input models.DeviceType
-	err := formats.ReadJSON(in, &input)
+	err := formats.ReadJSONBody(in, &input)
 	if err != nil {
 		log.Printf("Unable to save DeviceType: %v", err)
 		http.Error(out, "Unable to save DeviceType", http.StatusInternalServerError)
@@ -401,7 +401,7 @@ func SaveDeviceType(out http.ResponseWriter, in *http.Request) {
 		return
 
 	}
-	formats.PublishJSON(input, out, in)
+	formats.WriteJSONResponse(input, out, in)
 }
 
 func DeleteDeviceType(out http.ResponseWriter, in *http.Request) {
@@ -421,12 +421,12 @@ func DeleteDeviceType(out http.ResponseWriter, in *http.Request) {
 		http.Error(out, "Unable to delete DeviceType", http.StatusInternalServerError)
 		return
 	}
-	formats.PublishJSON(input, out, in)
+	formats.WriteJSONResponse(input, out, in)
 }
 
 func SaveVLAN(out http.ResponseWriter, in *http.Request) {
 	var input models.VLAN
-	err := formats.ReadJSON(in, &input)
+	err := formats.ReadJSONBody(in, &input)
 	if err != nil {
 		log.Printf("Unable to save VLAN: %v", err)
 		http.Error(out, "Unable to save VLAN", http.StatusInternalServerError)
@@ -444,7 +444,7 @@ func SaveVLAN(out http.ResponseWriter, in *http.Request) {
 		return
 
 	}
-	formats.PublishJSON(input, out, in)
+	formats.WriteJSONResponse(input, out, in)
 }
 
 func DeleteVLAN(out http.ResponseWriter, in *http.Request) {
@@ -464,12 +464,12 @@ func DeleteVLAN(out http.ResponseWriter, in *http.Request) {
 		http.Error(out, "Unable to delete VLAN", http.StatusInternalServerError)
 		return
 	}
-	formats.PublishJSON(input, out, in)
+	formats.WriteJSONResponse(input, out, in)
 }
 
 func SaveUser(out http.ResponseWriter, in *http.Request) {
 	var input models.User
-	err := formats.ReadJSON(in, &input)
+	err := formats.ReadJSONBody(in, &input)
 	if err != nil {
 		log.Printf("Unable to save User: %v", err)
 		http.Error(out, "Unable to save User", http.StatusInternalServerError)
@@ -487,7 +487,7 @@ func SaveUser(out http.ResponseWriter, in *http.Request) {
 		return
 
 	}
-	formats.PublishJSON(input, out, in)
+	formats.WriteJSONResponse(input, out, in)
 }
 
 func DeleteUser(out http.ResponseWriter, in *http.Request) {
@@ -507,5 +507,5 @@ func DeleteUser(out http.ResponseWriter, in *http.Request) {
 		http.Error(out, "Unable to delete User", http.StatusInternalServerError)
 		return
 	}
-	formats.PublishJSON(input, out, in)
+	formats.WriteJSONResponse(input, out, in)
 }

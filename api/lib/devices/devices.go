@@ -6,9 +6,12 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"time"
 
 	"facemasq/lib/db"
 	"facemasq/models"
+
+	"github.com/uptrace/bun"
 )
 
 type DeviceQueries struct {
@@ -113,7 +116,9 @@ func GetDevices(queries DeviceQueries, connTime string, includeConnectivity bool
 				addresses[a].SortOrder += fmt.Sprintf("%03d", ipnum)
 			}
 		}
-		addresses[a].Connectivity = connectivity[addresses[a].ID]
+		if includeConnectivity {
+			addresses[a].Connectivity = connectivity[addresses[a].ID]
+		}
 
 	}
 
@@ -160,6 +165,117 @@ func GetDevices(queries DeviceQueries, connTime string, includeConnectivity bool
 	sort.SliceStable(matchedDevices, func(i, j int) bool {
 		return matchedDevices[i].SortOrder < matchedDevices[j].SortOrder
 	})
+	return
+}
+
+func GetChangesSince(lastSeen time.Time, includeConnectivity bool) (matchedDevices []models.Device, seenRecently time.Time, err error) {
+	log.Println("GetChangesSince")
+	var deviceIDs []int64
+	var interfaceIDs []int64
+	var addressIDs []int64
+
+	var devices []models.Device
+	var netfaces []models.Interface
+	var addresses []models.Address
+	var hostnames []models.Hostname
+
+	var connections []models.ConnectionGroup
+	var connectivity map[int64]Connectivity
+
+	err = db.Conn.NewSelect().Model(&addresses).Where("last_seen >= ?", lastSeen).Scan(db.Context)
+	if err != nil {
+		return
+	}
+	for a := range addresses {
+		interfaceIDs = append(interfaceIDs, addresses[a].InterfaceID)
+		addressIDs = append(addressIDs, addresses[a].ID)
+	}
+
+	err = db.Conn.NewSelect().Model(&hostnames).Where("address_id IN (?)", bun.In(addressIDs)).Scan(db.Context)
+	if err != nil {
+		return
+	}
+
+	err = db.Conn.NewSelect().Model(&netfaces).Where("id IN (?)", bun.In(interfaceIDs)).Scan(db.Context)
+	if err != nil {
+		return
+	}
+
+	for i := range netfaces {
+		deviceIDs = append(deviceIDs, netfaces[i].DeviceID)
+	}
+
+	err = db.Conn.NewSelect().Model(&devices).Where("id IN (?)", bun.In(deviceIDs)).Scan(db.Context)
+	if err != nil {
+		return
+	}
+
+	if includeConnectivity {
+		connections, err = GetConnectivityData(lastSeen.Format("2006-01-02 15:04"))
+		if err != nil {
+			return
+		}
+
+		connectivity = ParseConnectivityData(addressIDs, connections)
+	}
+
+	for a := range addresses {
+		if addresses[a].IPv4.Valid {
+			sections := strings.Split(addresses[a].IPv4.String, ".")
+
+			for s := range sections {
+				var ipnum int
+				ipnum, _ = strconv.Atoi(sections[s])
+				addresses[a].SortOrder += fmt.Sprintf("%03d", ipnum)
+			}
+		}
+		if includeConnectivity {
+			addresses[a].Connectivity = connectivity[addresses[a].ID]
+		}
+
+	}
+
+	seenRecently = lastSeen
+
+	for d := range devices {
+		for n := range netfaces {
+			if devices[d].ID == netfaces[n].DeviceID {
+				for a := range addresses {
+					if addresses[a].LastSeen.After(seenRecently) {
+						seenRecently = addresses[a].LastSeen
+
+					}
+					if netfaces[n].ID == addresses[a].InterfaceID {
+						for h := range hostnames {
+							if addresses[a].ID == hostnames[h].AddressID {
+								addresses[a].Hostnames = append(addresses[a].Hostnames, hostnames[h])
+							}
+						}
+						netfaces[n].Addresses = append(netfaces[n].Addresses, addresses[a])
+						if netfaces[n].SortOrder == "" {
+							netfaces[n].SortOrder = addresses[a].SortOrder
+							netfaces[n].Primary.IPv4 = addresses[a].IPv4.String
+							netfaces[n].Primary.IPv6 = addresses[a].IPv6.String
+							netfaces[n].Primary.IsVirtualIP = addresses[a].IsVirtual
+							netfaces[n].Primary.IsReservedIP = addresses[a].IsReserved
+						}
+					}
+				}
+				if len(netfaces[n].Addresses) > 0 {
+					devices[d].Interfaces = append(devices[d].Interfaces, netfaces[n])
+					if devices[d].SortOrder == "" {
+						devices[d].SortOrder = netfaces[n].SortOrder
+						devices[d].Primary = netfaces[n].Primary
+						devices[d].Primary.MAC = netfaces[n].MAC
+						devices[d].Primary.InterfaceTypeID = netfaces[n].InterfaceTypeID
+						devices[d].Primary.VlanID = netfaces[n].VlanID
+						devices[d].Primary.IsVirtualIFace = netfaces[n].IsVirtual
+					}
+				}
+			}
+		}
+	}
+
 	return
 }
 

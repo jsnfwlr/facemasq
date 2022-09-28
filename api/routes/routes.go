@@ -47,6 +47,7 @@ func (router *Router) masqRoutes() {
 
 func (router *Router) deviceRoutes() {
 	router.Mux.HandleFunc(`/api/records/all`, devices.GetAll).Methods("GET").Name("GetAllDevices")
+	router.Mux.HandleFunc(`/ws/records/changed`, devices.GetRecentChanges).Name("WSRecentlyChangedDevices")
 	router.Mux.HandleFunc(`/api/records/active`, devices.GetActive).Methods("GET").Name("GetActiveDevices")
 	router.Mux.HandleFunc(`/api/records/chart`, devices.GetDashboardChartData).Methods("GET").Name("GetDashboardChartData")
 	router.Mux.HandleFunc(`/api/records/unknown`, devices.GetUnknown).Methods("GET").Name("GetUnknownDevices")

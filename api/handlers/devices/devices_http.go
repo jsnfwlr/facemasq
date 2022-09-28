@@ -34,7 +34,7 @@ func GetActive(out http.ResponseWriter, in *http.Request) {
 		return
 	}
 
-	formats.PublishJSON(activeDevices, out, in)
+	formats.WriteJSONResponse(activeDevices, out, in)
 }
 
 func GetAll(out http.ResponseWriter, in *http.Request) {
@@ -51,7 +51,7 @@ func GetAll(out http.ResponseWriter, in *http.Request) {
 		return
 	}
 
-	formats.PublishJSON(allDevices, out, in)
+	formats.WriteJSONResponse(allDevices, out, in)
 }
 
 func GetUnknown(out http.ResponseWriter, in *http.Request) {
@@ -69,12 +69,12 @@ func GetUnknown(out http.ResponseWriter, in *http.Request) {
 		return
 	}
 
-	formats.PublishJSON(unknownDevices, out, in)
+	formats.WriteJSONResponse(unknownDevices, out, in)
 }
 
 func SaveDevice(out http.ResponseWriter, in *http.Request) {
 	var input models.Device
-	err := formats.ReadJSON(in, &input)
+	err := formats.ReadJSONBody(in, &input)
 	if err != nil {
 		log.Printf("Unable to parse Device: %v", err)
 		http.Error(out, "Unable to parse Device", http.StatusInternalServerError)
@@ -85,7 +85,7 @@ func SaveDevice(out http.ResponseWriter, in *http.Request) {
 		input.FirstSeen = time.Now()
 	}
 	if input.ID > 0 {
-		_, err = db.Conn.NewUpdate().Model(&input).Exec(db.Context)
+		_, err = db.Conn.NewUpdate().Model(&input).Where("id = ?", input.ID).Exec(db.Context)
 	} else {
 		_, err = db.Conn.NewInsert().Model(&input).Exec(db.Context)
 	}
@@ -95,12 +95,12 @@ func SaveDevice(out http.ResponseWriter, in *http.Request) {
 		return
 
 	}
-	formats.PublishJSON(input, out, in)
+	formats.WriteJSONResponse(input, out, in)
 }
 
 func SaveInterface(out http.ResponseWriter, in *http.Request) {
 	var input models.Interface
-	err := formats.ReadJSON(in, &input)
+	err := formats.ReadJSONBody(in, &input)
 	if err != nil {
 		log.Printf("Unable to parse Inteface: %v", err)
 		http.Error(out, "Unable to parse Inteface", http.StatusInternalServerError)
@@ -117,12 +117,12 @@ func SaveInterface(out http.ResponseWriter, in *http.Request) {
 		return
 
 	}
-	formats.PublishJSON(input, out, in)
+	formats.WriteJSONResponse(input, out, in)
 }
 
 func SaveAddress(out http.ResponseWriter, in *http.Request) {
 	var input models.Address
-	err := formats.ReadJSON(in, &input)
+	err := formats.ReadJSONBody(in, &input)
 	if err != nil {
 		log.Printf("Unable to parse Address: %v", err)
 		http.Error(out, "Unable to parse Address", http.StatusInternalServerError)
@@ -139,12 +139,12 @@ func SaveAddress(out http.ResponseWriter, in *http.Request) {
 		return
 
 	}
-	formats.PublishJSON(input, out, in)
+	formats.WriteJSONResponse(input, out, in)
 }
 
 func SaveHostname(out http.ResponseWriter, in *http.Request) {
 	var input models.Hostname
-	err := formats.ReadJSON(in, &input)
+	err := formats.ReadJSONBody(in, &input)
 	if err != nil {
 		log.Printf("Unable to parse Hostname: %v", err)
 		http.Error(out, "Unable to parse Hostname", http.StatusInternalServerError)
@@ -161,13 +161,13 @@ func SaveHostname(out http.ResponseWriter, in *http.Request) {
 		return
 
 	}
-	formats.PublishJSON(input, out, in)
+	formats.WriteJSONResponse(input, out, in)
 }
 
 func InvestigateAddresses(out http.ResponseWriter, in *http.Request) {
 	var input []int64
 	var investigations []Investigation
-	err := formats.ReadJSON(in, &input)
+	err := formats.ReadJSONBody(in, &input)
 	if err != nil {
 		log.Printf("Unable to parse Address IDs: %v\n", err)
 		http.Error(out, "Unable to parse Address IDs", http.StatusInternalServerError)
@@ -185,5 +185,5 @@ func InvestigateAddresses(out http.ResponseWriter, in *http.Request) {
 		}
 		investigations = append(investigations, investigation)
 	}
-	formats.PublishJSON(investigations, out, in)
+	formats.WriteJSONResponse(investigations, out, in)
 }

@@ -9,6 +9,7 @@ require (
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/google/gopacket v1.1.17
 	github.com/gorilla/mux v1.8.0
+	github.com/gorilla/websocket v1.5.0
 	github.com/jackc/pgx/v4 v4.17.2
 	github.com/json-iterator/go v1.1.12
 	github.com/liamg/furious v0.0.0-20191231090757-c295c872d6c1

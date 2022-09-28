@@ -18,12 +18,12 @@ func GetAppSettings(out http.ResponseWriter, in *http.Request) {
 		log.Printf("error getting settings: %v", err)
 		http.Error(out, "Unable to retrieve data", http.StatusInternalServerError)
 	}
-	formats.PublishJSON(settings, out, in)
+	formats.WriteJSONResponse(settings, out, in)
 }
 
 func SaveAppSetting(out http.ResponseWriter, in *http.Request) {
 	var input, check models.Meta
-	err := formats.ReadJSON(in, &input)
+	err := formats.ReadJSONBody(in, &input)
 	if err != nil {
 		log.Printf("Unable to parse Setting: %v", err)
 		http.Error(out, "Unable to parse Setting", http.StatusInternalServerError)
@@ -50,5 +50,5 @@ func SaveAppSetting(out http.ResponseWriter, in *http.Request) {
 		http.Error(out, "Unable to retrieve data", http.StatusInternalServerError)
 	}
 
-	formats.PublishJSON(input, out, in)
+	formats.WriteJSONResponse(input, out, in)
 }

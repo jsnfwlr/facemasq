@@ -105,5 +105,5 @@ func GetTrendData(out http.ResponseWriter, in *http.Request) {
 		}
 	}
 
-	formats.PublishJSON(durations, out, in)
+	formats.WriteJSONResponse(durations, out, in)
 }

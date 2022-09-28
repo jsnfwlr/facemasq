@@ -1,40 +1,45 @@
 package devices
 
 import (
+	"log"
 	"net/http"
 	"time"
 
-	helper "facemasq/lib/devices"
-	"facemasq/lib/formats"
+	"facemasq/lib/devices"
+
+	"github.com/gorilla/websocket"
 )
 
-func GetActiveWS(out http.ResponseWriter, in *http.Request) {
-	queries := helper.DeviceQueries{
-		Devices:   `SELECT * FROM Devices;`,
-		Netfaces:  `SELECT * FROM Interfaces ORDER BY IsPrimary DESC, IsVirtual ASC;`,
-		Addresses: `SELECT * FROM Addresses WHERE LastSeen = (SELECT Time FROM Scans ORDER BY Time DESC LIMIT 1) ORDER BY IsPrimary DESC, IsVirtual ASC;`,
-		Hostnames: `SELECT * FROM Hostnames;`,
-	}
-
-	activeDevices, err := helper.GetDevices(queries, time.Now().Add(DefaultConnTime).Format("2006-01-02 15:04"), true)
-	if err != nil {
-		http.Error(out, "Unable to retrieve data", http.StatusInternalServerError)
-	}
-
-	formats.PublishJSON(activeDevices, out, in)
+var upgrader = websocket.Upgrader{
+	ReadBufferSize:  1024,
+	WriteBufferSize: 1024,
 }
 
-func GetAllWS(out http.ResponseWriter, in *http.Request) {
-	queries := helper.DeviceQueries{
-		Devices:   `SELECT * FROM Devices;`,
-		Netfaces:  `SELECT * FROM Interfaces ORDER BY IsPrimary DESC, IsVirtual ASC;`,
-		Addresses: `SELECT * FROM Addresses ORDER BY InterfaceID ASC, IsPrimary DESC, LastSeen DESC, IsVirtual ASC;`,
-		Hostnames: `SELECT * FROM Hostnames;`,
-	}
-	allDevices, err := helper.GetDevices(queries, time.Now().Add(DefaultConnTime).Format("2006-01-02 15:04"), true)
+func GetRecentChanges(out http.ResponseWriter, in *http.Request) {
+	socket, err := upgrader.Upgrade(out, in, nil)
 	if err != nil {
-		http.Error(out, "Unable to retrieve data", http.StatusInternalServerError)
+		if _, ok := err.(websocket.HandshakeError); !ok {
+			log.Println(err)
+		}
+		return
 	}
 
-	formats.PublishJSON(allDevices, out, in)
+	lastMod, _ := time.Parse("2006-01-02 15:04:05", in.FormValue("lastMod"))
+
+	go devices.Writer(socket, lastMod)
+	devices.Reader(socket)
 }
+
+/*
+(function() {
+		var data = document.querySelector(".flex.items-center.py-0.px-3.bg-gray-100");
+		var conn = new WebSocket("ws://192.168.0.41:6135/ws/records/changed?lastMod=2022-09-25 11:40:00");
+		conn.onclose = function(evt) {
+				data.textContent = 'Connection closed';
+		}
+		conn.onmessage = function(evt) {
+				console.log('file updated');
+				data.textContent = evt.data;
+		}
+})();
+*/

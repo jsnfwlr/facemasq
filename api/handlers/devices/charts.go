@@ -45,7 +45,7 @@ func GetDashboardChartData(out http.ResponseWriter, in *http.Request) {
 		http.Error(out, "Unable to retrieve averaged chart data", http.StatusInternalServerError)
 	}
 
-	formats.PublishJSON(series, out, in)
+	formats.WriteJSONResponse(series, out, in)
 }
 
 func getAddressCountPerScan(overallTimeSpan time.Duration) (data []DevicesOverTime, err error) {

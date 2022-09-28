@@ -32,6 +32,9 @@ tag-release:
 build-container:
 	docker buildx build --platform linux/arm64,linux/amd64 -t jsnfwlr/facemasq:dev -t jsnfwlr/facemasq:$(CURRENTVERSION) --push -f docker/Dockerfile.multiarch .
 
+build-container-dev:
+	docker buildx build --platform linux/arm64,linux/amd64 -t jsnfwlr/facemasq:dev --push -f docker/Dockerfile.multiarch .
+
 build-basic-container:
 	docker build -t jsnfwlr/facemasq:dev -t jsnfwlr/facemasq:$(CURRENTVERSION) -f docker/Dockerfile .
 

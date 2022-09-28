@@ -54,5 +54,5 @@ func Status(out http.ResponseWriter, in *http.Request) {
 	}
 	details["FormatHostnames"] = settings.Value
 
-	formats.PublishJSON(details, out, in)
+	formats.WriteJSONResponse(details, out, in)
 }
