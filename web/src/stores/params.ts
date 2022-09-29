@@ -4,6 +4,7 @@ import { mande } from "mande"
 const params = import.meta.env.DEV ? mande("http://192.168.0.41:6135/api/") : mande("/api/")
 
 export interface ParamState {
+  columnSorts: ColumnSorts
   Categories: Array<Category>
   Statuses: Array<Status>
   DeviceTypes: Array<DeviceType>
@@ -14,6 +15,24 @@ export interface ParamState {
   Architectures: Array<Architecture>
   VLANs: Array<VLAN>
   Users: Array<User>
+}
+
+export interface ColumnSorts {
+  Categories: ColumnSort
+  Statuses: ColumnSort
+  DeviceTypes: ColumnSort
+  InterfaceTypes: ColumnSort
+  Locations: ColumnSort
+  Maintainers: ColumnSort
+  OperatingSystems: ColumnSort
+  Architectures: ColumnSort
+  VLANs: ColumnSort
+  Users: ColumnSort
+}
+
+export interface ColumnSort {
+  column: string
+  direction: string
 }
 
 export interface Category {
@@ -110,6 +129,48 @@ export type UserArr = Array<User>
 export const useParams = defineStore("params", {
   state: () => {
     return {
+      columnSorts: {
+        Categories: {
+          column: "ID",
+          direction: "asc",
+        },
+        Statuses: {
+          column: "ID",
+          direction: "asc",
+        },
+        DeviceTypes: {
+          column: "ID",
+          direction: "asc",
+        },
+        InterfaceTypes: {
+          column: "ID",
+          direction: "asc",
+        },
+        Locations: {
+          column: "ID",
+          direction: "asc",
+        },
+        Maintainers: {
+          column: "ID",
+          direction: "asc",
+        },
+        OperatingSystems: {
+          column: "ID",
+          direction: "asc",
+        },
+        Architectures: {
+          column: "ID",
+          direction: "asc",
+        },
+        VLANs: {
+          column: "ID",
+          direction: "asc",
+        },
+        Users: {
+          column: "ID",
+          direction: "asc",
+        },
+      },
       Categories: [],
       Statuses: [],
       DeviceTypes: [],
@@ -159,6 +220,181 @@ export const useParams = defineStore("params", {
               break
           }
         })
+      })
+    },
+
+    setColumnSort(mode: string, colSort: ColumnSort) {
+      switch (mode) {
+        case "Category":
+          this.columnSorts.Categories = colSort
+          break
+        case "Status":
+          this.columnSorts.Statuses = colSort
+          break
+        case "DeviceType":
+          this.columnSorts.DeviceTypes = colSort
+          break
+        case "InterfaceType":
+          this.columnSorts.InterfaceTypes = colSort
+          break
+        case "Location":
+          this.columnSorts.Locations = colSort
+          break
+        case "Architecture":
+          this.columnSorts.Architectures = colSort
+          break
+        case "OperatingSystem":
+          this.columnSorts.OperatingSystems = colSort
+          break
+        case "User":
+          this.columnSorts.Users = colSort
+          break
+        case "Maintainer":
+          this.columnSorts.Maintainers = colSort
+          break
+        case "VLAN":
+          this.columnSorts.VLANs = colSort
+          break
+      }
+    },
+    SortCategories() {
+      if (this.columnSorts.Categories.column !== "ID") {
+        alert("SortCategories: " + this.columnSorts.Categories.column)
+      }
+      this.Categories.sort((a: Category, b: Category) => {
+        switch (this.columnSorts.Categories.column) {
+          default:
+            if ((a.ID ?? 0) < (b.ID ?? 0)) {
+              return this.columnSorts.Categories.direction === "asc" ? -1 : 1
+            }
+            return this.columnSorts.Categories.direction === "asc" ? 1 : -1
+        }
+      })
+    },
+    SortStatuses() {
+      if (this.columnSorts.Statuses.column !== "ID") {
+        alert("SortStatuses: " + this.columnSorts.Statuses.column)
+      }
+      this.Statuses.sort((a: Status, b: Status) => {
+        switch (this.columnSorts.Statuses.column) {
+          default:
+            if ((a.ID ?? 0) < (b.ID ?? 0)) {
+              return this.columnSorts.Statuses.direction === "asc" ? -1 : 1
+            }
+            return this.columnSorts.Statuses.direction === "asc" ? 1 : -1
+        }
+      })
+    },
+    SortDeviceTypes() {
+      if (this.columnSorts.DeviceTypes.column !== "ID") {
+        alert("SortDeviceTypes: " + this.columnSorts.DeviceTypes.column)
+      }
+      this.DeviceTypes.sort((a: DeviceType, b: DeviceType) => {
+        switch (this.columnSorts.DeviceTypes.column) {
+          default:
+            if ((a.ID ?? 0) < (b.ID ?? 0)) {
+              return this.columnSorts.DeviceTypes.direction === "asc" ? -1 : 1
+            }
+            return this.columnSorts.DeviceTypes.direction === "asc" ? 1 : -1
+        }
+      })
+    },
+    SortInterfaceTypes() {
+      if (this.columnSorts.InterfaceTypes.column !== "ID") {
+        alert("SortInterfaceTypes: " + this.columnSorts.InterfaceTypes.column)
+      }
+      this.InterfaceTypes.sort((a: InterfaceType, b: InterfaceType) => {
+        switch (this.columnSorts.InterfaceTypes.column) {
+          default:
+            if ((a.ID ?? 0) < (b.ID ?? 0)) {
+              return this.columnSorts.InterfaceTypes.direction === "asc" ? -1 : 1
+            }
+            return this.columnSorts.InterfaceTypes.direction === "asc" ? 1 : -1
+        }
+      })
+    },
+    SortLocations() {
+      if (this.columnSorts.Locations.column !== "ID") {
+        alert("SortLocations: " + this.columnSorts.Locations.column)
+      }
+      this.Locations.sort((a: Location, b: Location) => {
+        switch (this.columnSorts.Locations.column) {
+          default:
+            if ((a.ID ?? 0) < (b.ID ?? 0)) {
+              return this.columnSorts.Locations.direction === "asc" ? -1 : 1
+            }
+            return this.columnSorts.Locations.direction === "asc" ? 1 : -1
+        }
+      })
+    },
+    SortArchitectures() {
+      if (this.columnSorts.Architectures.column !== "ID") {
+        alert("SortArchitectures: " + this.columnSorts.Architectures.column)
+      }
+      this.Architectures.sort((a: Architecture, b: Architecture) => {
+        switch (this.columnSorts.Architectures.column) {
+          default:
+            if ((a.ID ?? 0) < (b.ID ?? 0)) {
+              return this.columnSorts.Architectures.direction === "asc" ? -1 : 1
+            }
+            return this.columnSorts.Architectures.direction === "asc" ? 1 : -1
+        }
+      })
+    },
+    SortOperatingSystems() {
+      if (this.columnSorts.OperatingSystems.column !== "ID") {
+        alert("SortOperatingSystems: " + this.columnSorts.OperatingSystems.column)
+      }
+      this.OperatingSystems.sort((a: OperatingSystem, b: OperatingSystem) => {
+        switch (this.columnSorts.OperatingSystems.column) {
+          default:
+            if ((a.ID ?? 0) < (b.ID ?? 0)) {
+              return this.columnSorts.OperatingSystems.direction === "asc" ? -1 : 1
+            }
+            return this.columnSorts.OperatingSystems.direction === "asc" ? 1 : -1
+        }
+      })
+    },
+    SortUsers() {
+      if (this.columnSorts.Users.column !== "ID") {
+        alert("SortUsers: " + this.columnSorts.Users.column)
+      }
+      this.Users.sort((a: User, b: User) => {
+        switch (this.columnSorts.Users.column) {
+          default:
+            if ((a.ID ?? 0) < (b.ID ?? 0)) {
+              return this.columnSorts.Users.direction === "asc" ? -1 : 1
+            }
+            return this.columnSorts.Users.direction === "asc" ? 1 : -1
+        }
+      })
+    },
+    SortMaintainers() {
+      if (this.columnSorts.Maintainers.column !== "ID") {
+        alert("SortMaintainers: " + this.columnSorts.Maintainers.column)
+      }
+      this.Maintainers.sort((a: Maintainer, b: Maintainer) => {
+        switch (this.columnSorts.Maintainers.column) {
+          default:
+            if ((a.ID ?? 0) < (b.ID ?? 0)) {
+              return this.columnSorts.Maintainers.direction === "asc" ? -1 : 1
+            }
+            return this.columnSorts.Maintainers.direction === "asc" ? 1 : -1
+        }
+      })
+    },
+    SortVLANs() {
+      if (this.columnSorts.VLANs.column !== "ID") {
+        alert("SortVLANs: " + this.columnSorts.VLANs.column)
+      }
+      this.VLANs.sort((a: VLAN, b: VLAN) => {
+        switch (this.columnSorts.VLANs.column) {
+          default:
+            if ((a.ID ?? 0) < (b.ID ?? 0)) {
+              return this.columnSorts.VLANs.direction === "asc" ? -1 : 1
+            }
+            return this.columnSorts.VLANs.direction === "asc" ? 1 : -1
+        }
       })
     },
 

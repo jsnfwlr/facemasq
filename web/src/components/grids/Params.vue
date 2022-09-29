@@ -4,7 +4,7 @@
   import { storeToRefs } from "pinia"
 
   import { icons } from "@/data/icons"
-  import { useParams, CategoryArr, StatusArr, DeviceTypeArr, InterfaceTypeArr, LocationArr, ArchitectureArr, OperatingSystemArr, UserArr, MaintainerArr, VLANArr, Category, Status, DeviceType, InterfaceType, Location, Architecture, OperatingSystem, User, Maintainer, VLAN } from "@/stores/params"
+  import { useParams, CategoryArr, StatusArr, DeviceTypeArr, InterfaceTypeArr, LocationArr, ArchitectureArr, OperatingSystemArr, UserArr, MaintainerArr, VLANArr, Category, Status, DeviceType, InterfaceType, Location, Architecture, OperatingSystem, User, Maintainer, VLAN, ColumnSort } from "@/stores/params"
 
   import Btns from "@/components/elements/Btns.vue"
   import Btn from "@/components/elements/Btn.vue"
@@ -236,6 +236,53 @@
     edits.value = []
     deletes.value = -1
   })
+
+  const sortColumn = ref<ColumnSort>({ column: "ID", direction: "asc" })
+  const setSortColumn = (byColumn: string) => {
+    if (sortColumn.value.column == byColumn) {
+      sortColumn.value.direction = sortColumn.value.direction === "asc" ? "desc" : "asc"
+    } else {
+      sortColumn.value = { column: byColumn, direction: "asc" }
+    }
+    paramsStore.setColumnSort(gridMode.value, sortColumn.value)
+    switch (gridMode.value) {
+      case "Category":
+        paramsStore.SortCategories()
+        break
+      case "Status":
+        paramsStore.SortStatuses()
+        break
+      case "DeviceType":
+        paramsStore.SortDeviceTypes()
+        break
+      case "InterfaceType":
+        paramsStore.SortInterfaceTypes()
+        break
+      case "Location":
+        paramsStore.SortLocations()
+        break
+      case "Architecture":
+        paramsStore.SortArchitectures()
+        break
+      case "OperatingSystem":
+        paramsStore.SortOperatingSystems()
+        break
+      case "User":
+        paramsStore.SortUsers()
+        break
+      case "Maintainer":
+        paramsStore.SortMaintainers()
+        break
+      case "VLAN":
+        paramsStore.SortVLANs()
+        break
+    }
+  }
+  const showSort = (column: string) => {
+    if (sortColumn.value.column === column) {
+      return sortColumn.value.direction
+    }
+  }
 </script>
 
 <template>
@@ -243,24 +290,24 @@
     <table>
       <thead>
         <tr>
-          <th v-if="showColumn('ID')" class="id">ID</th>
-          <th v-if="showColumn('Label')" class="label">Label</th>
+          <th v-if="showColumn('ID')" :class="[edits.length === 0 ? '' : 'stealth', showSort('ID')]" class="id sortable" @click="setSortColumn('ID')">ID</th>
+          <th v-if="showColumn('Label')" :class="[edits.length === 0 ? '' : 'stealth', showSort('Label')]" class="label sortable" @click="setSortColumn('Label')">Label</th>
           <th v-if="showColumn('Icon')" class="icon">Icon</th>
           <th v-if="showColumn('Maskv4')" class="other">Maskv4</th>
           <th v-if="showColumn('Maskv6')" class="other">Maskv6</th>
-          <th v-if="showColumn('Vendor')" class="other">Vendor</th>
+          <th v-if="showColumn('Vendor')" :class="[edits.length === 0 ? '' : 'stealth', showSort('Vendor')]" class="other sortable" @click="setSortColumn('Vendor')">Vendor</th>
           <th v-if="showColumn('Family')" class="other">Family</th>
           <th v-if="showColumn('Name')" class="other">Name</th>
-          <th v-if="showColumn('Version')" class="other">Version</th>
-          <th v-if="showColumn('IsOpenSource')" class="checkbox">IsOpenSource</th>
+          <th v-if="showColumn('Version')" :class="[edits.length === 0 ? '' : 'stealth', showSort('Version')]" class="other sortable" @click="setSortColumn('Version')">Version</th>
+          <th v-if="showColumn('IsOpenSource')" :class="[edits.length === 0 ? '' : 'stealth', showSort('IsOpenSource')]" class="checkbox sortable" @click="setSortColumn('IsOpenSource')">IsOpenSource</th>
           <th v-if="showColumn('IsInternal')" class="checkbox">IsInternal</th>
           <th v-if="showColumn('IsServer')" class="checkbox">IsServer</th>
           <th v-if="showColumn('BitSpace')" class="other">BitSpace</th>
           <th v-if="showColumn('IsCloud')" class="checkbox">IsCloud</th>
-          <th v-if="showColumn('Username')" class="other">Username</th>
-          <th v-if="showColumn('Password')" class="other">Password</th>
-          <th v-if="showColumn('CanAuthenticate')" class="checkbox">Active</th>
-          <th v-if="showColumn('AccessLevel')" class="other">AccessLevel</th>
+          <th v-if="showColumn('Username')" :class="[edits.length === 0 ? '' : 'stealth', showSort('Username')]" class="other sortable" @click="setSortColumn('Username')">Username</th>
+          <th v-if="showColumn('Password')" :class="[edits.length === 0 ? '' : 'stealth', showSort('Password')]" class="other sortable" @click="setSortColumn('Password')">Password</th>
+          <th v-if="showColumn('CanAuthenticate')" :class="[edits.length === 0 ? '' : 'stealth', showSort('Active')]" class="checkbox sortable" @click="setSortColumn('Active')">Active</th>
+          <th v-if="showColumn('AccessLevel')" :class="[edits.length === 0 ? '' : 'stealth', showSort('AccessLevel')]" class="other sortable" @click="setSortColumn('AccessLevel')">AccessLevel</th>
           <th v-if="showColumn('Notes')" class="notes">Notes</th>
           <th class="actions"></th>
         </tr>
