@@ -63,19 +63,19 @@ func GetTrendData(out http.ResponseWriter, in *http.Request) {
 	for d := range durations {
 		switch durations[d].Label {
 		case "Historic":
-			sql = `SELECT Count(active) FROM (SELECT DISTINCT Devices.ID as Active, 1 as Merge FROM Devices JOIN Interfaces ON Interfaces.DeviceID = Devices.ID JOIN Addresses ON Addresses.InterfaceID = Interfaces.ID) as Period GROUP BY Merge;`
+			sql = `SELECT Count(active) as active FROM (SELECT DISTINCT devices.id as active, 1 as merge FROM devices JOIN interfaces ON interfaces.device_id = devices.id JOIN addresses ON addresses.interface_id = interfaces.id) as period GROUP BY merge;`
 			err = db.Conn.NewRaw(sql).Scan(db.Context, &durations[d].Compare)
 		case "Concurrent":
-			sql = `SELECT COUNT(AddressID) FROM History GROUP BY ScanID ORDER BY COUNT(AddressID) DESC LIMIT 1 OFFSET 1;`
+			sql = `SELECT COUNT(address_id) as active FROM histories GROUP BY scan_id ORDER BY COUNT(address_id) DESC LIMIT 1 OFFSET 1;`
 			err = db.Conn.NewRaw(sql).Scan(db.Context, &durations[d].Compare)
 		default:
-			sql = `SELECT Count(active) FROM (SELECT DISTINCT addressID as active, 1 as Merge FROM History JOIN Scans ON History.ScanID = Scans.ID WHERE Time > ? AND Time < ?) as Period GROUP BY Merge;`
+			sql = `SELECT Count(active) as active FROM (SELECT DISTINCT address_id as active, 1 as merge FROM histories JOIN scans ON histories.scan_id = scans.id WHERE scans.time > ? AND scans.time < ?) as period GROUP BY merge;`
 			err = db.Conn.NewRaw(sql, durations[d].from.Format("2006-01-02 15:04"), durations[d].to.Format("2006-01-02 15:04")).Scan(db.Context, &durations[d].Compare)
 		}
 
 		if err != nil {
 			if err.Error() != "sql: no rows in result set" {
-				// log.Printf(`%s Compare: SELECT MAX(active) FROM (SELECT count(addressID) as active, 1 as Merge FROM History JOIN Scans ON History.ScanID = Scans.ID WHERE Time > '%s' AND Time < '%s' GROUP BY Time) as period GROUP BY Merge`, durations[d].Label, durations[d].from.Format("2006-01-02 15:04"), durations[d].to.Format("2006-01-02 15:04"))
+				// log.Printf(`%s Compare: SELECT MAX(active) FROM (SELECT count(addressID) as active, 1 as Merge FROM histories JOIN Scans ON histories.ScanID = Scans.ID WHERE Time > '%s' AND Time < '%s' GROUP BY Time) as period GROUP BY Merge`, durations[d].Label, durations[d].from.Format("2006-01-02 15:04"), durations[d].to.Format("2006-01-02 15:04"))
 				log.Println(err.Error())
 				http.Error(out, "Unable to retrieve comparative trend data for "+durations[d].Label, http.StatusInternalServerError)
 				return
@@ -87,16 +87,16 @@ func GetTrendData(out http.ResponseWriter, in *http.Request) {
 		case "Historic":
 			durations[d].Current = durations[d].Compare
 		case "Concurrent":
-			sql = `SELECT COUNT(AddressID) FROM History GROUP BY ScanID ORDER BY COUNT(AddressID) DESC LIMIT 1;`
+			sql = `SELECT COUNT(address_id) as active FROM histories GROUP BY scan_id ORDER BY COUNT(address_id) DESC LIMIT 1;`
 			err = db.Conn.NewRaw(sql).Scan(db.Context, &durations[d].Current)
 		default:
-			sql = `SELECT Count(active) FROM (SELECT DISTINCT addressID as active, 1 as Merge FROM History JOIN Scans ON History.ScanID = Scans.ID WHERE Time > ? AND Time < ?) as Period GROUP BY Merge;`
+			sql = `SELECT Count(active) as active FROM (SELECT DISTINCT address_id as active, 1 as merge FROM histories JOIN scans ON histories.scan_id = scans.id WHERE scans.time > ? AND scans.time < ?) as period GROUP BY merge;`
 			err = db.Conn.NewRaw(sql, durations[d].to.Format("2006-01-02 15:04"), time.Now().Format("2006-01-02 15:04")).Scan(db.Context, &durations[d].Current)
 		}
 
 		if err != nil {
 			if err.Error() != "sql: no rows in result set" {
-				// log.Printf(`%s Current: SELECT MAX(active) FROM (SELECT count(addressID) as active, 1 as Merge FROM History JOIN Scans ON History.ScanID = Scans.ID WHERE Time > '%s' AND Time < '%s' GROUP BY Time) as period GROUP BY Merge`, durations[d].Label, durations[d].to.Format("2006-01-02 15:04"), time.Now().Format("2006-01-02 15:04"))
+				// log.Printf(`%s Current: SELECT MAX(active) FROM (SELECT count(addressID) as active, 1 as Merge FROM histories JOIN Scans ON histories.ScanID = Scans.ID WHERE Time > '%s' AND Time < '%s' GROUP BY Time) as period GROUP BY Merge`, durations[d].Label, durations[d].to.Format("2006-01-02 15:04"), time.Now().Format("2006-01-02 15:04"))
 				log.Println(err.Error())
 				http.Error(out, "Unable to retrieve current trend data for "+durations[d].Label, http.StatusInternalServerError)
 				return
