@@ -5,17 +5,16 @@ import (
 	"os"
 
 	"facemasq/lib/db"
+	"facemasq/lib/logging"
 	"facemasq/lib/netscan"
 	"facemasq/lib/network"
 	"facemasq/routes"
 )
 
-var verbose bool
-
 func init() {
 	beVerbose := os.Getenv("VERBOSE")
 	if beVerbose != "" {
-		verbose = true
+		logging.Verbose = true
 	}
 }
 
@@ -35,7 +34,7 @@ func main() {
 
 	if os.Getenv("NETMASK") != "" {
 		log.Printf("Active Net scan running every %v", netscan.Frequency)
-		netscan.Schedule(verbose)
+		netscan.Schedule()
 	}
 
 	err = routes.Run()

@@ -107,7 +107,7 @@ func SaveInterface(out http.ResponseWriter, in *http.Request) {
 		return
 	}
 	if input.ID > 0 {
-		_, err = db.Conn.NewUpdate().Model(&input).Exec(db.Context)
+		_, err = db.Conn.NewUpdate().Model(&input).Where("id = ?", input.ID).Exec(db.Context)
 	} else {
 		_, err = db.Conn.NewInsert().Model(&input).Exec(db.Context)
 	}
@@ -129,7 +129,7 @@ func SaveAddress(out http.ResponseWriter, in *http.Request) {
 		return
 	}
 	if input.ID > 0 {
-		_, err = db.Conn.NewUpdate().Model(&input).Exec(db.Context)
+		_, err = db.Conn.NewUpdate().Model(&input).Where(`id = ?`, input.ID).Exec(db.Context)
 	} else {
 		_, err = db.Conn.NewInsert().Model(&input).Exec(db.Context)
 	}
@@ -151,7 +151,7 @@ func SaveHostname(out http.ResponseWriter, in *http.Request) {
 		return
 	}
 	if input.ID > 0 {
-		_, err = db.Conn.NewUpdate().Model(&input).Exec(db.Context)
+		_, err = db.Conn.NewUpdate().Model(&input).Where(`id = ?`, input.ID).Exec(db.Context)
 	} else {
 		_, err = db.Conn.NewInsert().Model(&input).Exec(db.Context)
 	}

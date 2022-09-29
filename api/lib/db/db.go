@@ -30,6 +30,7 @@ var (
 	DBConnString  string
 	Conn          *bun.DB
 	Context       context.Context
+	Verbose       bool
 )
 
 func init() {

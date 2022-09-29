@@ -91,7 +91,7 @@ func SaveCategory(out http.ResponseWriter, in *http.Request) {
 	}
 
 	if input.ID > 0 {
-		_, err = db.Conn.NewUpdate().Model(&input).Exec(db.Context)
+		_, err = db.Conn.NewUpdate().Model(&input).Where(`id = ?`, input.ID).Exec(db.Context)
 	} else {
 		_, err = db.Conn.NewInsert().Model(&input).Exec(db.Context)
 	}
@@ -134,7 +134,7 @@ func SaveStatus(out http.ResponseWriter, in *http.Request) {
 	}
 
 	if input.ID > 0 {
-		_, err = db.Conn.NewUpdate().Model(&input).Exec(db.Context)
+		_, err = db.Conn.NewUpdate().Model(&input).Where(`id = ?`, input.ID).Exec(db.Context)
 	} else {
 		_, err = db.Conn.NewInsert().Model(&input).Exec(db.Context)
 	}
@@ -177,7 +177,7 @@ func SaveLocation(out http.ResponseWriter, in *http.Request) {
 	}
 
 	if input.ID > 0 {
-		_, err = db.Conn.NewUpdate().Model(&input).Exec(db.Context)
+		_, err = db.Conn.NewUpdate().Model(&input).Where(`id = ?`, input.ID).Exec(db.Context)
 	} else {
 		_, err = db.Conn.NewInsert().Model(&input).Exec(db.Context)
 	}
@@ -220,7 +220,7 @@ func SaveMaintainer(out http.ResponseWriter, in *http.Request) {
 	}
 
 	if input.ID > 0 {
-		_, err = db.Conn.NewUpdate().Model(&input).Exec(db.Context)
+		_, err = db.Conn.NewUpdate().Model(&input).Where(`id = ?`, input.ID).Exec(db.Context)
 	} else {
 		_, err = db.Conn.NewInsert().Model(&input).Exec(db.Context)
 	}
@@ -262,7 +262,7 @@ func SaveArchitecture(out http.ResponseWriter, in *http.Request) {
 		return
 	}
 	if input.ID > 0 {
-		_, err = db.Conn.NewUpdate().Model(&input).Exec(db.Context)
+		_, err = db.Conn.NewUpdate().Model(&input).Where(`id = ?`, input.ID).Exec(db.Context)
 	} else {
 		_, err = db.Conn.NewInsert().Model(&input).Exec(db.Context)
 	}
@@ -305,7 +305,7 @@ func SaveOperatingSystem(out http.ResponseWriter, in *http.Request) {
 	}
 
 	if input.ID > 0 {
-		_, err = db.Conn.NewUpdate().Model(&input).Exec(db.Context)
+		_, err = db.Conn.NewUpdate().Model(&input).Where(`id = ?`, input.ID).Exec(db.Context)
 	} else {
 		_, err = db.Conn.NewInsert().Model(&input).Exec(db.Context)
 	}
@@ -348,7 +348,7 @@ func SaveInterfaceType(out http.ResponseWriter, in *http.Request) {
 	}
 
 	if input.ID > 0 {
-		_, err = db.Conn.NewUpdate().Model(&input).Exec(db.Context)
+		_, err = db.Conn.NewUpdate().Model(&input).Where(`id = ?`, input.ID).Exec(db.Context)
 	} else {
 		_, err = db.Conn.NewInsert().Model(&input).Exec(db.Context)
 	}
@@ -391,7 +391,7 @@ func SaveDeviceType(out http.ResponseWriter, in *http.Request) {
 	}
 
 	if input.ID > 0 {
-		_, err = db.Conn.NewUpdate().Model(&input).Exec(db.Context)
+		_, err = db.Conn.NewUpdate().Model(&input).Where(`id = ?`, input.ID).Exec(db.Context)
 	} else {
 		_, err = db.Conn.NewInsert().Model(&input).Exec(db.Context)
 	}
@@ -434,7 +434,7 @@ func SaveVLAN(out http.ResponseWriter, in *http.Request) {
 	}
 
 	if input.ID > 0 {
-		_, err = db.Conn.NewUpdate().Model(&input).Exec(db.Context)
+		_, err = db.Conn.NewUpdate().Model(&input).Where(`id = ?`, input.ID).Exec(db.Context)
 	} else {
 		_, err = db.Conn.NewInsert().Model(&input).Exec(db.Context)
 	}
@@ -477,7 +477,7 @@ func SaveUser(out http.ResponseWriter, in *http.Request) {
 	}
 
 	if input.ID > 0 {
-		_, err = db.Conn.NewUpdate().Model(&input).Exec(db.Context)
+		_, err = db.Conn.NewUpdate().Model(&input).Where(`id = ?`, input.ID).Exec(db.Context)
 	} else {
 		_, err = db.Conn.NewInsert().Model(&input).Exec(db.Context)
 	}

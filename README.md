@@ -1,8 +1,8 @@
-<p align="center"><img src="ui/public/images/mask.png" /></p>
+<p align="center"><img src="web/public/images/mask.png" /></p>
 
 <h1 style="color: #00CC99">faceMasq</h1>
 
-A containerised tool with a responsive UI for monitoring devices on a network and exporting PiHole/DNSMasq DNS and DHCP records for the monitored devices.
+A containerised tool with a responsive web interface for monitoring devices on a network and exporting PiHole/DNSMasq DNS and DHCP records for the monitored devices.
 
 A blend of DNS/DHCP editor, asset registrar, network monitor, and intruder detector.
 
@@ -124,6 +124,6 @@ Contribution Guide to come.
 
 ## Adding FIDO2 2FA
 - https://github.com/duo-labs/webauthn or https://github.com/fxamacker/webauthn for the API
-- https://github.com/MasterKale/SimpleWebAuthn/tree/master/packages/browser for the UI
+- https://github.com/MasterKale/SimpleWebAuthn/tree/master/packages/browser for the Web Interface
 
 

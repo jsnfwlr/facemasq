@@ -15,9 +15,9 @@ RUN chmod +x /dist/api/facemasq
 
 FROM node:16 as vuedeps
 RUN curl -f https://get.pnpm.io/v6.16.js | node - add --global pnpm
-RUN mkdir -p /build/dist/ui /build/ui
-COPY ./ui /build/ui
-WORKDIR /build/ui
+RUN mkdir -p /build/dist/web /build/web
+COPY ./web /build/web
+WORKDIR /build/web
 RUN pnpm install --frozen-lockfile
 RUN pnpm list
 RUN pnpm build
@@ -26,7 +26,7 @@ FROM scratch
 WORKDIR /app/data
 WORKDIR /app/config
 COPY --from=godeps /dist /app
-COPY --from=vuedeps /build/dist/ui /app/ui
+COPY --from=vuedeps /build/dist/web /app/web
 COPY --from=godeps /etc/ssl/certs /etc/ssl/certs
 COPY --from=godeps /usr/share/zoneinfo /usr/share/zoneinfo
 COPY ./upgrades /app/upgrades

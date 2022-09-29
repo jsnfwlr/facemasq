@@ -16,6 +16,7 @@ import (
 	"github.com/volatiletech/null"
 
 	"facemasq/lib/db"
+	"facemasq/lib/logging"
 	"facemasq/lib/network"
 	"facemasq/lib/portscan"
 	"facemasq/lib/scanresults"
@@ -41,10 +42,10 @@ func init() {
 	}
 }
 
-func Schedule(verbose bool) {
+func Schedule() {
 	sched := gocron.NewScheduler(time.UTC)
 	sched.Every(Frequency).Do(func() {
-		scanID, err := ScanAndStore(verbose)
+		scanID, err := ScanAndStore()
 		if err != nil {
 			log.Printf("error: %v", err)
 		}
@@ -56,7 +57,7 @@ func Schedule(verbose bool) {
 	sched.StartAsync()
 }
 
-func ScanAndStore(verbose bool) (scanID int64, err error) {
+func ScanAndStore() (scanID int64, err error) {
 	var records scanresults.Records
 
 	lastSeen := time.Now().Format("2006-01-02 15:04:05")
@@ -69,7 +70,7 @@ func ScanAndStore(verbose bool) (scanID int64, err error) {
 	}
 	scanID = scanRecord.ID
 	// Get details of local interfaces
-	if verbose {
+	if logging.Verbose {
 		log.Println("Processing local interfaces")
 	}
 	records, err = getLocalIFaces(scanID, lastSeen)
@@ -80,7 +81,7 @@ func ScanAndStore(verbose bool) (scanID int64, err error) {
 	}
 
 	// Scan the $target network
-	if verbose {
+	if logging.Verbose {
 		log.Println("Scanning network")
 	}
 
@@ -123,7 +124,7 @@ func ScanAndStore(verbose bool) (scanID int64, err error) {
 		}
 	}
 
-	err = records.Store(verbose)
+	err = records.Store(logging.Verbose)
 	if err != nil {
 		log.Printf("error recording netscan results: %v", err)
 		err = nil // a single error here shouldn't stop the whole process

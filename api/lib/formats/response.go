@@ -2,6 +2,7 @@ package formats
 
 import (
 	"bytes"
+	"facemasq/lib/logging"
 	"io"
 	"log"
 	"net/http"
@@ -29,7 +30,9 @@ func ReadJSONBody(request *http.Request, target interface{}) (err error) {
 		return
 	}
 	request.Body = io.NopCloser(bytes.NewBuffer(body))
-	log.Printf("%v\n", string(body))
+	if logging.Verbose {
+		log.Printf("Request Body Contents: %v\n", string(body))
+	}
 	err = json.Unmarshal(body, target)
 	return
 }

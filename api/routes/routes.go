@@ -96,7 +96,7 @@ func (router *Router) paramRoutes() {
 }
 
 func (router *Router) uiRoutes() {
-	router.Mux.Handle(`/`, http.FileServer(http.Dir("../ui"))).Methods("GET").Name("ServeUI")
+	router.Mux.Handle(`/`, http.FileServer(http.Dir("../web"))).Methods("GET").Name("ServeUI")
 }
 
 func (router *Router) staticRoutes() {
