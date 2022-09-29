@@ -131,7 +131,7 @@ func (record *Record) CreateDevice() (err error) {
 	device := models.Device{
 		MachineName: "",
 		Label:       null.String{String: "Unknown Device", Valid: true},
-		IsOnline:    true,
+		IsOnline:    null.BoolFrom(true),
 		Notes:       null.String{String: record.Notes, Valid: true},
 		StatusID:    1,
 		FirstSeen:   time.Now(),

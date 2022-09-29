@@ -12,9 +12,9 @@ type Address struct {
 	ID           int64         `bun:",notnull,pk,autoincrement" json:"ID"`
 	IPv4         null.String   `bun:"ipv4,type:varchar(15),unique:UC_Address" json:"IPv4"`
 	IPv6         null.String   `bun:"ipv6,type:varchar(64)" json:"IPv6"`
-	IsPrimary    bool          `bun:",nullzero,notnull,default:true" json:"IsPrimary"`
-	IsVirtual    bool          `bun:",nullzero,notnull,default:false" json:"IsVirtual"`
-	IsReserved   bool          `bun:",nullzero,notnull,default:false" json:"IsReserved"`
+	IsPrimary    null.Bool     `bun:",default:true" json:"IsPrimary"`
+	IsVirtual    null.Bool     `bun:",default:false" json:"IsVirtual"`
+	IsReserved   null.Bool     `bun:",default:false" json:"IsReserved"`
 	LastSeen     time.Time     `bun:",nullzero,notnull,default:current_timestamp" json:"LastSeen"`
 	Label        null.String   `bun:",type:varchar(64)" json:"Label"`
 	Notes        null.String   `bun:",type:text" json:"Notes"`

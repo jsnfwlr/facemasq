@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"facemasq/lib/db"
+	"facemasq/lib/utils"
 	"facemasq/models"
 
 	"github.com/uptrace/bun"
@@ -137,8 +138,8 @@ func GetDevices(queries DeviceQueries, connTime string, includeConnectivity bool
 							netfaces[n].SortOrder = addresses[a].SortOrder
 							netfaces[n].Primary.IPv4 = addresses[a].IPv4.String
 							netfaces[n].Primary.IPv6 = addresses[a].IPv6.String
-							netfaces[n].Primary.IsVirtualIP = addresses[a].IsVirtual
-							netfaces[n].Primary.IsReservedIP = addresses[a].IsReserved
+							netfaces[n].Primary.IsVirtualIP = utils.Ternary(addresses[a].IsVirtual.Valid, addresses[a].IsVirtual.Bool, false).(bool)
+							netfaces[n].Primary.IsReservedIP = utils.Ternary(addresses[a].IsReserved.Valid, addresses[a].IsReserved.Bool, false).(bool)
 						}
 					}
 				}
@@ -256,8 +257,8 @@ func GetChangesSince(lastSeen time.Time, includeConnectivity bool) (matchedDevic
 							netfaces[n].SortOrder = addresses[a].SortOrder
 							netfaces[n].Primary.IPv4 = addresses[a].IPv4.String
 							netfaces[n].Primary.IPv6 = addresses[a].IPv6.String
-							netfaces[n].Primary.IsVirtualIP = addresses[a].IsVirtual
-							netfaces[n].Primary.IsReservedIP = addresses[a].IsReserved
+							netfaces[n].Primary.IsVirtualIP = utils.Ternary(addresses[a].IsVirtual.Valid, addresses[a].IsVirtual.Bool, false).(bool)
+							netfaces[n].Primary.IsReservedIP = utils.Ternary(addresses[a].IsReserved.Valid, addresses[a].IsReserved.Bool, false).(bool)
 						}
 					}
 				}
