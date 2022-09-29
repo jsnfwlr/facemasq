@@ -27,12 +27,12 @@ func Exit(out http.ResponseWriter, in *http.Request) {
 
 func Static(out http.ResponseWriter, in *http.Request) {
 	file := mux.Vars(in)["filename"]
-	if files.FileExists("../ui/" + file) {
+	if files.FileExists("../web/" + file) {
 		out.Header().Set("Content-Type", mime.TypeByExtension(strings.TrimRight(filepath.Ext(file), "/")))
-		http.ServeFile(out, in, "../ui/"+file)
+		http.ServeFile(out, in, "../web/"+file)
 	} else {
 		out.Header().Set("Content-Type", mime.TypeByExtension(strings.TrimRight(filepath.Ext(file), "/")))
-		http.ServeFile(out, in, "../ui/index.html")
+		http.ServeFile(out, in, "../web/index.html")
 	}
 }
 

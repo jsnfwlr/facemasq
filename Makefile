@@ -39,5 +39,5 @@ build-container-dev:
 build-container-basic:
 	docker build -t jsnfwlr/facemasq:basic-$(ARCH) -f docker/Dockerfile .
 
-build-ui:
-	cd ui; pnpm build
+build-web:
+	cd web; pnpm build
