@@ -2,13 +2,13 @@ package devices
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"time"
 
 	"facemasq/lib/db"
 	helper "facemasq/lib/devices"
 	"facemasq/lib/formats"
+	"facemasq/lib/logging"
 	"facemasq/models"
 )
 
@@ -29,7 +29,7 @@ func GetActive(out http.ResponseWriter, in *http.Request) {
 
 	activeDevices, err := helper.GetDevices(queries, time.Now().Add(DefaultConnTime).Format("2006-01-02 15:04"), true)
 	if err != nil {
-		log.Panicf("Error: %v", err)
+		logging.Panicf("Error: %v", err)
 		http.Error(out, fmt.Sprintf("Unable to retrieve data: %v", err), http.StatusInternalServerError)
 		return
 	}
@@ -46,7 +46,7 @@ func GetAll(out http.ResponseWriter, in *http.Request) {
 	}
 	allDevices, err := helper.GetDevices(queries, time.Now().Add(DefaultConnTime).Format("2006-01-02 15:04"), true)
 	if err != nil {
-		log.Panicf("Error: %v", err)
+		logging.Panicf("Error: %v", err)
 		http.Error(out, fmt.Sprintf("Unable to retrieve data: %v", err), http.StatusInternalServerError)
 		return
 	}
@@ -64,7 +64,7 @@ func GetUnknown(out http.ResponseWriter, in *http.Request) {
 
 	unknownDevices, err := helper.GetDevices(queries, time.Now().Add(DefaultConnTime).Format("2006-01-02 15:04"), true)
 	if err != nil {
-		log.Panicf("Error: %v", err)
+		logging.Panicf("Error: %v", err)
 		http.Error(out, fmt.Sprintf("Unable to retrieve data: %v", err), http.StatusInternalServerError)
 		return
 	}
@@ -76,21 +76,21 @@ func SaveDevice(out http.ResponseWriter, in *http.Request) {
 	var input models.Device
 	err := formats.ReadJSONBody(in, &input)
 	if err != nil {
-		log.Printf("Unable to parse Device: %v", err)
+		logging.Errorf("Unable to parse Device: %v", err)
 		http.Error(out, "Unable to parse Device", http.StatusInternalServerError)
 		return
 	}
 	if input.FirstSeen.Format("2006-01-02") == "0001-01-01" {
 		input.FirstSeen = time.Now()
 	}
-	log.Printf("!! %v", input)
+	logging.Printf(2, "%v", input)
 	if input.ID > 0 {
 		_, err = db.Conn.NewUpdate().Model(&input).Where("id = ?", input.ID).Exec(db.Context)
 	} else {
 		_, err = db.Conn.NewInsert().Model(&input).Exec(db.Context)
 	}
 	if err != nil {
-		log.Printf("Unable to save Device: %v", err)
+		logging.Errorf("Unable to save Device: %v", err)
 		http.Error(out, "Unable to save Device", http.StatusInternalServerError)
 		return
 
@@ -102,7 +102,7 @@ func SaveInterface(out http.ResponseWriter, in *http.Request) {
 	var input models.Interface
 	err := formats.ReadJSONBody(in, &input)
 	if err != nil {
-		log.Printf("Unable to parse Inteface: %v", err)
+		logging.Errorf("Unable to parse Inteface: %v", err)
 		http.Error(out, "Unable to parse Inteface", http.StatusInternalServerError)
 		return
 	}
@@ -112,7 +112,7 @@ func SaveInterface(out http.ResponseWriter, in *http.Request) {
 		_, err = db.Conn.NewInsert().Model(&input).Exec(db.Context)
 	}
 	if err != nil {
-		log.Printf("Unable to save Inteface: %v", err)
+		logging.Errorf("Unable to save Inteface: %v", err)
 		http.Error(out, "Unable to save Inteface", http.StatusInternalServerError)
 		return
 
@@ -124,7 +124,7 @@ func SaveAddress(out http.ResponseWriter, in *http.Request) {
 	var input models.Address
 	err := formats.ReadJSONBody(in, &input)
 	if err != nil {
-		log.Printf("Unable to parse Address: %v", err)
+		logging.Errorf("Unable to parse Address: %v", err)
 		http.Error(out, "Unable to parse Address", http.StatusInternalServerError)
 		return
 	}
@@ -134,7 +134,7 @@ func SaveAddress(out http.ResponseWriter, in *http.Request) {
 		_, err = db.Conn.NewInsert().Model(&input).Exec(db.Context)
 	}
 	if err != nil {
-		log.Printf("Unable to save Address: %v", err)
+		logging.Errorf("Unable to save Address: %v", err)
 		http.Error(out, "Unable to save Address", http.StatusInternalServerError)
 		return
 
@@ -146,7 +146,7 @@ func SaveHostname(out http.ResponseWriter, in *http.Request) {
 	var input models.Hostname
 	err := formats.ReadJSONBody(in, &input)
 	if err != nil {
-		log.Printf("Unable to parse Hostname: %v", err)
+		logging.Errorf("Unable to parse Hostname: %v", err)
 		http.Error(out, "Unable to parse Hostname", http.StatusInternalServerError)
 		return
 	}
@@ -156,7 +156,7 @@ func SaveHostname(out http.ResponseWriter, in *http.Request) {
 		_, err = db.Conn.NewInsert().Model(&input).Exec(db.Context)
 	}
 	if err != nil {
-		log.Printf("Unable to save Hostname: %v", err)
+		logging.Errorf("Unable to save Hostname: %v", err)
 		http.Error(out, "Unable to save Hostname", http.StatusInternalServerError)
 		return
 
@@ -169,7 +169,7 @@ func InvestigateAddresses(out http.ResponseWriter, in *http.Request) {
 	var investigations []Investigation
 	err := formats.ReadJSONBody(in, &input)
 	if err != nil {
-		log.Printf("Unable to parse Address IDs: %v\n", err)
+		logging.Errorf("Unable to parse Address IDs: %v\n", err)
 		http.Error(out, "Unable to parse Address IDs", http.StatusInternalServerError)
 		return
 	}
@@ -179,7 +179,7 @@ func InvestigateAddresses(out http.ResponseWriter, in *http.Request) {
 		}
 		investigation.Connectivity, err = helper.GetSpecificAddressConnectivityData(address, time.Now().Add(time.Duration(7*24*-1)*time.Hour).Format("2006-01-02 15:04"))
 		if err != nil {
-			log.Printf("Unable to get connection data: %v\n", err)
+			logging.Errorf("Unable to get connection data: %v\n", err)
 			http.Error(out, "Unable to get connection data", http.StatusInternalServerError)
 			return
 		}

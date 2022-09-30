@@ -1,11 +1,11 @@
 package devices
 
 import (
-	"log"
 	"net/http"
 	"time"
 
 	"facemasq/lib/devices"
+	"facemasq/lib/logging"
 
 	"github.com/gorilla/websocket"
 )
@@ -19,7 +19,7 @@ func GetRecentChanges(out http.ResponseWriter, in *http.Request) {
 	socket, err := upgrader.Upgrade(out, in, nil)
 	if err != nil {
 		if _, ok := err.(websocket.HandshakeError); !ok {
-			log.Println(err)
+			logging.Errorln(err)
 		}
 		return
 	}

@@ -1,11 +1,11 @@
 package settings
 
 import (
-	"log"
 	"net/http"
 
 	"facemasq/lib/db"
 	"facemasq/lib/formats"
+	"facemasq/lib/logging"
 	"facemasq/models"
 
 	"github.com/volatiletech/null"
@@ -15,7 +15,7 @@ func GetAppSettings(out http.ResponseWriter, in *http.Request) {
 	var settings []models.Meta
 	err := db.Conn.NewSelect().Model(&settings).Where(`user_id IS NULL`).Scan(db.Context)
 	if err != nil {
-		log.Printf("error getting settings: %v", err)
+		logging.Errorf("error getting settings: %v", err)
 		http.Error(out, "Unable to retrieve data", http.StatusInternalServerError)
 	}
 	formats.WriteJSONResponse(settings, out, in)
@@ -25,7 +25,7 @@ func SaveAppSetting(out http.ResponseWriter, in *http.Request) {
 	var input, check models.Meta
 	err := formats.ReadJSONBody(in, &input)
 	if err != nil {
-		log.Printf("Unable to parse Setting: %v", err)
+		logging.Errorf("Unable to parse Setting: %v", err)
 		http.Error(out, "Unable to parse Setting", http.StatusInternalServerError)
 		return
 	}
@@ -46,7 +46,7 @@ func SaveAppSetting(out http.ResponseWriter, in *http.Request) {
 		_, err = db.Conn.NewInsert().Model(&input).Exec(db.Context)
 	}
 	if err != nil {
-		log.Printf("error saving setting: %v", err)
+		logging.Errorf("error saving setting: %v", err)
 		http.Error(out, "Unable to retrieve data", http.StatusInternalServerError)
 	}
 

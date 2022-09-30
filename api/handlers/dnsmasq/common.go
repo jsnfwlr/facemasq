@@ -3,12 +3,12 @@ package dnsmasq
 import (
 	"bytes"
 	"fmt"
-	"log"
 	"os"
 	"text/template"
 	"time"
 
 	"facemasq/lib/files"
+	"facemasq/lib/logging"
 )
 
 type Params struct {
@@ -52,7 +52,7 @@ func getFileHeaderFromTemplate() (fileHeader string, err error) {
 
 	tmplPath, err = getTemplateFilePath()
 	if err != nil {
-		log.Print("Unable to determine template folder location")
+		logging.Errorf("Unable to determine template folder location: %v", err)
 		return
 	}
 
@@ -62,7 +62,7 @@ func getFileHeaderFromTemplate() (fileHeader string, err error) {
 		templateParser, err = template.ParseFS(files.GetEmbeddedFileSystem(), fmt.Sprintf("templates/%s", templateName))
 	}
 	if err != nil {
-		log.Printf("Error: %v", err)
+		logging.Errorf("Error: %v", err)
 		return
 	}
 
@@ -72,7 +72,7 @@ func getFileHeaderFromTemplate() (fileHeader string, err error) {
 	output := new(bytes.Buffer)
 	err = templateParser.Execute(output, params)
 	if err != nil {
-		log.Printf("error executing template : %v\n", err)
+		logging.Errorf("error executing template : %v\n", err)
 		return
 	}
 	fileHeader = output.String()

@@ -4,11 +4,11 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"log"
 	"os"
 	"strings"
 
 	"facemasq/lib/files"
+	"facemasq/lib/logging"
 	"facemasq/models"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -131,7 +131,7 @@ func checkPrepare() (doPrepare bool, err error) {
 }
 
 func prepare(ctx context.Context, db *bun.DB) error {
-	log.Println("Preparing db")
+	logging.Processln("Preparing db")
 	if err := db.ResetModel(ctx,
 		// Params
 		(*models.Architecture)(nil),

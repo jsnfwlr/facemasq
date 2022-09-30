@@ -2,13 +2,13 @@ package devices
 
 import (
 	"fmt"
-	"log"
 	"sort"
 	"strconv"
 	"strings"
 	"time"
 
 	"facemasq/lib/db"
+	"facemasq/lib/logging"
 	"facemasq/lib/utils"
 	"facemasq/models"
 
@@ -32,7 +32,7 @@ func GetConnectivityData(connTime string) (connections []models.ConnectionGroup,
 	sql := `SELECT time, CASE WHEN addresses IS NULL THEN 204 ELSE addresses END AS addresses FROM (SELECT scans.time, GROUP_CONCAT(address_id, ',') as addresses FROM scans LEFT JOIN histories ON scans.id = histories.scan_id WHERE scans.time > ? GROUP BY scans.time) as scans ORDER BY scans.time ASC;`
 	err = db.Conn.NewRaw(sql, connTime).Scan(db.Context, &connections)
 	if err != nil {
-		log.Printf("Error getting connectivity data: %v", err)
+		logging.Errorf("Error getting connectivity data: %v", err)
 		return
 	}
 	for i := range connections {
@@ -170,7 +170,6 @@ func GetDevices(queries DeviceQueries, connTime string, includeConnectivity bool
 }
 
 func GetChangesSince(lastSeen time.Time, includeConnectivity bool) (matchedDevices []models.Device, seenRecently time.Time, err error) {
-	log.Println("GetChangesSince")
 	var deviceIDs []int64
 	var interfaceIDs []int64
 	var addressIDs []int64
@@ -244,7 +243,6 @@ func GetChangesSince(lastSeen time.Time, includeConnectivity bool) (matchedDevic
 				for a := range addresses {
 					if addresses[a].LastSeen.After(seenRecently) {
 						seenRecently = addresses[a].LastSeen
-
 					}
 					if netfaces[n].ID == addresses[a].InterfaceID {
 						for h := range hostnames {
@@ -284,7 +282,7 @@ func GetSpecificAddressConnectivityData(addressID int64, connTime string) (conne
 	sql := `SELECT scans.time, CASE WHEN address_id IS NULL THEN false ELSE true END as state FROM scans LEFT JOIN histories ON histories.scan_id = scans.id AND histories.address_id = ? WHERE scans.time > ? ORDER BY scans.id DESC;`
 	err = db.Conn.NewRaw(sql, addressID, connTime).Scan(db.Context, &connections)
 	if err != nil {
-		log.Printf("Error getting connectivity data: %v", err)
+		logging.Errorf("Error getting connectivity data: %v", err)
 		return
 	}
 	sort.Sort(Connectivity(connections))

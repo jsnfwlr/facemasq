@@ -2,7 +2,6 @@ package dnsmasq
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"sort"
@@ -11,6 +10,7 @@ import (
 
 	"facemasq/lib/db"
 	"facemasq/lib/files"
+	"facemasq/lib/logging"
 )
 
 type DHCP struct {
@@ -27,7 +27,7 @@ func WriteDHCPConfig(out http.ResponseWriter, in *http.Request) {
 	sql := `SELECT interfaces.mac, addresses.ipv4, devices.label, devices.machine_name FROM addresses JOIN interfaces ON interfaces.id = addresses.interface_id JOIN devices ON devices.id = interfaces.device_id WHERE addresses.is_reserved = 1;`
 	err := db.Conn.NewRaw(sql).Scan(db.Context, &records)
 	if err != nil {
-		log.Printf("Error getting DHCP Records: %v", err)
+		logging.Errorf("Error getting DHCP Records: %v", err)
 		http.Error(out, "Unable to retrieve DHCP Records", http.StatusInternalServerError)
 		return
 	}

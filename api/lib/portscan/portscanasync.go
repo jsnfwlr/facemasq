@@ -2,12 +2,12 @@ package portscan
 
 import (
 	"fmt"
-	"log"
 	"net"
 	"strconv"
 	"time"
 
 	"facemasq/lib/db"
+	"facemasq/lib/logging"
 )
 
 func DiscoverScanAndStoreAsync(scanID int64) (err error) {
@@ -23,7 +23,7 @@ func DiscoverScanAndStoreAsync(scanID int64) (err error) {
 					sql := `INSERT INTO Ports (AddressID, ScanID, Port, Protocol) VALUES (?,?,?,?);`
 					_, err = db.Conn.Exec(sql, scan.AddressID, scanID, result.Number, result.Protocol)
 					if err != nil {
-						log.Printf("could not record port state: %v\n", err)
+						logging.Errorf("could not record port state: %v\n", err)
 						return
 					}
 				}

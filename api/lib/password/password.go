@@ -3,9 +3,10 @@ package password
 import (
 	"crypto/sha256"
 	"fmt"
-	"log"
 	"os"
 	"strings"
+
+	"facemasq/lib/logging"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -21,7 +22,7 @@ func init() {
 		salt = os.Getenv("PASSWORDSALT")
 	}
 	if salt == "" {
-		log.Fatalln("A password salt is required. See https://jsnfwlr.github.io/facemasq/errors/#PasswordSalt for more details")
+		logging.Fatalln("A password salt is required. See https://jsnfwlr.github.io/facemasq/errors/#PasswordSalt for more details")
 	}
 }
 

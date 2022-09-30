@@ -17,7 +17,6 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
-	"log"
 	"net"
 	"os"
 	"strings"
@@ -25,6 +24,7 @@ import (
 	"time"
 
 	"facemasq/lib/db"
+	"facemasq/lib/logging"
 
 	"github.com/google/gopacket"
 	"github.com/google/gopacket/layers"
@@ -43,15 +43,15 @@ func init() {
 	}
 }
 
-func Schedule(verbose bool) {
-	go ScanAndStore(verbose)
+func Schedule() {
+	go ScanAndStore()
 }
 
-func ScanAndStore(verbose bool) {
+func ScanAndStore() {
 	// Get a list of all interfaces.
 	netFaces, err := net.Interfaces()
 	if err != nil {
-		log.Printf("ArpScan: %+v\n", err.Error())
+		logging.Errorf("ArpScan: %+v\n", err.Error())
 		return
 	}
 	var wg sync.WaitGroup
@@ -59,7 +59,7 @@ func ScanAndStore(verbose bool) {
 		if !strings.Contains(netFace.Name, "veth") && !strings.Contains(netFace.Name, "lo") && !strings.Contains(netFace.Name, "br-") && !strings.Contains(netFace.Name, "docker0") {
 			addresses, err := netFace.Addrs()
 			if err != nil {
-				log.Printf("ArpScan: %+v\n", err.Error())
+				logging.Errorf("ArpScan: %+v\n", err.Error())
 				continue
 			}
 			if len(addresses) > 0 {
@@ -67,8 +67,8 @@ func ScanAndStore(verbose bool) {
 				// Start up a scan on each interface.
 				go func(iface net.Interface) {
 					defer wg.Done()
-					if err := ScanARP(&iface, verbose); err != nil {
-						log.Printf("interface %v: %v", iface.Name, err)
+					if err := ScanARP(&iface); err != nil {
+						logging.Errorf("interface %v: %v", iface.Name, err)
 					}
 				}(netFace)
 			}
@@ -82,7 +82,7 @@ func ScanAndStore(verbose bool) {
 //
 // scan loops forever, sending packets out regularly.  It returns an error if
 // it's ever unable to write a packet.
-func ScanARP(iface *net.Interface, verbose bool) error {
+func ScanARP(iface *net.Interface) error {
 	// We just look for IPv4 addresses, so try to find if the interface has one.
 	var addr *net.IPNet
 	if addrs, err := iface.Addrs(); err != nil {
@@ -118,12 +118,12 @@ func ScanARP(iface *net.Interface, verbose bool) error {
 
 	// Start up a goroutine to read in packet data.
 	stop := make(chan struct{})
-	go readARP(verbose, handle, iface, stop)
+	go readARP(handle, iface, stop)
 	defer close(stop)
 	for {
 		// Write our scan packets out to the handle.
 		if err := writeARP(handle, iface, addr); err != nil {
-			log.Printf("error writing packets on %v: %v", iface.Name, err)
+			logging.Errorf("error writing packets on %v: %v", iface.Name, err)
 			return err
 		}
 		// We don't know exactly how long it'll take for packets to be
@@ -136,14 +136,14 @@ func ScanARP(iface *net.Interface, verbose bool) error {
 // readARP watches a handle for incoming ARP responses we might care about, and prints them.
 //
 // readARP loops until 'stop' is closed.
-func readARP(verbose bool, handle *pcap.Handle, iface *net.Interface, stop chan struct{}) {
+func readARP(handle *pcap.Handle, iface *net.Interface, stop chan struct{}) {
 	src := gopacket.NewPacketSource(handle, layers.LayerTypeEthernet)
 	in := src.Packets()
 	for {
 		var packet gopacket.Packet
 		select {
 		case <-stop:
-			log.Println("Stopping ARP Scan")
+			logging.Processln("Stopping ARP Scan")
 			return
 		case packet = <-in:
 			arpLayer := packet.Layer(layers.LayerTypeARP)
@@ -167,11 +167,11 @@ func readARP(verbose bool, handle *pcap.Handle, iface *net.Interface, stop chan 
 					sql := `INSERT INTO Scans (Time) VALUES (?);`
 					sqlres, err = db.Conn.Exec(sql, time.Now().Format("2006-01-02 15:04:05"))
 					if err != nil {
-						log.Printf("api/lib/arpscan/arpscan.go:177 Err: %v\n", err)
+						logging.Errorf("api/lib/arpscan/arpscan.go:177 Err: %v\n", err)
 					}
 					scanID, _ = sqlres.LastInsertId()
 				} else {
-					log.Printf("api/lib/arpscan/arpscan.go:181 Err: %v\n", err)
+					logging.Errorf("api/lib/arpscan/arpscan.go:181 Err: %v\n", err)
 				}
 			}
 
@@ -182,9 +182,7 @@ func readARP(verbose bool, handle *pcap.Handle, iface *net.Interface, stop chan 
 				MAC:      strings.ToUpper(net.HardwareAddr(arp.SourceHwAddress).String()),
 			}
 			record.Store()
-			if verbose {
-				log.Printf("Updating %v (%v) via ARP\n", record.IPv4, record.MAC)
-			}
+			logging.Printf(1, "Updating %v (%v) via ARP\n", record.IPv4, record.MAC)
 		}
 	}
 }

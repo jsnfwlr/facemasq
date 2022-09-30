@@ -1,8 +1,9 @@
 package network
 
 import (
-	"log"
 	"os"
+
+	"facemasq/lib/logging"
 )
 
 var Target string
@@ -20,6 +21,6 @@ func ShowNetworkSummary() (err error) {
 	if err != nil {
 		return
 	}
-	log.Printf("Network: %s, Broadcast: %s, Mask: %s, Addresses: %d\n", network, broadcast, mask, len(addresses))
+	logging.Processf("Network: %s, Broadcast: %s, Mask: %s, Addresses: %d\n", network, broadcast, mask, len(addresses))
 	return
 }

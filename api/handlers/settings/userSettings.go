@@ -1,7 +1,6 @@
 package settings
 
 import (
-	"log"
 	"net/http"
 	"strconv"
 
@@ -10,6 +9,7 @@ import (
 
 	"facemasq/lib/db"
 	"facemasq/lib/formats"
+	"facemasq/lib/logging"
 	"facemasq/models"
 )
 
@@ -19,7 +19,7 @@ func GetUserSettings(out http.ResponseWriter, in *http.Request) {
 	sql := `SELECT name, value FROM meta WHERE user_id = ?`
 	err := db.Conn.NewRaw(sql, userID).Scan(db.Context, &settings)
 	if err != nil {
-		log.Printf("error getting settings: %v", err)
+		logging.Errorf("error getting settings: %v", err)
 		http.Error(out, "Unable to retrieve data", http.StatusInternalServerError)
 	}
 	formats.WriteJSONResponse(settings, out, in)
@@ -30,14 +30,14 @@ func SaveUserSetting(out http.ResponseWriter, in *http.Request) {
 
 	userID, err := strconv.ParseInt(mux.Vars(in)["userID"], 10, 64)
 	if err != nil {
-		log.Printf("Unable to parse user_id: %v", err)
+		logging.Errorf("Unable to parse user_id: %v", err)
 		http.Error(out, "Unable to parse UserID", http.StatusBadRequest)
 		return
 	}
 
 	err = formats.ReadJSONBody(in, &input)
 	if err != nil {
-		log.Printf("Unable to parse Setting: %v", err)
+		logging.Errorf("Unable to parse Setting: %v", err)
 		http.Error(out, "Unable to parse Setting", http.StatusInternalServerError)
 		return
 	}
@@ -59,7 +59,7 @@ func SaveUserSetting(out http.ResponseWriter, in *http.Request) {
 		_, err = db.Conn.NewInsert().Model(&input).Exec(db.Context)
 	}
 	if err != nil {
-		log.Printf("error saving setting: %v", err)
+		logging.Errorf("error saving setting: %v", err)
 		http.Error(out, "Unable to retrieve data", http.StatusInternalServerError)
 	}
 

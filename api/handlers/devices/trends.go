@@ -1,12 +1,12 @@
 package devices
 
 import (
-	"log"
 	"net/http"
 	"time"
 
 	"facemasq/lib/db"
 	"facemasq/lib/formats"
+	"facemasq/lib/logging"
 )
 
 type TrendWindow struct {
@@ -75,8 +75,7 @@ func GetTrendData(out http.ResponseWriter, in *http.Request) {
 
 		if err != nil {
 			if err.Error() != "sql: no rows in result set" {
-				// log.Printf(`%s Compare: SELECT MAX(active) FROM (SELECT count(addressID) as active, 1 as Merge FROM histories JOIN Scans ON histories.ScanID = Scans.ID WHERE Time > '%s' AND Time < '%s' GROUP BY Time) as period GROUP BY Merge`, durations[d].Label, durations[d].from.Format("2006-01-02 15:04"), durations[d].to.Format("2006-01-02 15:04"))
-				log.Println(err.Error())
+				logging.Errorln(err.Error())
 				http.Error(out, "Unable to retrieve comparative trend data for "+durations[d].Label, http.StatusInternalServerError)
 				return
 			}
@@ -96,8 +95,7 @@ func GetTrendData(out http.ResponseWriter, in *http.Request) {
 
 		if err != nil {
 			if err.Error() != "sql: no rows in result set" {
-				// log.Printf(`%s Current: SELECT MAX(active) FROM (SELECT count(addressID) as active, 1 as Merge FROM histories JOIN Scans ON histories.ScanID = Scans.ID WHERE Time > '%s' AND Time < '%s' GROUP BY Time) as period GROUP BY Merge`, durations[d].Label, durations[d].to.Format("2006-01-02 15:04"), time.Now().Format("2006-01-02 15:04"))
-				log.Println(err.Error())
+				logging.Errorln(err.Error())
 				http.Error(out, "Unable to retrieve current trend data for "+durations[d].Label, http.StatusInternalServerError)
 				return
 			}

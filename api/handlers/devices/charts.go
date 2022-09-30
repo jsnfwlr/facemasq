@@ -1,7 +1,6 @@
 package devices
 
 import (
-	"log"
 	"net/http"
 	"os"
 	"strconv"
@@ -10,6 +9,7 @@ import (
 
 	"facemasq/lib/db"
 	"facemasq/lib/formats"
+	"facemasq/lib/logging"
 )
 
 type DevicesOverTime struct {
@@ -35,13 +35,13 @@ func GetDashboardChartData(out http.ResponseWriter, in *http.Request) {
 
 	series["full"], err = getAddressCountPerScan(time.Duration(-24) * time.Hour)
 	if err != nil {
-		log.Printf("error getting intial chart data: %v\n", err)
+		logging.Errorf("error getting intial chart data: %v\n", err)
 		http.Error(out, "Unable to retrieve inital chart data", http.StatusInternalServerError)
 	}
 
 	series["averaged"], err = getAverageAddressCountPerPeriod(time.Duration(-24)*time.Hour, time.Duration(5)*frequency)
 	if err != nil {
-		log.Printf("error getting averaged chart data: %v\n", err)
+		logging.Errorf("error getting averaged chart data: %v\n", err)
 		http.Error(out, "Unable to retrieve averaged chart data", http.StatusInternalServerError)
 	}
 

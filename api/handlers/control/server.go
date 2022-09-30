@@ -1,7 +1,6 @@
 package control
 
 import (
-	"log"
 	"mime"
 	"net/http"
 	"os"
@@ -11,6 +10,7 @@ import (
 	"facemasq/lib/db"
 	"facemasq/lib/files"
 	"facemasq/lib/formats"
+	"facemasq/lib/logging"
 	"facemasq/lib/netscan"
 	"facemasq/lib/network"
 	"facemasq/lib/portscan"
@@ -21,7 +21,7 @@ import (
 )
 
 func Exit(out http.ResponseWriter, in *http.Request) {
-	log.Println("Remote exit invoked")
+	logging.Processln("Remote exit invoked")
 	os.Exit(0)
 }
 
@@ -48,7 +48,7 @@ func Status(out http.ResponseWriter, in *http.Request) {
 
 	err := db.Conn.NewSelect().Model(&settings).Where(`name = 'formatHostnames' AND user_id IS NULL`).Scan(db.Context)
 	if err != nil {
-		log.Printf("error getting settings: %v", err)
+		logging.Errorf("error getting settings: %v", err)
 		http.Error(out, "Unable to retrieve data", http.StatusInternalServerError)
 		return
 	}

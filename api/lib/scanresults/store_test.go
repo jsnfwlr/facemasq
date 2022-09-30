@@ -8,6 +8,7 @@ import (
 
 	"facemasq/lib/db"
 	"facemasq/lib/files"
+	"facemasq/lib/logging"
 	"facemasq/models"
 
 	"github.com/volatiletech/null"
@@ -125,7 +126,8 @@ func TestBulkStore(test *testing.T) {
 			MAC:    netface2.MAC,
 		},
 	}
-	err = results.Store(true)
+	logging.Verbosity = 2
+	err = results.Store()
 	if err != nil {
 		test.Error(err)
 	}

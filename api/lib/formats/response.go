@@ -2,10 +2,10 @@ package formats
 
 import (
 	"bytes"
-	"facemasq/lib/logging"
 	"io"
-	"log"
 	"net/http"
+
+	"facemasq/lib/logging"
 
 	jsoniter "github.com/json-iterator/go"
 )
@@ -30,9 +30,7 @@ func ReadJSONBody(request *http.Request, target interface{}) (err error) {
 		return
 	}
 	request.Body = io.NopCloser(bytes.NewBuffer(body))
-	if logging.Verbose {
-		log.Printf("Request Body Contents: %v\n", string(body))
-	}
+	logging.Printf(2, "Request Body Contents: %v\n", string(body))
 	err = json.Unmarshal(body, target)
 	return
 }

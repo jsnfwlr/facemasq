@@ -2,18 +2,21 @@ package portscan
 
 import (
 	"fmt"
-	"log"
 	"net"
 	"os"
 	"strconv"
 	"strings"
 	"time"
+
+	"facemasq/lib/logging"
 )
 
-var scanWidth string
-var timeOut int
-var portList []int
-var PortScan bool
+var (
+	scanWidth string
+	timeOut   int
+	portList  []int
+	PortScan  bool
+)
 
 func init() {
 	var err error
@@ -31,7 +34,6 @@ func init() {
 		for i := 1; i <= 65535; i++ {
 			portList = append(portList, i)
 		}
-
 	}
 
 	PortScan = false
@@ -39,7 +41,7 @@ func init() {
 		PortScan = true
 	}
 
-	log.Printf("%v timeout\n", time.Duration(timeOut)*time.Millisecond)
+	logging.Processf("%v timeout\n", time.Duration(timeOut)*time.Millisecond)
 }
 
 func ScanPort(protocol, ipv4 string, portNum int) Port {
@@ -53,7 +55,6 @@ func ScanPort(protocol, ipv4 string, portNum int) Port {
 	if err != nil {
 		if err.Error() == fmt.Sprintf("dial %s %s:%d: connect: connection refused", protocol, ipv4, portNum) {
 			port.State = "closed"
-
 		} else if err.Error() == fmt.Sprintf("dial %s %s:%d: connect: no route to host", protocol, ipv4, portNum) {
 			port.State = "unavailable"
 		} else {

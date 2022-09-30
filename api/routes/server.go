@@ -1,11 +1,11 @@
 package routes
 
 import (
-	"log"
 	"net/http"
 	"os"
 
 	"facemasq/lib/files"
+	"facemasq/lib/logging"
 
 	"github.com/rs/cors"
 	"github.com/urfave/negroni/v3"
@@ -23,7 +23,7 @@ func init() {
 func Run() (err error) {
 	var rootDir string
 	rootDir, _ = files.GetAppRoot()
-	log.Printf("Starting API server at localhost:%s from  %s\n", Port, rootDir)
+	logging.Processf("Starting API server at localhost:%s from  %s\n", Port, rootDir)
 
 	server := negroni.New()
 	router := BuildRoutes()

@@ -1,7 +1,6 @@
 package devices
 
 import (
-	"log"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -29,7 +28,6 @@ func Reader(socket *websocket.Conn) {
 }
 
 func Writer(socket *websocket.Conn, lastMod time.Time) {
-	log.Println("Writer")
 	// lastError := ""
 	pingTicker := time.NewTicker(PingPeriod)
 	fileTicker := time.NewTicker(ScanPeriod)
