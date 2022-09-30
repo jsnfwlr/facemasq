@@ -14,10 +14,10 @@ import (
 )
 
 type DHCP struct {
-	MAC         string `db:"MAC"`
-	IPv4        string `db:"IPv4"`
-	Label       string `db:"Label"`
-	MachineName string `db:"MachineName"`
+	MAC         string `bun:"mac"`
+	IPv4        string `bun:"ipv4"`
+	Label       string `bun:"label"`
+	MachineName string `bun:"machine_name"`
 	SortOrder   string
 }
 
