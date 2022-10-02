@@ -308,6 +308,7 @@ func GetIntefaceChildren(interfacePK int64) (children string, err error) {
 	return
 }
 
+// @TODO: Swap to soft delete
 func DeleteDevice(devicePK int64) (err error) {
 	var children DeviceChildren
 	var ids []int64
@@ -348,6 +349,7 @@ func DeleteDevice(devicePK int64) (err error) {
 	return
 }
 
+// @TODO: Swap to soft delete
 func DeleteInterface(interfacePK int64) (err error) {
 	var addresses string
 	var ids []int64
@@ -379,6 +381,7 @@ func DeleteInterface(interfacePK int64) (err error) {
 	return
 }
 
+// @TODO: Swap to soft delete
 func DeleteAddress(addressPK int64) (err error) {
 	_, err = db.Conn.NewDelete().Model((*models.History)(nil)).Where(`address_id = ?`, addressPK).Exec(db.Context)
 	if err != nil {
