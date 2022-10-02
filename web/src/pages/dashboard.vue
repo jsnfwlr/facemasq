@@ -42,8 +42,8 @@
   })
 
   const fakeTrends = [
-    { Label: "Historic", Compare: 0, Current: 0, Tooltip: null },
-    { Label: "Concurrent", Compare: 0, Current: 0, Tooltip: null },
+    { Label: "Historic", Compare: 0, Current: 0, Tooltip: "" },
+    { Label: "Concurrent", Compare: 0, Current: 0, Tooltip: "" },
     { Label: "30 days", Compare: 0, Current: 0, Tooltip: null },
     { Label: "7 days", Compare: 0, Current: 0, Tooltip: null },
     { Label: "24 hours", Compare: 0, Current: 0, Tooltip: null },
