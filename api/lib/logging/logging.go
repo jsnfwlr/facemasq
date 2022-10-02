@@ -1,8 +1,21 @@
 package logging
 
-import "log"
+import (
+	"log"
+	"os"
+	"strconv"
+)
 
 var Verbosity int
+
+func init() {
+	var err error
+	Verbosity, err = strconv.Atoi(os.Getenv("VERBOSE"))
+	if err != nil {
+		Verbosity = 0
+	}
+	Printf(0, "Log Verbosity set to %d", Verbosity)
+}
 
 func Printf(verbosity int, format string, args ...interface{}) {
 	if Verbosity >= verbosity {

@@ -50,7 +50,7 @@ func init() {
 	case "sqlite":
 		dataPath, err = files.GetDir("data")
 		if err != nil {
-			panic(err)
+			logging.Panic(err)
 		}
 		DBConnString = fmt.Sprintf("file:%[2]s%[1]c%[3]s", os.PathSeparator, dataPath, dbParams[1])
 
@@ -72,20 +72,20 @@ func Connect() (err error) {
 	case "sqlite":
 		conn, err = sql.Open(sqliteshim.ShimName, DBConnString)
 		if err != nil {
-			panic(err)
+			logging.Panic(err)
 		}
 		conn.SetMaxOpenConns(1)
 		Conn = bun.NewDB(conn, sqlitedialect.New())
 	case "mariadb", "mysql":
 		conn, err = sql.Open("mysql", DBConnString)
 		if err != nil {
-			panic(err)
+			logging.Panic(err)
 		}
 		Conn = bun.NewDB(conn, mysqldialect.New())
 	case "postgres":
 		config, err := pgx.ParseConfig(DBConnString)
 		if err != nil {
-			panic(err)
+			logging.Panic(err)
 		}
 		config.PreferSimpleProtocol = true
 
@@ -99,7 +99,7 @@ func Connect() (err error) {
 	doPrepare, err = checkPrepare()
 	if doPrepare {
 		if err := prepare(Context, Conn); err != nil {
-			panic(err)
+			logging.Panic(err)
 		}
 	}
 	return
@@ -107,7 +107,12 @@ func Connect() (err error) {
 
 func checkPrepare() (doPrepare bool, err error) {
 	var sql string
+	if strings.HasSuffix(os.Args[0], ".test") {
+		doPrepare = true
+		return
+	}
 
+	doPrepare = false
 	switch DBEngine {
 	case "sqlite":
 		sql = `SELECT name FROM sqlite_master WHERE type='table' AND name='meta';`
@@ -126,13 +131,42 @@ func checkPrepare() (doPrepare bool, err error) {
 		err = nil
 		return
 	}
-	doPrepare = false
+
 	return
 }
 
-func prepare(ctx context.Context, db *bun.DB) error {
+func prepare(ctx context.Context, db *bun.DB) (err error) {
 	logging.Processln("Preparing db")
-	if err := db.ResetModel(ctx,
+	var drops, creates []interface{}
+	// Params
+	drops = append(
+		drops,
+
+		// Users & Maintainers
+
+		// Devices
+
+		// Scans
+		(*models.Meta)(nil),
+		(*models.Port)(nil),
+		(*models.Scan)(nil),
+		(*models.History)(nil),
+		(*models.Hostname)(nil),
+		(*models.Address)(nil),
+		(*models.Interface)(nil),
+		(*models.Device)(nil),
+		(*models.User)(nil),
+		(*models.VLAN)(nil),
+		(*models.Status)(nil),
+		(*models.OperatingSystem)(nil),
+		(*models.Location)(nil),
+		(*models.InterfaceType)(nil),
+		(*models.DeviceType)(nil),
+		(*models.Category)(nil),
+		(*models.Architecture)(nil),
+	)
+	creates = append(
+		creates,
 		// Params
 		(*models.Architecture)(nil),
 		(*models.Category)(nil),
@@ -157,45 +191,56 @@ func prepare(ctx context.Context, db *bun.DB) error {
 		(*models.Scan)(nil),
 		(*models.Port)(nil),
 		(*models.Meta)(nil),
-	); err != nil {
-		return err
-	}
-	userSeed := models.GetUserSeed(adminPassword)
-	if _, err := db.NewInsert().Model(&userSeed).Exec(ctx); err != nil {
-		return err
-	}
-	architectureSeed := models.GetArchitectureSeed()
-	if _, err := db.NewInsert().Model(&architectureSeed).Exec(ctx); err != nil {
-		return err
-	}
-	categorySeed := models.GetCategorySeed()
-	if _, err := db.NewInsert().Model(&categorySeed).Exec(ctx); err != nil {
-		return err
-	}
-	deviceTypeSeed := models.GetDeviceTypeSeed()
-	if _, err := db.NewInsert().Model(&deviceTypeSeed).Exec(ctx); err != nil {
-		return err
-	}
-	interfaceTypeSeed := models.GetInterfaceTypeSeed()
-	if _, err := db.NewInsert().Model(&interfaceTypeSeed).Exec(ctx); err != nil {
-		return err
-	}
-	locationSeed := models.GetLocationSeed()
-	if _, err := db.NewInsert().Model(&locationSeed).Exec(ctx); err != nil {
-		return err
-	}
-	operatingSystemSeed := models.GetOperatingSystemSeed()
-	if _, err := db.NewInsert().Model(&operatingSystemSeed).Exec(ctx); err != nil {
-		return err
-	}
-	statusSeed := models.GetStatusSeed()
-	if _, err := db.NewInsert().Model(&statusSeed).Exec(ctx); err != nil {
-		return err
-	}
-	vLANSeed := models.GetVLANSeed()
-	if _, err := db.NewInsert().Model(&vLANSeed).Exec(ctx); err != nil {
-		return err
+	)
+	for _, drop := range drops {
+		if _, err = db.NewDropTable().Model(drop).IfExists().Cascade().Exec(ctx); err != nil {
+			return
+		}
 	}
 
-	return nil
+	if err = db.ResetModel(ctx, creates...); err != nil {
+		return
+	}
+	userSeed := models.GetUserSeed(adminPassword)
+	if _, err = db.NewInsert().Model(&userSeed).Exec(ctx); err != nil {
+		return
+	}
+	architectureSeed := models.GetArchitectureSeed()
+	if _, err = db.NewInsert().Model(&architectureSeed).Exec(ctx); err != nil {
+		return
+	}
+	categorySeed := models.GetCategorySeed()
+	if _, err = db.NewInsert().Model(&categorySeed).Exec(ctx); err != nil {
+		return
+	}
+	deviceTypeSeed := models.GetDeviceTypeSeed()
+	if _, err = db.NewInsert().Model(&deviceTypeSeed).Exec(ctx); err != nil {
+		return
+	}
+	interfaceTypeSeed := models.GetInterfaceTypeSeed()
+	if _, err = db.NewInsert().Model(&interfaceTypeSeed).Exec(ctx); err != nil {
+		return
+	}
+	locationSeed := models.GetLocationSeed()
+	if _, err = db.NewInsert().Model(&locationSeed).Exec(ctx); err != nil {
+		return
+	}
+	operatingSystemSeed := models.GetOperatingSystemSeed()
+	if _, err = db.NewInsert().Model(&operatingSystemSeed).Exec(ctx); err != nil {
+		return
+	}
+	statusSeed := models.GetStatusSeed()
+	if _, err = db.NewInsert().Model(&statusSeed).Exec(ctx); err != nil {
+		return
+	}
+	vLANSeed := models.GetVLANSeed()
+	if _, err = db.NewInsert().Model(&vLANSeed).Exec(ctx); err != nil {
+		return
+	}
+
+	return
 }
+
+// func ConnectToTest() (err error) {
+// 	return
+// }

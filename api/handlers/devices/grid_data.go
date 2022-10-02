@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"time"
 
-	"facemasq/lib/devices"
 	helper "facemasq/lib/devices"
 	"facemasq/lib/formats"
 	"facemasq/lib/logging"
@@ -114,8 +113,8 @@ func GetRecentChanges(out http.ResponseWriter, in *http.Request) {
 
 	lastMod, _ := time.Parse("2006-01-02 15:04:05", in.FormValue("lastMod"))
 
-	go devices.Writer(socket, lastMod)
-	devices.Reader(socket)
+	go helper.Writer(socket, lastMod)
+	helper.Reader(socket)
 }
 
 /*

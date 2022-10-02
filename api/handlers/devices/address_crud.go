@@ -1,10 +1,10 @@
 package devices
 
 import (
-	"fmt"
 	"net/http"
 
 	"facemasq/lib/db"
+	"facemasq/lib/devices"
 	"facemasq/lib/formats"
 	"facemasq/lib/logging"
 	"facemasq/models"
@@ -33,23 +33,21 @@ func SaveAddress(out http.ResponseWriter, in *http.Request) {
 }
 
 func DeleteAddress(out http.ResponseWriter, in *http.Request) {
-	var input models.Address
+	var input models.Device
 	err := formats.ReadJSONBody(in, &input)
 	if err != nil {
-		logging.Errorf("Unable to parse Address: %v", err)
-		http.Error(out, "Unable to parse Address", http.StatusInternalServerError)
+		logging.Errorf("Unable to parse Device: %v", err)
+		http.Error(out, "Unable to parse Device", http.StatusInternalServerError)
 		return
 	}
-	if input.ID > 0 {
-		_, err = db.Conn.NewDelete().Model(&input).WherePK().Exec(db.Context)
-	} else {
-		err = fmt.Errorf("input (%v) is not a valid address record", input)
-	}
+
+	err = devices.DeleteAddress(input.ID)
 	if err != nil {
-		logging.Errorf("Unable to delete Address: %v", err)
-		http.Error(out, "Unable to delete Address", http.StatusInternalServerError)
+		logging.Errorf("Unable to delete Device: %v", err)
+		http.Error(out, "Unable to delete Device", http.StatusInternalServerError)
 		return
 
 	}
+
 	formats.WriteJSONResponse(input, out, in)
 }

@@ -22,6 +22,13 @@ type DeviceQueries struct {
 	Hostnames string
 }
 
+type DeviceChildren struct {
+	Interfaces string
+	Addresses  string
+}
+
+type InterfaceChildren string
+
 type Connectivity []models.Connections
 
 func (a Connectivity) Less(i, j int) bool { return a[i].Time.Before(a[j].Time) }
@@ -286,5 +293,104 @@ func GetSpecificAddressConnectivityData(addressID int64, connTime string) (conne
 		return
 	}
 	sort.Sort(Connectivity(connections))
+	return
+}
+
+func GetDeviceChildren(devicePK int64) (children DeviceChildren, err error) {
+	logging.Verbosity = 3
+	err = db.Conn.NewRaw(`SELECT GROUP_CONCAT(interfaces.id) as interfaces, GROUP_CONCAT(addresses.id) as addresses FROM devices JOIN interfaces ON devices.id = interfaces.device_id JOIN addresses on interfaces.id = addresses.interface_id WHERE devices.id = ?`, devicePK).Scan(db.Context, &children)
+	return
+}
+
+func GetIntefaceChildren(interfacePK int64) (children string, err error) {
+	logging.Verbosity = 3
+	err = db.Conn.NewRaw(`SELECT GROUP_CONCAT(addresses.id) as addresses FROM devices JOIN addresses on interfaces.id = addresses.interface_id WHERE interfaces.id = ?`, interfacePK).Scan(db.Context, &children)
+	return
+}
+
+func DeleteDevice(devicePK int64) (err error) {
+	var children DeviceChildren
+	var ids []int64
+	children, err = GetDeviceChildren(devicePK)
+	if err != nil {
+		return
+	}
+	ids, err = utils.CSVtoInt64s(children.Addresses)
+	if err != nil {
+		return
+	}
+	_, err = db.Conn.NewDelete().Model((*models.History)(nil)).Where(`address_id in (?)`, bun.In(ids)).Exec(db.Context)
+	if err != nil {
+		return
+	}
+	_, err = db.Conn.NewDelete().Model((*models.Hostname)(nil)).Where(`address_id in (?)`, bun.In(ids)).Exec(db.Context)
+	if err != nil {
+		return
+	}
+	_, err = db.Conn.NewDelete().Model((*models.Address)(nil)).Where(`id in (?)`, bun.In(ids)).Exec(db.Context)
+	if err != nil {
+		return
+	}
+
+	ids, err = utils.CSVtoInt64s(children.Interfaces)
+	if err != nil {
+		return
+	}
+	_, err = db.Conn.NewDelete().Model((*models.Interface)(nil)).Where(`id in (?)`, bun.In(ids)).Exec(db.Context)
+	if err != nil {
+		return
+	}
+
+	_, err = db.Conn.NewDelete().Model((*models.Device)(nil)).Where(`id  = ?`, devicePK).Exec(db.Context)
+	if err != nil {
+		return
+	}
+	return
+}
+
+func DeleteInterface(interfacePK int64) (err error) {
+	var addresses string
+	var ids []int64
+	addresses, err = GetIntefaceChildren(interfacePK)
+	if err != nil {
+		return
+	}
+	ids, err = utils.CSVtoInt64s(addresses)
+	if err != nil {
+		return
+	}
+	_, err = db.Conn.NewDelete().Model((*models.History)(nil)).Where(`address_id in (?)`, bun.In(ids)).Exec(db.Context)
+	if err != nil {
+		return
+	}
+	_, err = db.Conn.NewDelete().Model((*models.Hostname)(nil)).Where(`address_id in (?)`, bun.In(ids)).Exec(db.Context)
+	if err != nil {
+		return
+	}
+	_, err = db.Conn.NewDelete().Model((*models.Address)(nil)).Where(`id in (?)`, bun.In(ids)).Exec(db.Context)
+	if err != nil {
+		return
+	}
+
+	_, err = db.Conn.NewDelete().Model((*models.Interface)(nil)).Where(`id  = ?`, interfacePK).Exec(db.Context)
+	if err != nil {
+		return
+	}
+	return
+}
+
+func DeleteAddress(addressPK int64) (err error) {
+	_, err = db.Conn.NewDelete().Model((*models.History)(nil)).Where(`address_id = ?`, addressPK).Exec(db.Context)
+	if err != nil {
+		return
+	}
+	_, err = db.Conn.NewDelete().Model((*models.Hostname)(nil)).Where(`address_id = ?`, addressPK).Exec(db.Context)
+	if err != nil {
+		return
+	}
+	_, err = db.Conn.NewDelete().Model((*models.Address)(nil)).Where(`address_id = ?`, addressPK).Exec(db.Context)
+	if err != nil {
+		return
+	}
 	return
 }

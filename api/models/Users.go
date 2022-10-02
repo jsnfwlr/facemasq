@@ -1,6 +1,7 @@
 package models
 
 import (
+	"facemasq/lib/logging"
 	"facemasq/lib/password"
 
 	"github.com/volatiletech/null"
@@ -24,7 +25,7 @@ type User struct {
 func GetUserSeed(adminPassword string) (seed []User) {
 	hashedPW, err := password.HashPassword(adminPassword)
 	if err != nil {
-		panic(err)
+		logging.Panic(err)
 	}
 	seed = []User{
 		{

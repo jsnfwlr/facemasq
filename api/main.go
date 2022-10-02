@@ -2,7 +2,6 @@ package main
 
 import (
 	"os"
-	"strconv"
 
 	"facemasq/lib/db"
 	"facemasq/lib/logging"
@@ -11,19 +10,11 @@ import (
 	"facemasq/routes"
 )
 
-func init() {
-	var err error
-	logging.Verbosity, err = strconv.Atoi(os.Getenv("VERBOSE"))
-	if err != nil {
-		logging.Verbosity = 0
-	}
-}
-
 func main() {
 	logging.Processln("Running faceMasq as a daemon")
 	err := db.Connect()
 	if err != nil {
-		panic(err)
+		logging.Panic(err)
 	}
 
 	if err != nil {

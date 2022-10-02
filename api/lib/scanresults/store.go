@@ -196,3 +196,36 @@ func (record *Record) CreateHostname() (err error) {
 	}
 	return
 }
+
+func PrepareForTest() (err error) {
+	scan := models.Scan{
+		Time: time.Now(),
+	}
+	_, err = db.Conn.NewInsert().Model(&scan).Exec(db.Context)
+	if err != nil {
+		return
+	}
+	records := Records{
+		{
+			ScanID: scan.ID,
+			IPv4:   "192.168.0.1",
+			MAC:    "00:00:00:00:00:00:01:00",
+		},
+		{
+			ScanID: scan.ID,
+			IPv4:   "192.168.0.2",
+			MAC:    "00:00:00:00:00:00:01:01",
+		},
+		{
+			ScanID:   scan.ID,
+			Hostname: "TestDevice",
+			IPv4:     "192.168.0.3",
+			MAC:      "00:00:00:00:00:00:01:02",
+		},
+	}
+
+	err = records.Store()
+
+	return
+
+}
