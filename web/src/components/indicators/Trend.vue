@@ -50,7 +50,7 @@
     <level class="mb-3" mobile>
       <level type="justify-start" class="gap-3">
         <mdIcon v-if="icon" :icon="icon" size="48" w="" h="h-16" :class="color" />
-        <h3 class="text-lg leading-tight text-gray-500 dark:text-gray-400">
+        <h3 class="text-lg leading-tight text-gray-500 dark:text-gray-400" :title="trend.Tooltip !== null ? trend.Tooltip : 'Unique devices detected over the last ' + trend.Label">
           {{ trend.Label }}
         </h3>
       </level>

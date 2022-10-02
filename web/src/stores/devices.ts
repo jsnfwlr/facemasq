@@ -90,6 +90,7 @@ export interface Trend {
   Label: string
   Current: number
   Compare: number
+  Tooltip: string | null
 }
 
 export interface ColumnSort {
