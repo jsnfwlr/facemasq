@@ -42,12 +42,12 @@
   })
 
   const fakeTrends = [
-    { Label: "Historic", Compare: 0, Current: 0 },
-    { Label: "Concurrent", Compare: 0, Current: 0 },
-    { Label: "30 days", Compare: 0, Current: 0 },
-    { Label: "7 days", Compare: 0, Current: 0 },
-    { Label: "24 hours", Compare: 0, Current: 0 },
-    { Label: "30 minutes", Compare: 0, Current: 0 },
+    { Label: "Historic", Compare: 0, Current: 0, Tooltip: null },
+    { Label: "Concurrent", Compare: 0, Current: 0, Tooltip: null },
+    { Label: "30 days", Compare: 0, Current: 0, Tooltip: null },
+    { Label: "7 days", Compare: 0, Current: 0, Tooltip: null },
+    { Label: "24 hours", Compare: 0, Current: 0, Tooltip: null },
+    { Label: "30 minutes", Compare: 0, Current: 0, Tooltip: null },
   ]
 
   const getMin = computed(() => {
