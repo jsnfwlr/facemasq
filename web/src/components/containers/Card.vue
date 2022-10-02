@@ -66,14 +66,16 @@
       </h2>
       <div v-if="hasTable && hasFilters" :class="showFilters ? 'filters-wrapper active' : 'filters-wrapper'">
         <a href="#" class="flex items-center py-3 px-4 justify-center ring-blue-700 focus:ring" aria-label="Toggle the filter inputs" :title="showFilters ? 'Hide filters' : 'Show filters'" @click.prevent="showFilters = !showFilters"> <mdIcon :icon="showFilters ? 'ChevronRight' : 'ChevronLeft'" :size="18" /> <mdIcon icon="Filter" :size="18" /> </a>
-        <div v-show="showFilters" class="filters">
-          <slot name="filter" />
-        </div>
       </div>
       <a v-if="headerIcon && !hideHeaderIcon" href="#" class="flex items-center py-3 px-4 justify-center ring-blue-700 focus:ring" :aria-label="headerIconTitle" :title="headerIconTitle" @click.prevent="headerIconClick">
         <mdIcon v-if="headerIcon" :icon="headerIcon" :size="18" />
       </a>
     </header>
+    <div v-if="hasTable && hasFilters" :class="showFilters ? 'filters-wrapper active' : 'filters-wrapper'">
+      <div v-show="showFilters" class="filters">
+        <slot name="filter" />
+      </div>
+    </div>
     <div v-if="empty" class="text-center py-24 text-gray-500 dark:text-gray-400">
       <p>Nothing's here…</p>
     </div>
