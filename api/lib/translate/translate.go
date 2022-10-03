@@ -49,3 +49,15 @@ func Start() (err error) {
 	}
 	return
 }
+
+func Message(id, msg string) (translation string) {
+	translation = Localiser.MustLocalize(&i18n.LocalizeConfig{
+		DefaultMessage: &i18n.Message{
+			ID:    id,
+			Other: msg,
+		},
+	})
+	return
+}
+
+// func Translatef() {}
