@@ -22,22 +22,29 @@ type TrendWindow struct {
 }
 
 type Concurrency struct {
-	value int
-	time  time.Time
+	Value int       `bun:"active"`
+	Time  time.Time `bun:"time"`
 }
 
 func GetTrendData(out http.ResponseWriter, in *http.Request) {
+	durations, err := getTrendData()
+	if err != nil {
+		logging.Errorln(err.Error())
+		http.Error(out, "Error getting trend data", http.StatusInternalServerError)
+	}
+	formats.WriteJSONResponse(durations, out, in)
+}
+
+func getTrendData() (durations []TrendWindow, err error) {
 	var firstSeen time.Time
 	var concurrency Concurrency
-	err := db.Conn.NewRaw("SELECT first_seen FROM devices ORDER BY first_seen ASC LIMIT 1;").Scan(db.Context, &firstSeen)
+	err = db.Conn.NewRaw("SELECT first_seen FROM devices ORDER BY first_seen ASC LIMIT 1;").Scan(db.Context, &firstSeen)
 	if err != nil {
 		if err.Error() != "sql: no rows in result set" {
-			logging.Errorln(err.Error())
-			http.Error(out, "Error getting first_seen for oldest device", http.StatusInternalServerError)
 			return
 		}
 	}
-	durations := []TrendWindow{
+	durations = []TrendWindow{
 		{
 			Label:   "Historic",
 			Current: 0,
@@ -85,13 +92,11 @@ func GetTrendData(out http.ResponseWriter, in *http.Request) {
 		case "Concurrent":
 			err = db.Conn.NewRaw(`SELECT COUNT(address_id) as active FROM histories GROUP BY scan_id ORDER BY COUNT(address_id) DESC LIMIT 1 OFFSET 1;`).Scan(db.Context, &durations[d].Compare)
 		default:
-			err = db.Conn.NewRaw(`SELECT Count(active) as active, '' as Tooltip FROM (SELECT DISTINCT address_id as active, 1 as merge FROM histories JOIN scans ON histories.scan_id = scans.id WHERE scans.time > ? AND scans.time < ?) as period GROUP BY merge;`, durations[d].from.Format("2006-01-02 15:04"), durations[d].to.Format("2006-01-02 15:04")).Scan(db.Context, &durations[d].Compare)
+			err = db.Conn.NewRaw(`SELECT Count(active) as active FROM (SELECT DISTINCT address_id as active, 1 as merge FROM histories JOIN scans ON histories.scan_id = scans.id WHERE scans.time > ? AND scans.time < ?) as period GROUP BY merge;`, durations[d].from.Format("2006-01-02 15:04"), durations[d].to.Format("2006-01-02 15:04")).Scan(db.Context, &durations[d].Compare)
 		}
 
 		if err != nil {
 			if err.Error() != "sql: no rows in result set" {
-				logging.Errorln(err.Error())
-				http.Error(out, "Unable to retrieve comparative trend data for "+durations[d].Label, http.StatusInternalServerError)
 				return
 			}
 			durations[d].Compare = 0
@@ -102,21 +107,19 @@ func GetTrendData(out http.ResponseWriter, in *http.Request) {
 			durations[d].Current = durations[d].Compare
 		case "Concurrent":
 			err = db.Conn.NewRaw(`SELECT active, scans.time FROM (SELECT COUNT(address_id) AS active, scan_id FROM histories GROUP BY scan_id ORDER BY COUNT(address_id) DESC LIMIT 1 OFFSET 0) AS peak JOIN scans ON scans.id = peak.scan_id;`).Scan(db.Context, &concurrency)
-			durations[d].Current = concurrency.value
-			durations[d].Tooltip = null.StringFrom(fmt.Sprintf("Peak number of unique devices online at one time (%s)", concurrency.time.Format("2006-01-02 15:04:05")))
+			durations[d].Current = concurrency.Value
+			durations[d].Tooltip = null.StringFrom(fmt.Sprintf("Peak number of unique devices online at one time (%s)", concurrency.Time.Format("2006-01-02 15:04:05")))
 		default:
 			err = db.Conn.NewRaw(`SELECT Count(active) as active FROM (SELECT DISTINCT address_id as active, 1 as merge FROM histories JOIN scans ON histories.scan_id = scans.id WHERE scans.time > ? AND scans.time < ?) as period GROUP BY merge;`, durations[d].to.Format("2006-01-02 15:04"), time.Now().Format("2006-01-02 15:04")).Scan(db.Context, &durations[d].Current)
 		}
 
 		if err != nil {
 			if err.Error() != "sql: no rows in result set" {
-				logging.Errorln(err.Error())
-				http.Error(out, "Unable to retrieve current trend data for "+durations[d].Label, http.StatusInternalServerError)
 				return
 			}
 			durations[d].Current = 0
 		}
 	}
+	return
 
-	formats.WriteJSONResponse(durations, out, in)
 }

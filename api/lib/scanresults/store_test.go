@@ -12,10 +12,11 @@ import (
 func TestBulkStore(t *testing.T) {
 	lastSeen := time.Now()
 
-	err := db.ConnectToTest()
+	container, err := db.ConnectToTest()
 	if err != nil {
 		t.Fatal(err)
 	}
+	defer container.Close()
 
 	scan := models.Scan{
 		Time: lastSeen,
@@ -47,5 +48,9 @@ func TestBulkStore(t *testing.T) {
 	err = results.Store()
 	if err != nil {
 		t.Error(err)
+	}
+	err = container.Close()
+	if err != nil {
+		t.Errorf("Error closing container: %v", err)
 	}
 }

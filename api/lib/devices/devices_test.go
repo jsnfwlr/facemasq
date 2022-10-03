@@ -1,16 +1,18 @@
 package devices
 
 import (
-	"facemasq/lib/db"
 	"testing"
+
+	"facemasq/lib/db"
 )
 
 func TestGetDeviceChildren(t *testing.T) {
 	db.DBEngine = "mysql"
-	err := db.ConnectToTest()
+	container, err := db.ConnectToTest()
 	if err != nil {
 		t.Fatalf("Could not connect to DB: %v", err)
 	}
+	defer container.Close()
 
 	children, err := GetDeviceChildren(1)
 	if err != nil {
@@ -70,5 +72,9 @@ func TestGetDeviceChildren(t *testing.T) {
 	}
 	if children.Addresses != "" {
 		t.Error("Device 3 should have no Address")
+	}
+	err = container.Close()
+	if err != nil {
+		t.Errorf("Error closing container: %v", err)
 	}
 }

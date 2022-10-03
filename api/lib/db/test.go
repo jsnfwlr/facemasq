@@ -1,18 +1,32 @@
 package db
 
 import (
-	"facemasq/lib/files"
-	"facemasq/lib/logging"
-	"facemasq/models"
 	"fmt"
 	"os"
 	"strings"
 	"time"
 
+	"facemasq/lib/files"
+	"facemasq/lib/logging"
+	"facemasq/models"
+
 	"github.com/volatiletech/null"
 )
 
-func ConnectToTest() (err error) {
+type TestContainer interface {
+	Close() error
+	GetConnection() ConnectionParams
+}
+
+type ConnectionParams struct {
+	DBName string
+	DBUser string
+	DBPass string
+	DBHost string
+	DBPort string
+}
+
+func ConnectToTest() (container TestContainer, err error) {
 	var dataPath string
 
 	switch strings.ToLower(DBEngine) {
@@ -24,19 +38,29 @@ func ConnectToTest() (err error) {
 
 		DBConnString = fmt.Sprintf("file:%[2]s%[1]c%[3]s", os.PathSeparator, dataPath, "network.sqlite")
 	case "postgres":
-		DBConnString = "pg://phalacee:h34rts@(192.168.0.41)/test_facemasq"
+		container, err = StartPostgresDB("test_facemasq", "faceMasq", "testpasswd", "5432")
+		if err != nil {
+			logging.Panicf("Could not start postgres container: %v", err)
+		}
+		connParams := container.GetConnection()
+		DBConnString = fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable", connParams.DBUser, connParams.DBPass, connParams.DBHost, connParams.DBPort, connParams.DBName)
 	case "mysql":
-		DBConnString = "phalacee:h34rts@(192.168.0.41)/test_facemasq"
+		container, err = StartMySQLDB("test_facemasq", "faceMasq", "testpasswd", "3306")
+		if err != nil {
+			logging.Panicf("Could not start postgres container: %v", err)
+		}
+		connParams := container.GetConnection()
+		DBConnString = fmt.Sprintf("%s:%s@(%s:%s)/%s", connParams.DBUser, connParams.DBPass, connParams.DBHost, connParams.DBPort, connParams.DBName)
 	}
 	err = Connect()
 	if err != nil {
 		return
 	}
-	return preloadTestData()
+	err = preloadTestData()
+	return
 }
 
 func preloadTestData() (err error) {
-
 	lastSeen := time.Now()
 
 	devices := []models.Device{

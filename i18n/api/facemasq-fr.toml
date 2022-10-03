@@ -1,0 +1,8 @@
+HelloPerson = "French {{.Name}}"
+
+[DeviceErrors]
+other = "Dev Err French {{.Err}}"
+
+[ParamErrors]
+other = "Param Err French {{.Err}}"
+

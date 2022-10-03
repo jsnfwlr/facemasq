@@ -247,6 +247,9 @@
 
 <style lang="scss">
   .filters {
+    & {
+      display: flex;
+    }
     .control {
       select {
       }

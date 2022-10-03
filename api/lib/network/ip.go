@@ -68,5 +68,4 @@ func getIPRange(cidr string) (addresses []string, network, broadcast, mask strin
 	}
 
 	return
-
 }
