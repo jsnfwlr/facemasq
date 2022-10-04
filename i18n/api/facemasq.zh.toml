@@ -1,7 +1,7 @@
-HelloPerson = "Hello {{.Name}}"
+Food = "Chinese {{.Food}}"
 
 [RetreiveCategoryError]
-other = "Unable to retreive Category data"
+other = "无法检索类别数据"
 [RetreiveStatusError]
 other = "Unable to retreive Status data"
 [RetreiveLocationError]

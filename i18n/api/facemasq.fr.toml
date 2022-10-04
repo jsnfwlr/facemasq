@@ -1,0 +1,62 @@
+Food = "French {{.Food}}"
+
+[RetreiveCategoryError]
+other = "Impossible de récupérer les données de catégorie"
+[RetreiveStatusError]
+other = "Unable to retreive Status data"
+[RetreiveLocationError]
+other = "Unable to retreive Location data"
+[RetreiveMaintainerError]
+other = "Unable to retreive Maintainer data"
+[RetreiveArchitectureError]
+other = "Unable to retreive Architecture data"
+[RetreiveOperatingSystemError]
+other = "Unable to retreive OperatingSystem data"
+[RetreiveInterfaceTypeError]
+other = "Unable to retreive InterfaceType data"
+[RetreiveDeviceTypeError]
+other = "Unable to retreive DeviceType data"
+[RetreiveVLANError]
+other = "Unable to retreive VLAN data"
+[RetreiveUserError]
+other = "Unable to retreive User data"
+[SaveCategoryError]
+other = "Unable to save Category"
+[DeleteCategoryError]
+other = "Unable to delete Category"
+[SaveStatusError]
+other = "Unable to save Status"
+[DeleteStatusError]
+other = "Unable to delete Status"
+[SaveLocationError]
+other = "Unable to save Location"
+[DeleteLocationError]
+other = "Unable to delete Location"
+[SaveMaintainerError]
+other = "Unable to save Maintainer"
+[DeleteMaintainerError]
+other = "Unable to delete Maintainer"
+[SaveArchitectureError]
+other = "Unable to save Architecture"
+[DeleteArchitectureError]
+other = "Unable to delete Architecture"
+[SaveOperatingSystemError]
+other = "Unable to save OperatingSystem"
+[DeleteOperatingSystemError]
+other = "Unable to delete OperatingSystem"
+[SaveInterfaceTypeError]
+other = "Unable to save InterfaceType"
+[DeleteInterfaceTypeError]
+other = "Unable to delete InterfaceType"
+[SaveDeviceTypeError]
+other = "Unable to save DeviceType"
+[DeleteDeviceTypeError]
+other = "Unable to delete DeviceType"
+[SaveVLANError]
+other = "Unable to save VLAN"
+[DeleteVLANError]
+other = "Unable to delete VLAN"
+[SaveUserError]
+other = "Unable to save User"
+[DeleteUserError]
+other = "Unable to delete User"

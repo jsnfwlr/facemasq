@@ -1,5 +1,4 @@
-//go:build test
-// +build test
+//go:build database && test
 
 package db
 

@@ -30,23 +30,22 @@ func init() {
 
 func Start() (err error) {
 	var dir string
-	if Language != "en" {
-		dir, err = files.GetDir("i18n")
-		if err != nil {
-			logging.Errorf("error getting i18n folder: %v", err)
-			return
-		}
-		translationFile := fmt.Sprintf("%[2]s%[1]capi%[1]cfacemasq.%[3]s.toml", os.PathSeparator, dir, Language)
-		// translationFile := "active.fr.toml"
 
-		logging.Processf("Translations loaded from %s", translationFile)
-		if !files.FileExists(translationFile) {
-			err = fmt.Errorf("could not find %s", translationFile)
-			return
-		}
-		Bundle.MustLoadMessageFile(translationFile)
-		Localiser = i18n.NewLocalizer(Bundle, Language, fmt.Sprintf("%s;q=0.9", Language))
+	dir, err = files.GetDir("i18n")
+	if err != nil {
+		logging.Errorf("error getting i18n folder: %v", err)
+		return
 	}
+	translationFile := fmt.Sprintf("%[2]s%[1]capi%[1]cfacemasq.%[3]s.toml", os.PathSeparator, dir, Language)
+	// translationFile := "active.fr.toml"
+
+	if !files.FileExists(translationFile) {
+		err = fmt.Errorf("could not find %s", translationFile)
+		return
+	}
+	Bundle.MustLoadMessageFile(translationFile)
+	logging.Processf("Translations loaded from %s", translationFile)
+	Localiser = i18n.NewLocalizer(Bundle, Language, fmt.Sprintf("%s;q=0.9", Language))
 	return
 }
 
