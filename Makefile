@@ -13,19 +13,19 @@ all: api web
 tag-alpha:
 	@git tag $(ALPHAVERSION)
 	@git push upstream --tags
-
+	@npm version $(ALPHAVERSION); cd web; npm version $(ALPHAVERSION)
 tag-beta:
 	@git tag $(BETAVERSION)
 	@git push upstream --tags
-
+	@npm version $(BETAVERSION); cd web; npm version $(BETAVERSION)
 tag-rc:
 	@git tag $(RCVERSION)
 	@git push upstream --tags
-
+	@npm version $(RCVERSION); cd web; npm version $(RCVERSION)
 tag-release:
 	@git tag $(RELEASEVERSION)
 	@git push upstream --tags
-	
+	@npm version $(RELEASEVERSION); cd web; npm version $(RELEASEVERSION)
 # API - run vet, tests or coverage generation against the API code
 api-vet:
 	@cd api; go vet -tags test ./...
