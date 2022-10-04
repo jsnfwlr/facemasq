@@ -3,7 +3,7 @@
   import { Chart, BarElement, BarController, LinearScale, CategoryScale, Tooltip, ChartData } from "chart.js"
   import { format, parseISO } from "date-fns"
 
-  import { TimeLog } from "@/types/deviceStore"
+  import { TimeLog } from "@/stores/devices"
 
   const props = defineProps<{
     color: string

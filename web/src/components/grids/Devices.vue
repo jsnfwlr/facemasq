@@ -4,8 +4,7 @@
   import { parse, differenceInWeeks, differenceInHours, differenceInDays, differenceInMinutes } from "date-fns"
   import clonedeep from "lodash.clonedeep"
 
-  import { useDevices } from "@/stores/devices"
-  import { Device, DomainName, Connection, ColumnSort } from "@/types/deviceStore"
+  import { useDevices, Device, DomainName, Connection, ColumnSort } from "@/stores/devices"
   import { useParams } from "@/stores/params"
   import { useUser } from "@/stores/user"
 

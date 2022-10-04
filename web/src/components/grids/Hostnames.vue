@@ -4,8 +4,7 @@
   import { storeToRefs } from "pinia"
   import cloneDeep from "lodash.clonedeep"
 
-  import { useDevices } from "@/stores/devices"
-  import { DomainName } from "@/types/deviceStore"
+  import { useDevices, DomainName } from "@/stores/devices"
 
   import Btn from "@/components/elements/Btn.vue"
   import Btns from "@/components/elements/Btns.vue"

@@ -3,8 +3,7 @@
   import { storeToRefs } from "pinia"
   import { parse, differenceInMinutes } from "date-fns"
 
-  import { useDevices } from "@/stores/devices"
-  import { Device } from "@/types/deviceStore"
+  import { useDevices, Device } from "@/stores/devices"
   import { useParams } from "@/stores/params"
 
   import Btn from "@/components/elements/Btn.vue"

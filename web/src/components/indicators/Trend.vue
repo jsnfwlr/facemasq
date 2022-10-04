@@ -1,7 +1,7 @@
 <script setup lang="ts">
   import { computed } from "vue"
 
-  import { Trend } from "@/types/deviceStore"
+  import { Trend } from "@/stores/devices"
 
   import mdIcon from "@/components/elements/MDIcon.vue"
   import Level from "@/components/containers/Level.vue"
