@@ -7,15 +7,15 @@ import InfoPage from "@/pages/info.vue"
 
 import { setupI18n, setI18nLanguage, loadLocaleMessages, SUPPORT_LOCALES } from "@/i18n"
 
-import en from "../../../i18n/web/facemasq-en.json"
-import fr from "../../../i18n/web/facemasq-fr.json"
+// import en fro../../../i18n/web/facemasq.en.json"
+// import fr fro../../../i18n/web/facemasq.fr.json"
 
 const i18n = setupI18n({
   locale: "en",
-  messages: {
-    en: en,
-    fr: fr,
-  },
+  // messages: {
+  //   en: en,
+  //   fr: fr,
+  // },
 })
 
 const routes = [
