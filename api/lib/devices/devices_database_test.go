@@ -1,3 +1,5 @@
+//go:build database || full
+
 package devices
 
 import (

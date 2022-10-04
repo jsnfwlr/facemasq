@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"facemasq/lib/utils"
@@ -93,6 +94,20 @@ func GetDir(which string) (dir string, err error) {
 	}
 	if !FileExists(dir) {
 		err = fmt.Errorf("could not find `%s`", dir)
+	}
+	return
+}
+
+func RemoveGlob(path string) (err error) {
+	contents, err := filepath.Glob(path)
+	if err != nil {
+		return
+	}
+	for _, item := range contents {
+		err = os.RemoveAll(item)
+		if err != nil {
+			return
+		}
 	}
 	return
 }

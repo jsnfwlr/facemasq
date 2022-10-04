@@ -2,8 +2,9 @@ package files
 
 import (
 	"embed"
-	"fmt"
 	"io/fs"
+
+	"facemasq/lib/logging"
 )
 
 //go:embed templates/*
@@ -11,12 +12,12 @@ import (
 var content embed.FS
 
 func GetEmbeddedFileContents(name string) ([]byte, error) {
-	fmt.Printf("Get %s", name)
+	logging.Printf(2, "Get %s", name)
 	return content.ReadFile(name)
 }
 
 func GetEmbeddedFile(name string) (fs.File, error) {
-	fmt.Printf("Get %s", name)
+	logging.Printf(2, "Get %s", name)
 	return content.Open(name)
 }
 

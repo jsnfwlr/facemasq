@@ -1,4 +1,4 @@
-//go:build !database
+//go:build !database && !full
 
 package db
 

@@ -59,6 +59,11 @@ func TestCopy(t *testing.T) {
 		t.Error(`Getdir("tests") failed`)
 	}
 
+	err = RemoveGlob(fmt.Sprintf("%s/test.*", tests))
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	srcFile := fmt.Sprintf("%s/test.file", tests)
 	dstFile := fmt.Sprintf("%s/copy.file", tests)
 	dstFail := fmt.Sprintf("%s/test.copy", strings.Replace(tests, "tests", "failures", -1))
@@ -67,6 +72,15 @@ func TestCopy(t *testing.T) {
 	srcDir := tests
 	srcLink := fmt.Sprintf("%s/test.link", tests)
 	dstLink := fmt.Sprintf("%s/copy.link", tests)
+
+	err = WriteOut(srcFile, "Test File")
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = os.Symlink(srcFile, srcLink)
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	_, err = Copy(srcFile, dstFile)
 	if err != nil {
@@ -137,6 +151,7 @@ func TestGetAppRoot(t *testing.T) {
 }
 
 func TestGetDir(t *testing.T) {
+	mode = "detected"
 	_, err := GetDir("data")
 	if err != nil {
 		t.Errorf(`Getdir("data") failed: %v`, err)

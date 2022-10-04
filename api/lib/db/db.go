@@ -34,23 +34,32 @@ var (
 )
 
 func init() {
-	var err error
-	var dataPath string
-
 	adminPassword = os.Getenv("ADMINPASSWORD")
-	DBConnString = os.Getenv("DBCONNSTR")
-	if DBConnString == "" {
-		DBConnString = "sqlite://network.sqlite"
+	dbConnString := os.Getenv("DBCONNSTR")
+	if dbConnString == "" {
+		dbConnString = "sqlite://network.sqlite"
 	}
+	err := initialise(dbConnString)
+	if err != nil {
+		logging.Panic(err)
+	}
+}
 
-	dbParams := strings.Split(DBConnString, "://")
+func initialise(dbConnString string) (err error) {
+	var dataPath string
+	DBEngine = ""
+	if !strings.Contains(dbConnString, "://") {
+		err = fmt.Errorf("`%s` is in the wrong format", dbConnString)
+		return
+	}
+	dbParams := strings.Split(dbConnString, "://")
 	DBEngine = strings.ToLower(dbParams[0])
 
 	switch DBEngine {
 	case "sqlite":
 		dataPath, err = files.GetDir("data")
 		if err != nil {
-			logging.Panic(err)
+			return
 		}
 		DBConnString = fmt.Sprintf("file:%[2]s%[1]c%[3]s", os.PathSeparator, dataPath, dbParams[1])
 
@@ -59,7 +68,11 @@ func init() {
 	case "pg", "pgsql", "postgres", "postgresql":
 		DBEngine = "postgres"
 		DBConnString = fmt.Sprintf("postgres://%s?sslmode=disable", dbParams[1])
+	default:
+		err = fmt.Errorf("`%s` is not supported", DBEngine)
 	}
+
+	return
 }
 
 func Connect() (err error) {

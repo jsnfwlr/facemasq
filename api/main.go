@@ -1,8 +1,6 @@
 package main
 
 import (
-	"os"
-
 	"facemasq/lib/db"
 	"facemasq/lib/logging"
 	"facemasq/lib/netscan"
@@ -24,7 +22,7 @@ func main() {
 
 	network.ShowNetworkSummary()
 
-	if os.Getenv("NETMASK") != "" {
+	if network.Target != "" {
 		logging.Processf("Active Net scan running every %v", netscan.Frequency)
 		netscan.Schedule()
 	}

@@ -1,4 +1,4 @@
-//go:build database && test
+//go:build (database && test) || full
 
 package db
 
@@ -8,7 +8,7 @@ import (
 )
 
 func TestPostgres(t *testing.T) {
-	if pg, err := StartPostgresDB("test", "postgres", "pass", "5432"); err != nil {
+	if pg, err := StartPostgresDB("test", "postgresUser", "pass", "5432"); err != nil {
 		t.Fatalf("unable to start postgres container %v", err)
 	} else {
 		time.Sleep(30 * time.Second)

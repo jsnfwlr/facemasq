@@ -21,7 +21,6 @@ COPY ./i18n /build/i18n
 COPY ./web /build/web
 WORKDIR /build/web
 RUN pnpm install --frozen-lockfile
-RUN pnpm list
 RUN pnpm build
 
 FROM scratch
@@ -34,7 +33,7 @@ COPY ./templates /app/templates
 COPY ./i18n /app/i18n
 
 ENV TZ=Etc/UTC
-VOLUME /app/data
-VOLUME /app/export
+VOLUME /data
+VOLUME /export
 WORKDIR /app/api
 CMD ["/app/api/facemasq"]

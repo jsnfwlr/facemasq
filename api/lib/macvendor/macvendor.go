@@ -21,5 +21,10 @@ func Lookup(mac string) (vendor string, err error) {
 		return
 	}
 	vendor = buf.String()
+	if vendor == `{"errors":{"detail":"Not Found"}}` {
+		vendor = ""
+		err = fmt.Errorf("could not determine vendor of `%s`", mac)
+
+	}
 	return
 }

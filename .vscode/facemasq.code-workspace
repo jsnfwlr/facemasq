@@ -8,8 +8,8 @@
     "editor.codeActionsOnSave": {
       "source.fixAll.eslint": true
     },
-    "go.buildTags": "database test !test !database",
-    "go.testTags": "database test !test !database",
+    "go.buildTags": "database",
+    "go.testTags": "database",
     "eslint.validate": ["javascript", "typescript"],
     "css.customData": ["./facemasq.css-data.json"],
     "html.format.indentInnerHtml": true,

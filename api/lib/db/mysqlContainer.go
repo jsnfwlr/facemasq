@@ -1,4 +1,4 @@
-//go:build database
+//go:build database || full
 
 package db
 
@@ -12,6 +12,7 @@ import (
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
+	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/api/types/network"
 	"github.com/docker/docker/client"
 	"github.com/docker/go-connections/nat"
@@ -54,6 +55,16 @@ func StartMySQLDB(dbName, dbUser, dbPassword, dbPort string) (*MySQL, error) {
 		}
 	}
 
+	filters := filters.NewArgs()
+	filters.Add("name", "mysql_facemasq")
+
+	containerList, err := cli.ContainerList(context.Background(), types.ContainerListOptions{Filters: filters})
+
+	if len(containerList) > 0 {
+		for i := range containerList {
+			fmt.Printf("%+v", containerList[i])
+		}
+	}
 	// Create container
 	container, err := cli.ContainerCreate(
 		context.Background(),
@@ -87,6 +98,9 @@ func StartMySQLDB(dbName, dbUser, dbPassword, dbPort string) (*MySQL, error) {
 		if err := cli.ContainerKill(context.Background(), container.ID, ""); err != nil {
 			return err
 		}
+		// if err := cli.ContainerRemove(context.Background(), container.ID, types.ContainerRemoveOptions{RemoveVolumes: true, RemoveLinks: true, Force: true}); err != nil {
+		// 	return err
+		// }
 		return cli.Close()
 	}
 

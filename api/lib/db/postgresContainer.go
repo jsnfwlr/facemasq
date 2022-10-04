@@ -1,4 +1,4 @@
-//go:build database
+//go:build database || full
 
 package db
 
@@ -86,6 +86,9 @@ func StartPostgresDB(dbName, dbUser, dbPassword, dbPort string) (testContainer *
 		if err := cli.ContainerKill(context.Background(), container.ID, ""); err != nil {
 			return err
 		}
+		// if err := cli.ContainerRemove(context.Background(), container.ID, types.ContainerRemoveOptions{RemoveVolumes: true, RemoveLinks: true, Force: true}); err != nil {
+		// 	return err
+		// }
 		return cli.Close()
 	}
 
