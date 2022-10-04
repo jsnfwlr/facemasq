@@ -3,7 +3,7 @@
   import { parse, differenceInWeeks, differenceInHours, differenceInDays, differenceInMinutes } from "date-fns"
   import { storeToRefs } from "pinia"
 
-  import { Device } from "@/stores/devices"
+  import { Device } from "@/types/deviceStore"
   import { useApp } from "@/stores/app"
   import { useParams } from "@/stores/params"
 

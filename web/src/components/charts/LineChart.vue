@@ -3,7 +3,7 @@
   import { Chart, LineElement, PointElement, LineController, LinearScale, CategoryScale, Tooltip, Filler, ChartData } from "chart.js"
   import { format, parseISO } from "date-fns"
 
-  import { ChartValues, TimeLog } from "@/stores/devices"
+  import { ChartValues, TimeLog } from "@/types/deviceStore"
 
   interface Props {
     colors: Array<string>

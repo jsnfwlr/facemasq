@@ -5,6 +5,9 @@ import (
 	"os"
 	"strings"
 	"testing"
+	"time"
+
+	"facemasq/lib/password"
 )
 
 func TestWriteOut(t *testing.T) {
@@ -122,16 +125,33 @@ func TestGetAppRoot(t *testing.T) {
 		t.Errorf("Should not be able to get %s as AppRoot", testDir)
 	}
 	os.Chdir(rootDir)
+
+	mode = "forced"
+	forceDir, err := GetAppRoot()
+	if err != nil {
+		t.Errorf("This should force the rootDir to `/app`: %v", err)
+	}
+	if forceDir != "/app" {
+		t.Errorf("This should force the rootDir to `/app` not %s", forceDir)
+	}
 }
 
 func TestGetDir(t *testing.T) {
 	_, err := GetDir("data")
 	if err != nil {
-		t.Error(`Getdir("data") failed`)
+		t.Errorf(`Getdir("data") failed: %v`, err)
 	}
 
 	_, err = GetDir("../data")
 	if err == nil {
 		t.Error(`Getdir("../data") should have failed`)
+	}
+
+	// Use a semi-random string to test this one, so we don't trip over any folders that actually exist on the filesystem
+	randomDir, _ := password.HashPassword(time.Now().Format("2006-01-02 15:04:05"))
+	mode = "forced"
+	dir, err := GetDir(randomDir)
+	if err == nil {
+		t.Errorf("Getdir(`%s`) should have thrown an error saying `%s`could not be found", randomDir, dir)
 	}
 }

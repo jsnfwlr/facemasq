@@ -4,40 +4,48 @@ ALPHAVERSION != semver -d "alpha" $(RELEASEVERSION)
 BETAVERSION != semver -d "beta" $(RELEASEVERSION)
 RCVERSION != semver -d "rc" $(RELEASEVERSION)
 ARCH != go env GOARCH
+IMAGENAME != docker info | sed -r "/Username:/!d;s|.*: (.*)|\1/facemasq|"
 
-test-api:
-	cd api; go test ./...
+tag-alpha:
+	@git tag $(ALPHAVERSION)
+	@git push upstream --tags
 
-test-api-coverage:
-	rm data/test.sqlite data/test2.sqlite; cd api; go test -v ./... -covermode=count -coverpkg=./... -coverprofile ../dist/coverage.out; go tool cover -html ../dist/coverage.out -o ../dist/coverage.html
+tag-beta:
+	@git tag $(BETAVERSION)
+	@git push upstream --tags
+
+tag-rc:
+	@git tag $(RCVERSION)
+	@git push upstream --tags
+
+tag-release:
+	@git tag $(RELEASEVERSION)
+	@git push upstream --tags
+	
+api-test:
+	@cd api; go test ./...
+
+api-generate-coverage:
+	@rm data/test.sqlite data/test2.sqlite; cd api; go test -v ./... -covermode=count -coverpkg=./... -coverprofile ../dist/coverage.out; go tool cover -html ../dist/coverage.out -o ../dist/coverage.html
+
+api-test-tests:
+	@cd api; go test -tags test ./...
 
 # test-api-integration:
 # 	cd api; go test --tags integration ./...
 
-tag-alpha:
-	git tag $(ALPHAVERSION)
-	git push upstream --tags
+container-release-build:
+	docker buildx build --platform linux/arm64,linux/amd64 -t $(IMAGENAME):dev -t $(IMAGENAME):$(CURRENTVERSION) --push -f docker/Dockerfile.multiarch .
 
-tag-beta:
-	git tag $(BETAVERSION)
-	git push upstream --tags
+container-dev-build:
+	docker buildx build --platform linux/arm64,linux/amd64 -t $(IMAGENAME):dev --push -f docker/Dockerfile.multiarch .
 
-tag-rc:
-	git tag $(RCVERSION)
-	git push upstream --tags
+container-basic-build:
+	docker build -t $(IMAGENAME):basic-$(ARCH) -t $(IMAGENAME):basic-$(ARCH)-$(CURRENTVERSION) -f docker/Dockerfile .
 
-tag-release:
-	git tag $(RELEASEVERSION)
-	git push upstream --tags
+web-build:
+	@cd web; pnpm build
 
-build-container:
-	docker buildx build --platform linux/arm64,linux/amd64 -t jsnfwlr/facemasq:dev -t jsnfwlr/facemasq:$(CURRENTVERSION) --push -f docker/Dockerfile.multiarch .
+test-names:
+	@echo $(IMAGENAME)-$(ARCH):$(CURRENTVERSION)
 
-build-container-dev:
-	docker buildx build --platform linux/arm64,linux/amd64 -t jsnfwlr/facemasq:dev --push -f docker/Dockerfile.multiarch .
-
-build-container-basic:
-	docker build -t jsnfwlr/facemasq:basic-$(ARCH) -f docker/Dockerfile .
-
-build-web:
-	cd web; pnpm build

@@ -2,7 +2,7 @@
   import { computed } from "vue"
   import { parse, format, differenceInMinutes } from "date-fns"
 
-  import { Connection } from "@/stores/devices"
+  import { Connection } from "@/types/deviceStore"
 
   const props = defineProps<{
     data: Array<Connection> | null

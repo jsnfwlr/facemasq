@@ -21,6 +21,8 @@ export default defineConfig({
       // eslint-disable-next-line no-undef
       "@": resolve(__dirname, "src"),
       // eslint-disable-next-line no-undef
+      "!": resolve(__dirname),
+      // eslint-disable-next-line no-undef
       "^": resolve(__dirname, "src/stores"),
     },
   },

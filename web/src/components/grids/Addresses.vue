@@ -1,13 +1,15 @@
 <script setup lang="ts">
   import { ref, onMounted } from "vue"
-  import { useDevices, Address } from "@/stores/devices"
+
   import { storeToRefs } from "pinia"
+  import cloneDeep from "lodash.clonedeep"
+
+  import { useDevices } from "@/stores/devices"
+  import { Address } from "@/types/deviceStore"
 
   import Btn from "@/components/elements/Btn.vue"
   import Btns from "@/components/elements/Btns.vue"
   import Control from "@/components/elements/Control.vue"
-
-  import cloneDeep from "lodash.clonedeep"
 
   // import UserAvatar from '@/components/justboil/UserAvatar.vue'
 

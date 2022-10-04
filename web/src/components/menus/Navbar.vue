@@ -42,7 +42,6 @@
   const menuNavBarToggle = () => {
     isMenuNavBarActive.value = !isMenuNavBarActive.value
   }
-  const mode = import.meta.env.DEV
 </script>
 
 <template>
@@ -68,7 +67,7 @@
         <navbar-menu has-divider>
           <user-avatar class="w-10 h-10 lg:w-6 lg:h-6 mr-3 inline-flex" :username="userName" />
           <div class="text-xl lg:text-lg leading-8">
-            <span>{{ userName }} - {{ mode }}</span>
+            <span>{{ userName }}</span>
           </div>
 
           <template #dropdown>

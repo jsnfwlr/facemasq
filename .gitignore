@@ -10,3 +10,6 @@ pkg
 data/**
 build/*.tar.gz
 export/**
+.containerimage
+tests/*
+!tests/.gitkeep

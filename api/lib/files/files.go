@@ -9,6 +9,8 @@ import (
 	"facemasq/lib/utils"
 )
 
+var mode = "detect"
+
 func WriteOut(fileLocation, content string) (err error) {
 	var fileHandler *os.File
 	if _, err = os.Stat(fileLocation); err == nil {
@@ -66,6 +68,10 @@ func Copy(src, dst string) (size int64, err error) {
 }
 
 func GetAppRoot() (rootDir string, err error) {
+	if mode == "forced" {
+		rootDir = "/app"
+		return
+	}
 	rootDir, err = os.Getwd()
 	if err != nil {
 		return
@@ -82,10 +88,11 @@ func GetDir(which string) (dir string, err error) {
 	lowerWhich := strings.ToLower(which)
 	switch lowerWhich {
 	default:
-		dir = utils.Ternary(rootDir == "/app", fmt.Sprintf("%[1]c%[2]s", os.PathSeparator, lowerWhich), fmt.Sprintf("%[1]s%[2]s", rootDir[0:strings.Index(rootDir, "api")], lowerWhich)).(string)
+		position := utils.Ternary(strings.Contains(rootDir, "api"), strings.Index(rootDir, "api"), 0).(int)
+		dir = utils.Ternary((rootDir == "/app"), fmt.Sprintf("%[1]c%[2]s", os.PathSeparator, lowerWhich), fmt.Sprintf("%[1]s%[2]s", rootDir[0:position], lowerWhich)).(string)
 	}
 	if !FileExists(dir) {
-		err = fmt.Errorf("could not find %s", which)
+		err = fmt.Errorf("could not find `%s`", dir)
 	}
 	return
 }

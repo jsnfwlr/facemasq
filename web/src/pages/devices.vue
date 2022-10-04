@@ -1,10 +1,11 @@
 <script setup lang="ts">
   import { onMounted, onBeforeUnmount, computed, ref } from "vue"
   import { storeToRefs } from "pinia"
-  import { useDevices, Device } from "@/stores/devices"
-  import { useParams } from "@/stores/params"
-
   import { parse, differenceInMinutes } from "date-fns"
+
+  import { useDevices } from "@/stores/devices"
+  import { Device } from "@/types/deviceStore"
+  import { useParams } from "@/stores/params"
 
   import Btn from "@/components/elements/Btn.vue"
   import Card from "@/components/containers/Card.vue"
