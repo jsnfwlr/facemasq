@@ -22,9 +22,9 @@ tag-release:
 	@npm set preid="" && npm version patch
 	$make tag-git
 tag-git:
-  cd web; npm version $(CURRENTVERSION)
+	@cd web; npm version $(CURRENTVERSION)
 	@git tag v$(CURRENTVERSION)
-	@git push upstream --tags
+	@git push dev --tags
 
 # API - run vet, tests or coverage generation against the API code
 api-vet:
