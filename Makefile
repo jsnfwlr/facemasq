@@ -11,24 +11,23 @@ all: api web
 
 # Versioning - semver control and commit tagging for different release types
 tag-alpha:
-	@npm version $(GITVERSION) --allow-same-version
+	@npm version $(GITVERSION) --allow-same-version --git-tag-version=false
 	@npm version prerelease --preid=alpha
-	@make tag-git
+	$(MAKE) tag-git
 tag-beta:
-	@npm version $(GITVERSION) --allow-same-version
+	@npm version $(GITVERSION) --allow-same-version --git-tag-version=false
 	@npm version prerelease --preid=beta
-	@make tag-git
+	$(MAKE) tag-git
 tag-rc:
-	@npm version $(GITVERSION) --allow-same-version
+	@npm version $(GITVERSION) --allow-same-version --git-tag-version=false
 	@npm version prerelease --preid=rc
-	@make tag-git
+	$(MAKE) tag-git
 tag-release:
-	@npm version $(GITVERSION) --allow-same-version
+	@npm version $(GITVERSION) --allow-same-version --git-tag-version=false
 	@npm version patch
-	$make tag-git
+	$(MAKE) tag-git
 tag-git:
-	@git tag v$(CURRENTVERSION)
-	@git push dev --tags
+	@git push dev --all
 
 # API - run vet, tests or coverage generation against the API code
 api-vet:
