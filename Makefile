@@ -10,13 +10,13 @@ all: api web
 
 # Versioning - semver control and commit tagging for different release types
 tag-alpha:
-	@npm set preid="alpha" && npm version prerelease
+	@npm set preid="alpha" && npm version prerelease --preid=alpha
 	@make tag-git
 tag-beta:
-	@npm set preid="beta" && npm version prerelease
+	@npm set preid="beta" && npm version prerelease --preid=beta
 	@make tag-git
 tag-rc:
-	@npm set preid="rc" && npm version prerelease
+	@npm set preid="rc" && npm version prerelease --preid=rc
 	@make tag-git
 tag-release:
 	@npm set preid="" && npm version patch
