@@ -1,5 +1,23 @@
 [
   {
+    "text": "General",
+    "collapsible": true,
+    "items": [
+      {
+        "text": "About",
+        "link": "/en/"
+      },
+      {
+        "text": "License",
+        "link": "/en/license"
+      },
+      {
+        "text": "Change log",
+        "link": "/en/changelog"
+      }
+    ]
+  },
+  {
     "text": "User Guide",
     "collapsible": true,
     "items": [

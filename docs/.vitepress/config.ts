@@ -1,21 +1,47 @@
 import { defineConfig } from "vitepress"
 
-import en from "../en/sidebar.json"
 import fr from "../fr/sidebar.json"
+import en from "../en/sidebar.json"
+import es from "../es/sidebar.json"
+import zh from "../zh/sidebar.json"
 import { version } from "../../package.json"
 
-const langs = {
-  "en": {
+const langs = [
+  // {
+  //   key: null,
+  //   text: "Most Used",
+  //   link: null
+  // },
+  {
+    key: "en",
     text: "English",
     link: "/en/",
     sidebar: en
   },
-  "fr": {
-    text: "French",
+  {
+    key: "es",
+    text: "Español",
+    link: "/es/",
+    sidebar: es
+  },
+  {
+    key: "fr",
+    text: "Français",
     link: "/fr/",
     sidebar: fr
-  }
-}
+  },
+  {
+    key: "zh",
+    text: "中文",
+    link: "/zh/",
+    sidebar: zh
+  },
+  // {
+  //   key: null,
+  //   text: "Other",
+  //   link: null
+  // }
+]
 
 
 export default defineConfig({
@@ -40,24 +66,11 @@ export default defineConfig({
 })
 
 function nav() {
-  const lang = "en"
+
   return [
     {
       text: version,
-      items: [
-        {
-          text: "Changelog",
-          link: "https://github.com/jsnfwlr/facemasq/blob/main/CHANGELOG.md"
-        },
-        {
-          text: "Contributing",
-          link: "https://github.com/jsnfwlr/facemasq/blob/main/.github/contributing.md"
-        },
-        {
-          text: "License",
-          link: "https://github.com/jsnfwlr/facemasq/blob/main/LICENSE"
-        }
-      ]
+      link: null
     }
   ]
 }
@@ -65,23 +78,28 @@ function nav() {
 function sidebar() {
   const sidebar = {}
   const langList = Object.keys(langs)
-  langList.forEach((lang) => {
-    sidebar[langs[lang].link] = langs[lang].sidebar
+  langs.forEach((lang) => {
+    if (lang.key !== null) {
+      sidebar[lang.link] = lang.sidebar
+    }
   })
   return sidebar
 }
 
+type localeLink = {
+  text: string
+  link: string | null
+}
 
 function locales() {
-  const langList = Object.keys(langs)
   const locales = {
     text: "",
-    items: []
+    items: [] as Array<localeLink>
   }
-  langList.forEach((lang) => {
+  langs.forEach((lang) => {
     locales.items.push({
-      text: langs[lang].text,
-      link: langs[lang].link
+      text: lang.text,
+      link: lang.link
     })
   })
   return locales

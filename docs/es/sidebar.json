@@ -5,15 +5,15 @@
     "items": [
       {
         "text": "About",
-        "link": "/fr/"
+        "link": "/es/"
       },
       {
         "text": "License",
-        "link": "/fr/license"
+        "link": "/es/license"
       },
       {
         "text": "Change log",
-        "link": "/fr/changelog"
+        "link": "/es/changelog"
       }
     ]
   },
@@ -23,27 +23,27 @@
     "items": [
       {
         "text": "l'Introduction",
-        "link": "/fr/guide/introduction"
+        "link": "/es/guide/introduction"
       },
       {
         "text": "Guide d'installation",
-        "link": "/fr/guide/installation"
+        "link": "/es/guide/installation"
       },
       {
         "text": "Commencer",
-        "link": "/fr/guide/getting-started"
+        "link": "/es/guide/getting-started"
       },
       {
         "text": "Gestion des enregistrements",
-        "link": "/fr/guide/managing-records"
+        "link": "/es/guide/managing-records"
       },
       {
         "text": "Guide d'installation avancée",
-        "link": "/fr/guide/advanced-installation"
+        "link": "/es/guide/advanced-installation"
       },
       {
         "test": "Comprendre les erreurs",
-        "link": "/fr/guide/errors/"
+        "link": "/es/guide/errors/"
       }
     ]
   },
@@ -53,23 +53,23 @@
     "items": [
       {
         "text": "Introduction",
-        "link": "/fr/dev/introduction"
+        "link": "/es/dev/introduction"
       },
       {
         "text": "Dependencies",
-        "link": "/fr/dev/dependencies"
+        "link": "/es/dev/dependencies"
       },
       {
         "text": "Contributing",
-        "link": "/fr/dev/contributing"
+        "link": "/es/dev/contributing"
       },
       {
         "text": "API Documentation",
-        "link": "/fr/dev/api-documentation"
+        "link": "/es/dev/api-documentation"
       },
       {
         "text": "UI Documentation",
-        "link": "/fr/dev/ui-documentation"
+        "link": "/es/dev/ui-documentation"
       }
     ]
   }
