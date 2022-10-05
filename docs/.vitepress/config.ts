@@ -10,7 +10,7 @@ const langs = [
   // {
   //   key: null,
   //   text: "Most Used",
-  //   link: null
+  //   link: ""
   // },
   {
     key: "en",
@@ -30,17 +30,17 @@ const langs = [
     link: "/fr/",
     sidebar: fr
   },
+  // {
+  //   key: null,
+  //   text: "Other",
+  //   link: ""
+  // },
   {
     key: "zh",
     text: "中文",
     link: "/zh/",
     sidebar: zh
-  },
-  // {
-  //   key: null,
-  //   text: "Other",
-  //   link: null
-  // }
+  }
 ]
 
 
@@ -70,7 +70,7 @@ function nav() {
   return [
     {
       text: version,
-      link: null
+      link: ""
     }
   ]
 }
@@ -86,15 +86,15 @@ function sidebar() {
   return sidebar
 }
 
-type localeLink = {
+type LocaleLink = {
   text: string
-  link: string | null
+  link: string
 }
 
 function locales() {
   const locales = {
     text: "",
-    items: [] as Array<localeLink>
+    items: [] as LocaleLink[]
   }
   langs.forEach((lang) => {
     locales.items.push({
