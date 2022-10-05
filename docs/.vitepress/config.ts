@@ -1,87 +1,89 @@
-import { defineConfig } from 'vitepress'
+import { defineConfig } from "vitepress"
 
-import { version } from '../../web/package.json'
+import en from "../en/sidebar.json"
+import fr from "../fr/sidebar.json"
+import { version } from "../../package.json"
+
+const langs = {
+  "en": {
+    text: "English",
+    link: "/en/",
+    sidebar: en
+  },
+  "fr": {
+    text: "French",
+    link: "/fr/",
+    sidebar: fr
+  }
+}
 
 
 export default defineConfig({
-  title: 'faceMasq',
-  description: 'Something',
+  title: "faceMasq",
+  description: "Something",
+  lang: "en",
   themeConfig: {
-    siteTitle: 'faceMasq',
+    siteTitle: "faceMasq",
     logo: "/logo.png",
     nav: nav(),
-    sidebar: {
-      '/guide/': userSidebar(),
-      '/dev/': devSidebar()
+    sidebar: sidebar(),
+    localeLinks: locales()
+  },
+
+  locales: {
+    fr: {
+      lang: "fr",
+      title: "faceMasq",
     }
   },
+  cleanUrls: "with-subfolders"
 })
 
 function nav() {
+  const lang = "en"
   return [
-      { 
-        text: 'About', 
-        link: '/' 
-      },
-      { 
-        text: 'User Guide', 
-        link: '/guide/introduction' 
-      },
-      { 
-        text: 'Developer Docs', 
-        link: '/dev/introduction'
-      },
-      { 
-        text: version, 
-        items: [
-          { 
-            text: "Changelog",
-            link: 'https://github.com/jsnfwlr/facemasq/blob/main/CHANGELOG.md' 
-          },
-          { 
-            text: "Contributing",
-            link: 'https://github.com/jsnfwlr/facemasq/blob/main/.github/contributing.md' 
-          },
-          { 
-            text: "License",
-            link: 'https://github.com/jsnfwlr/facemasq/blob/main/LICENSE' 
-          }
-        ]
-        
-      }
-
-  ]
-}
-
-function userSidebar() {
- return [
     {
-      text: 'User Guide',
-      collapsible: true,
+      text: version,
       items: [
-        { text: 'Introduction', link: '/guide/introduction' },
-        { text: 'Installation', link: '/guide/installation' },
-        { text: 'Getting Started', link: '/guide/getting-started' },
-        { text: 'Managing Records', link: '/guide/managing-records' },
-        { text: 'Advanced Installation', link: '/guide/advanced-installation' },
-        { test: 'Understanding Errors', link: '/errors/'}
+        {
+          text: "Changelog",
+          link: "https://github.com/jsnfwlr/facemasq/blob/main/CHANGELOG.md"
+        },
+        {
+          text: "Contributing",
+          link: "https://github.com/jsnfwlr/facemasq/blob/main/.github/contributing.md"
+        },
+        {
+          text: "License",
+          link: "https://github.com/jsnfwlr/facemasq/blob/main/LICENSE"
+        }
       ]
     }
   ]
 }
 
-function devSidebar() {
-  return [
-    {
-      text: 'Developer Docs',
-      collapsible: true,
-      items: [
-        { text: 'Introduction', link: '/dev/introduction' },
-        { text: 'Dependencies', link: '/dev/dependencies' },
-        { text: 'Contributing', link: '/dev/contributing' },
-        { text: 'API Documentation', link: '/dev/api-documentation' },
-        { text: 'UI Documentation', link: '/dev/ui-documentation' },
-      ]
-    }
-  ]
+function sidebar() {
+  const sidebar = {}
+  const langList = Object.keys(langs)
+  langList.forEach((lang) => {
+    sidebar[langs[lang].link] = langs[lang].sidebar
+  })
+  return sidebar
+}
+
+
+function locales() {
+  const langList = Object.keys(langs)
+  const locales = {
+    text: "",
+    items: []
+  }
+  langList.forEach((lang) => {
+    locales.items.push({
+      text: langs[lang].text,
+      link: langs[lang].link
+    })
+  })
+  return locales
+
 }

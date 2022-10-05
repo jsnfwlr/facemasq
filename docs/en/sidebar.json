@@ -1,0 +1,58 @@
+[
+  {
+    "text": "User Guide",
+    "collapsible": true,
+    "items": [
+      {
+        "text": "Introduction",
+        "link": "/en/guide/introduction"
+      },
+      {
+        "text": "Installation",
+        "link": "/en/guide/installation"
+      },
+      {
+        "text": "Getting Started",
+        "link": "/en/guide/getting-started"
+      },
+      {
+        "text": "Managing Records",
+        "link": "/en/guide/managing-records"
+      },
+      {
+        "text": "Advanced Installation",
+        "link": "/en/guide/advanced-installation"
+      },
+      {
+        "test": "Understanding Errors",
+        "link": "/en/guide/errors/"
+      }
+    ]
+  },
+  {
+    "text": "Developer Docs",
+    "collapsible": true,
+    "items": [
+      {
+        "text": "Introduction",
+        "link": "/en/dev/introduction"
+      },
+      {
+        "text": "Dependencies",
+        "link": "/en/dev/dependencies"
+      },
+      {
+        "text": "Contributing",
+        "link": "/en/dev/contributing"
+      },
+      {
+        "text": "API Documentation",
+        "link": "/en/dev/api-documentation"
+      },
+      {
+        "text": "UI Documentation",
+        "link": "/en/dev/ui-documentation"
+      }
+    ]
+  }
+]

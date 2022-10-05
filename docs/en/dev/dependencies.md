@@ -47,9 +47,11 @@ Just sign up for a github account if you don't already have one, fork the primar
   brew install make gcc libpcap-dev bison flex
   ```
 * ### NodeJS and PNPM
-  NodeJS and PNPM are used to build the web interface for faceMasq.
+  NodeJS and PNPM are used to build the web interface and docs for faceMasq.
   ```sh
   ```
+* ### NPM
+  NPM is used for the semantic versioning of the project
 * ### Docker
   Docker is used to run the database containers needed for testing - `mysql:8-debian` and `postgres:14-alpine`.
 
@@ -64,16 +66,6 @@ sudo yum install make # redhat/centos/fedora
 pacman -S base-devel  # arch/manjaro
 brew install make     # mac os
 ```
-
-### SemVer Bash 
-SemVer Bash is used in Makefile for versioning the project.
-
-```sh
-wget https://raw.githubusercontent.com/unforswearing/bash-semver/main/semver.bash
-chmod +x semver.bash
-sudo mv semver.bash /usr/bin/semver
-```
-
 
 ### Multi-arch Docker Buildx Config (Optional)
 The Buildx Config is used to build a single container image that supports all of the different CPU architectures faceMasq supports (currently `amd64` and  `arm64`/`aarch64`, although I would like to add `armv6` and `armv7` in the future). It is not a requirement if you just want to build or test for the one CPU architecture.

@@ -1,7 +1,7 @@
 {
   "name": "facemasq",
   "version": "0.1.0-alpha.7",
-  "description": "",
+  "description": "Documentation for the faceMasq project",
   "main": "index.js",
   "scripts": {
     "docs:dev": "vitepress dev docs",
