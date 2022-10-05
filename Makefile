@@ -1,31 +1,31 @@
-CURRENTVERSION != git describe --tags --abbrev=0
-RELEASEVERSION != semver -p $(CURRENTVERSION)
-ALPHAVERSION != semver -d "alpha" $(RELEASEVERSION)
-BETAVERSION != semver -d "beta" $(RELEASEVERSION)
-RCVERSION != semver -d "rc" $(RELEASEVERSION)
+CURRENTVERSION != npm version | jq -r .facemasq
 ARCH != go env GOARCH
 IMAGENAME != docker info | sed -r "/Username:/!d;s|.*: (.*)|\1/facemasq|"
+
+.PHONY: all tag-alpha tag-beta tag-rc tag-release tag-git api-vet api-test api-coverage api-test-tests api container-release container-dev container-basic web-test web-coverage web docs docs-run
+.DEFAULT: all
 
 #DEFAULT
 all: api web
 
-# TAGGING - tag commits for different release types
+# Versioning - semver control and commit tagging for different release types
 tag-alpha:
-	@git tag $(ALPHAVERSION)
-	@git push upstream --tags
-	@npm version $(ALPHAVERSION); cd web; npm version $(ALPHAVERSION)
+	@npm set preid="alpha" && npm version prerelease
+	@make tag-git
 tag-beta:
-	@git tag $(BETAVERSION)
-	@git push upstream --tags
-	@npm version $(BETAVERSION); cd web; npm version $(BETAVERSION)
+	@npm set preid="beta" && npm version prerelease
+	@make tag-git
 tag-rc:
-	@git tag $(RCVERSION)
-	@git push upstream --tags
-	@npm version $(RCVERSION); cd web; npm version $(RCVERSION)
+	@npm set preid="rc" && npm version prerelease
+	@make tag-git
 tag-release:
-	@git tag $(RELEASEVERSION)
+	@npm set preid="" && npm version patch
+	$make tag-git
+tag-git:
+  cd web; npm version $(CURRENTVERSION)
+	@git tag v$(CURRENTVERSION)
 	@git push upstream --tags
-	@npm version $(RELEASEVERSION); cd web; npm version $(RELEASEVERSION)
+
 # API - run vet, tests or coverage generation against the API code
 api-vet:
 	@cd api; go vet -tags test ./...

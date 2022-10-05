@@ -1,6 +1,6 @@
 {
-  "name": "facemasq-docs",
-  "version": "0.0.5-alpha.0",
+  "name": "facemasq",
+  "version": "v0.1.0-alpha.5",
   "description": "",
   "main": "index.js",
   "scripts": {
