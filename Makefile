@@ -1,3 +1,4 @@
+GITVERSION != git describe --tags --abbrev=0
 CURRENTVERSION != npm version | jq -r .facemasq
 ARCH != go env GOARCH
 IMAGENAME != docker info | sed -r "/Username:/!d;s|.*: (.*)|\1/facemasq|"
@@ -10,19 +11,22 @@ all: api web
 
 # Versioning - semver control and commit tagging for different release types
 tag-alpha:
-	@npm set preid="alpha" && npm version prerelease --preid=alpha
+	@npm version $(GITVERSION)
+	@npm version prerelease --preid=alpha
 	@make tag-git
 tag-beta:
-	@npm set preid="beta" && npm version prerelease --preid=beta
+	@npm version $(GITVERSION)
+	@npm version prerelease --preid=beta
 	@make tag-git
 tag-rc:
-	@npm set preid="rc" && npm version prerelease --preid=rc
+	@npm version $(GITVERSION)
+	@npm version prerelease --preid=rc
 	@make tag-git
 tag-release:
-	@npm set preid="" && npm version patch
+	@npm version $(GITVERSION)
+	@npm version patch
 	$make tag-git
 tag-git:
-	@cd web; npm version $(CURRENTVERSION)
 	@git tag v$(CURRENTVERSION)
 	@git push dev --tags
 
