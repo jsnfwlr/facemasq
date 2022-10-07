@@ -1,4 +1,4 @@
-# Docker Installation
+# Quick Start
 
 ## Core Configuration
 

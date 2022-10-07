@@ -23,9 +23,9 @@ A blend of DNS/DHCP editor, asset registrar, network monitor, and intruder detec
 
 # Installation and configuration
 
-faceMasq is intended to be run as a Docker container. Details on how to install and configure it can be found in the [Docker Installation](docs/installation/docker.md) Documents.
+faceMasq is intended to be run as a Docker container. Details on how to install and configure it can be found in the [Quick-Start](docs/en/overview/quick-start.md) Guide, with more information about configuration options available in the [Configuration](docs/en/overview/configuration.md) Documentation.
 
-If you wish to run it as a bare-metal service, details on how to do that can be found in the [Advanced Installation](advanced.md) Documents.
+If you wish to run it as a bare-metal service, details on how to do that can be found in the [Advanced Installation](docs/en/how-tos/advanced-installation.md) Documents.
 
 # Roadmap
 
@@ -121,6 +121,9 @@ Contribution Guide to come.
 [MIT](https://choosealicense.com/licenses/mit/)
 
 # Notes for considerations
+
+## Use Buildx Bake
+- https://github.com/coreruleset/modsecurity-crs-docker/blob/develop/docker-bake.hcl for an easy to understand example
 
 ## Adding FIDO2 2FA
 - https://github.com/duo-labs/webauthn or https://github.com/fxamacker/webauthn for the API

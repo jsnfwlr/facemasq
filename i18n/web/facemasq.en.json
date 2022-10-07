@@ -22,16 +22,15 @@
     "about": "About",
     "info": "Info"
   },
+  "dashboard": {
+    "labels": {},
+    "columns": {},
+    "tooltips": {}
+  },
   "devicePage": {
-    "labels": {
-
-    },
-    "options": {
-
-    },
-    "columns": {
-
-    },
+    "labels": {},
+    "options": {},
+    "columns": {},
     "tooltips": {
       "addDevice": "Add device",
       "addInterface": "Add interface",
@@ -55,6 +54,32 @@
       "cancelDelete": "Cancel delete",
       "investigate": "Investigate"
     }
-
+  },
+  "infoPage": {
+    "cards": {
+      "SystemDetails": "System Details",
+      "InstalledPluggins": "Installed Plugins",
+      "LibraryAttribution": "Attribution for included libraries",
+      "ImageAttribution": "Attribution for included graphics"
+    },
+    "headers": {
+      "VersionDetails": "Version Details",
+      "ServerConfig": "Server Configuration",
+      "ScannerConfig": "Scanner Configuration"
+    },
+    "labels": {
+      "NetScanFrequency": "Network Scan Frequency",
+      "TargetCIDR": "Target Network CIDR",
+      "ServerPort": "Port",
+      "ReleaseDate": "Release Date"
+    },
+    "other": {
+      "ReleaseNoteLinkText": "View on GitHub"
+    },
+    "attribution": {
+      "justboil": "Original Vue UI library created by JustBoil - GitHub.",
+      "materialdesignicons": "Icons imported from Templarian/MaterialDesign - GitHub.",
+      "logo": "Logo based on Original Mask icons created by mangsaabguru - Flaticon."
+    }
   }
 }

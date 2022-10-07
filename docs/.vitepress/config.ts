@@ -1,46 +1,16 @@
 import { defineConfig } from "vitepress"
 
-import fr from "../fr/sidebar.json"
-import en from "../en/sidebar.json"
-import es from "../es/sidebar.json"
-import zh from "../zh/sidebar.json"
+import fr from "../fr/definition"
+import en from "../en/definition"
+import es from "../es/definition"
+import zh from "../zh/definition"
 import { version } from "../../package.json"
 
 const langs = [
-  // {
-  //   key: null,
-  //   text: "Most Used",
-  //   link: ""
-  // },
-  {
-    key: "en",
-    text: "English",
-    link: "/en/",
-    sidebar: en
-  },
-  {
-    key: "es",
-    text: "Español",
-    link: "/es/",
-    sidebar: es
-  },
-  {
-    key: "fr",
-    text: "Français",
-    link: "/fr/",
-    sidebar: fr
-  },
-  // {
-  //   key: null,
-  //   text: "Other",
-  //   link: ""
-  // },
-  {
-    key: "zh",
-    text: "中文",
-    link: "/zh/",
-    sidebar: zh
-  }
+  en,
+  fr,
+  es,
+  zh,
 ]
 
 
@@ -48,12 +18,21 @@ export default defineConfig({
   title: "faceMasq",
   description: "Something",
   lang: "en",
+  outDir: "./dist/docs/",
   themeConfig: {
     siteTitle: "faceMasq",
     logo: "/logo.png",
     nav: nav(),
     sidebar: sidebar(),
-    localeLinks: locales()
+    localeLinks: localeLinks(),
+    outlineTitle: langs[detectLocale()].outlineTitle,
+    editLink: {
+      pattern: "https://github.com/jsnfwlr/facemasq/edit/main/docs/:path",
+      text: langs[detectLocale()].editLinkText
+    },
+    socialLinks: [
+      { icon: 'github', link: 'https://github.com/jsnfwlr/facemasq' },
+    ]
   },
 
   locales: {
@@ -77,7 +56,6 @@ function nav() {
 
 function sidebar() {
   const sidebar = {}
-  const langList = Object.keys(langs)
   langs.forEach((lang) => {
     if (lang.key !== null) {
       sidebar[lang.link] = lang.sidebar
@@ -91,7 +69,12 @@ type LocaleLink = {
   link: string
 }
 
-function locales() {
+type Locales = {
+  lang: string
+  text: string
+}
+
+function localeLinks() {
   const locales = {
     text: "",
     items: [] as LocaleLink[]
@@ -104,4 +87,26 @@ function locales() {
   })
   return locales
 
+}
+
+function locales() {
+  const locales = [] as Locales[]
+  // {
+  //   lang: "",
+  //   title: ""
+  // }
+  langs.forEach((lang) => {
+    locales.push({
+      lang: lang.key,
+      text: "faceMasq " + lang.text
+    })
+  })
+  return locales
+}
+
+function detectLocale() {
+  const index = 0
+  // const preference = navigator.language.substring(0, 1)
+  // let index = langs.findIndex(lang => lang.key === preference)
+  return index
 }
