@@ -90,7 +90,7 @@ func getRecords(scanID int64) (records scans.DeviceRecords, err error) {
 				Notes:    result.Manufacturer,
 			}
 
-			logging.Printf(3, "Found %s (%s) via NET\n", record.IPv4, record.MAC)
+			logging.Printf(3, "Found %s (%s) via NET", record.IPv4, record.MAC)
 
 			records = append(records, record)
 		}
@@ -105,14 +105,14 @@ func getLocalIFaces(scanID int64, lastSeen string) (records scans.DeviceRecords,
 
 	netFaces, err := net.Interfaces()
 	if err != nil {
-		logging.Printf(0, "ProcessLocal: %+v\n", err.Error())
+		logging.Errorf("ProcessLocal: %+v", err.Error())
 		return
 	}
 	for _, netFace := range netFaces {
 		if !strings.Contains(netFace.Name, "veth") && !strings.Contains(netFace.Name, "lo") && !strings.Contains(netFace.Name, "br-") && !strings.Contains(netFace.Name, "docker0") {
 			addresses, err := netFace.Addrs()
 			if err != nil {
-				logging.Printf(0, "ProcessLocal: %+v\n", err.Error())
+				logging.Errorf("ProcessLocal: %+v", err.Error())
 				continue
 			}
 			if len(addresses) > 0 {

@@ -18,7 +18,7 @@ func main() {
 	if err != nil {
 		logging.Fatalf("%v", err)
 	}
-	logging.Processf("Connected: %+v\n", db.DBEngine)
+	logging.Processf("Connected: %+v", db.DBEngine)
 
 	network.ShowNetworkSummary()
 

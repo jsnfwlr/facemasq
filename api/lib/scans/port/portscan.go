@@ -34,6 +34,10 @@ func init() {
 			portList = append(portList, i)
 		}
 	} else if scanWidth == "wide" {
+		for i := int64(1); i <= 10000; i++ {
+			portList = append(portList, i)
+		}
+	} else if scanWidth == "all" {
 		for i := int64(1); i <= 65535; i++ {
 			portList = append(portList, i)
 		}
@@ -44,7 +48,7 @@ func init() {
 		PortScan = true
 	}
 
-	logging.Processf("%v timeout\n", time.Duration(timeOut)*time.Millisecond)
+	logging.Processf("%v timeout", time.Duration(timeOut)*time.Millisecond)
 }
 
 func Scan(scanID int64, scanAll bool) (err error) {
@@ -66,7 +70,7 @@ func Scan(scanID int64, scanAll bool) (err error) {
 		if len(ports) > 0 {
 			_, err = db.Conn.NewInsert().Model(&ports).Exec(db.Context)
 			if err != nil {
-				logging.Errorf("could not record port state: %v\n", err)
+				logging.Errorf("could not record port state: %v", err)
 				return
 			}
 		}
@@ -97,7 +101,7 @@ func Discover(scanAll bool) (devices []scans.AddressToPortScan, err error) {
 
 func ScanPort(protocol, ipv4 string, portNum int64) portDetails {
 	address := fmt.Sprintf("%s:%d", ipv4, portNum)
-	logging.Printf(2, "Scanning %s\n", address)
+	logging.Printf(2, "Scanning %s", address)
 	conn, err := net.DialTimeout(protocol, address, time.Duration(timeOut)*time.Millisecond)
 	port := portDetails{
 		Number:   portNum,
@@ -128,12 +132,10 @@ func ScanAddress(ipv4 string) (scan addressPortRecord) {
 		for _, portNum := range portList {
 			port := ScanPort(protocol, ipv4, portNum)
 			if port.State == "open" {
+				logging.Printf(0, "%s has port %d open", ipv4, portNum)
 				scan.Ports = append(scan.Ports, port)
 			}
 		}
-	}
-	if len(scan.Ports) > 0 {
-		logging.Printf(4, "%s has %d TCP ports open", ipv4, len(scan.Ports))
 	}
 	return
 }

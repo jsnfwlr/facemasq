@@ -47,11 +47,11 @@ func Schedule() {
 	sched.Every(Frequency).Do(func() {
 		scanID, err := ScanAndStore()
 		if err != nil {
-			logging.Printf(0, "error: %v", err)
+			logging.Errorf("error: %v", err)
 		}
 		err = portscan.ScanAysnc(scanID, false)
 		if err != nil {
-			logging.Printf(0, "%v", err)
+			logging.Errorf("%v", err)
 		}
 	})
 	sched.StartAsync()
@@ -104,7 +104,7 @@ func Scan(scanID int64) (records scans.DeviceRecords, err error) {
 				Notes:    result.Manufacturer,
 			}
 
-			logging.Printf(3, "Found %s (%s) via NET\n", record.IPv4, record.MAC)
+			logging.Printf(3, "Found %s (%s) via NET", record.IPv4, record.MAC)
 
 			records = append(records, record)
 		}
@@ -115,7 +115,7 @@ func Scan(scanID int64) (records scans.DeviceRecords, err error) {
 func Store(records scans.DeviceRecords, scanID int64) (err error) {
 	err = records.Store()
 	if err != nil {
-		logging.Printf(0, "error recording netscan results: %v", err)
+		logging.Errorf("error recording netscan results: %v", err)
 		err = nil // a single error here shouldn't stop the whole process
 	}
 
@@ -123,28 +123,28 @@ func Store(records scans.DeviceRecords, scanID int64) (err error) {
 	sqlQ := `UPDATE devices SET is_online = false WHERE is_online = true;`
 	_, err = db.Conn.Exec(sqlQ)
 	if err != nil {
-		logging.Printf(0, "could not update device statuses: %v\n", err)
+		logging.Errorf("could not update device statuses: %v", err)
 		// return
 	}
 
 	sqlQ = `UPDATE interfaces SET is_online = false WHERE is_online = true;`
 	_, err = db.Conn.Exec(sqlQ)
 	if err != nil {
-		logging.Printf(0, "could not update Interfaces statuses: %v\n", err)
+		logging.Errorf("could not update Interfaces statuses: %v", err)
 		// return
 	}
 
 	sqlQ = `UPDATE devices SET is_online = true WHERE is_online = false AND id IN (SELECT interfaces.device_id FROM interfaces JOIN addresses ON addresses.interface_id = interfaces.id JOIN histories ON histories.address_id = addresses.id AND histories.scan_id = ?);`
 	_, err = db.Conn.Exec(sqlQ, scanID)
 	if err != nil {
-		logging.Printf(0, "could not update device statuses: %v\n", err)
+		logging.Errorf("could not update device statuses: %v", err)
 		// return
 	}
 
 	sqlQ = `UPDATE interfaces SET is_online = true WHERE is_online = false AND ID IN (SELECT addresses.interface_id FROM addresses JOIN histories ON histories.address_id = addresses.id AND histories.scan_id = ?);`
 	_, err = db.Conn.Exec(sqlQ, scanID)
 	if err != nil {
-		logging.Printf(0, "could not updatie Interfaces statuses: %v\n", err)
+		logging.Errorf("could not updatie Interfaces statuses: %v", err)
 		// return
 	}
 	return
@@ -177,14 +177,14 @@ func getLocalIFaces(scanID int64, lastSeen string) (records scans.DeviceRecords,
 
 	netFaces, err := net.Interfaces()
 	if err != nil {
-		logging.Printf(0, "ProcessLocal: %+v\n", err.Error())
+		logging.Errorf("ProcessLocal: %+v", err.Error())
 		return
 	}
 	for _, netFace := range netFaces {
 		if !strings.Contains(netFace.Name, "veth") && !strings.Contains(netFace.Name, "lo") && !strings.Contains(netFace.Name, "br-") && !strings.Contains(netFace.Name, "docker0") {
 			addresses, err := netFace.Addrs()
 			if err != nil {
-				logging.Printf(0, "ProcessLocal: %+v\n", err.Error())
+				logging.Errorf("ProcessLocal: %+v", err.Error())
 				continue
 			}
 			if len(addresses) > 0 {

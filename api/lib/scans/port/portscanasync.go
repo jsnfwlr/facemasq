@@ -26,7 +26,7 @@ func ScanAysnc(scanID int64, scanAll bool) (err error) {
 		if len(ports) > 0 {
 			_, err = db.Conn.NewInsert().Model(&ports).Exec(db.Context)
 			if err != nil {
-				logging.Errorf("could not record port state: %v\n", err)
+				logging.Errorf("could not record port state: %v", err)
 				return
 			}
 		}

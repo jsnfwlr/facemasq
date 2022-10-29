@@ -30,7 +30,7 @@ func ReadJSONBody(request *http.Request, target interface{}) (err error) {
 		return
 	}
 	request.Body = io.NopCloser(bytes.NewBuffer(body))
-	logging.Printf(2, "Request Body Contents: %v\n", string(body))
+	logging.Printf(2, "Request Body Contents: %v", string(body))
 	err = json.Unmarshal(body, target)
 	return
 }

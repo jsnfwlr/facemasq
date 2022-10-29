@@ -31,13 +31,13 @@ func (record Result) Store() (err error) {
 	err = db.Conn.NewRaw(sql, record.MAC).Scan(db.Context, &netface)
 	if err != nil {
 		if err.Error() != "sql: no rows in result set" {
-			logging.Errorf("%v\n", err)
+			logging.Errorf("%v", err)
 			return
 		}
 		sql = `INSERT INTO Devices (first_seen, notes, machine_name, label, is_online, status_id) VALUES (?, ?, "", "Unknown Device", true, 1)`
 		sqlres, err = db.Conn.Exec(sql, record.LastSeen, record.Notes)
 		if err != nil {
-			logging.Errorf("Error creating device: %v\n", err)
+			logging.Errorf("Error creating device: %v", err)
 			return
 		}
 		lastDeviceID, _ := sqlres.LastInsertId()
@@ -51,7 +51,7 @@ func (record Result) Store() (err error) {
 		sql = `INSERT INTO interfaces (mac, device_id, notes, last_seen, is_online, status_id) VALUES (?, ?, ?, ?, true, 1);`
 		sqlres, err = db.Conn.Exec(sql, record.MAC, lastDeviceID, record.Notes, record.LastSeen)
 		if err != nil {
-			logging.Errorf("Error creating interface: %v\n", err)
+			logging.Errorf("Error creating interface: %v", err)
 			return
 		}
 		lastInterfaceID, _ := sqlres.LastInsertId()
@@ -59,7 +59,7 @@ func (record Result) Store() (err error) {
 		sql = `INSERT INTO addresses (ipv4, ipv6, interface_id, last_seen, notes) VALUES (?, ?, ?, ?, ?);`
 		sqlres, err = db.Conn.Exec(sql, record.IPv4, record.IPv6, lastInterfaceID, record.LastSeen, record.Notes)
 		if err != nil {
-			logging.Errorf("Error creating address: %v\n", err)
+			logging.Errorf("Error creating address: %v", err)
 			return
 		}
 		lastAddressID, _ := sqlres.LastInsertId()
@@ -68,7 +68,7 @@ func (record Result) Store() (err error) {
 			sql = `INSERT INTO hostnames (hostname, address_id, notes) VALUES (?,?, ?);`
 			_, err = db.Conn.Exec(sql, record.Hostname, lastAddressID, record.Notes)
 			if err != nil {
-				logging.Errorf("Error creating hostname: %v\n", err)
+				logging.Errorf("Error creating hostname: %v", err)
 				return
 			}
 		}
@@ -76,7 +76,7 @@ func (record Result) Store() (err error) {
 		sql = `INSERT INTO histories (address_id, scan_id) VALUES (?,?);`
 		_, err = db.Conn.Exec(sql, lastAddressID, record.ScanID)
 		if err != nil {
-			logging.Errorf("Error creating histories: %v\n", err)
+			logging.Errorf("Error creating histories: %v", err)
 			return
 		}
 		return
@@ -86,14 +86,14 @@ func (record Result) Store() (err error) {
 	err = db.Conn.NewRaw(sql, record.IPv4, netface.ID).Scan(db.Context, &address)
 	if err != nil {
 		if err.Error() != "sql: no rows in result set" {
-			logging.Errorf("%v\n", err)
+			logging.Errorf("%v", err)
 			return
 		}
 
 		sql = `INSERT INTO addresses (ipv4, ipv6, interface_id, last_seen, notes) VALUES (?, ?, ?, ?, ?);`
 		sqlres, err = db.Conn.Exec(sql, record.IPv4, record.IPv6, netface.ID, record.LastSeen, record.Notes)
 		if err != nil {
-			logging.Errorf("Error adding address: %v\n", err)
+			logging.Errorf("Error adding address: %v", err)
 			return
 		}
 		lastAddressID, _ := sqlres.LastInsertId()
@@ -102,7 +102,7 @@ func (record Result) Store() (err error) {
 			sql = `INSERT INTO hostnames (hostname, address_id, notes) VALUES (?, ?, ?);`
 			_, err = db.Conn.Exec(sql, record.Hostname, lastAddressID, record.Notes)
 			if err != nil {
-				logging.Errorf("Error adding hostname: %v\n", err)
+				logging.Errorf("Error adding hostname: %v", err)
 				return
 			}
 		}
@@ -110,7 +110,7 @@ func (record Result) Store() (err error) {
 		sql = `INSERT INTO histories (address_id, scan_id) VALUES (?, ?);`
 		_, err = db.Conn.Exec(sql, lastAddressID, record.ScanID)
 		if err != nil {
-			logging.Errorf("Error adding histories: %v\n", err)
+			logging.Errorf("Error adding histories: %v", err)
 			return
 		}
 
@@ -125,14 +125,14 @@ func (record Result) Store() (err error) {
 	sql = `UPDATE interfaces SET last_seen = ? WHERE id = ?;`
 	_, err = db.Conn.Exec(sql, record.LastSeen, netface.ID)
 	if err != nil {
-		logging.Errorf("Error recording interfaces lastseen: %v\n", err)
+		logging.Errorf("Error recording interfaces lastseen: %v", err)
 		return
 	}
 
 	sql = `UPDATE addresses SET last_seen = ? WHERE id = ?;`
 	_, err = db.Conn.Exec(sql, record.LastSeen, address.ID)
 	if err != nil {
-		logging.Errorf("Error recording address lastseen: %v\n", err)
+		logging.Errorf("Error recording address lastseen: %v", err)
 		return
 	}
 
@@ -140,7 +140,7 @@ func (record Result) Store() (err error) {
 	_, err = db.Conn.Exec(sql, address.ID, record.ScanID)
 	if err != nil {
 		if err.Error() != "UNIQUE constraint failed: histories.address_id, histories.scan_id" {
-			logging.Errorf("Error recording new histories: %v\n", err)
+			logging.Errorf("Error recording new histories: %v", err)
 		}
 		return
 	}

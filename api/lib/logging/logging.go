@@ -1,9 +1,10 @@
 package logging
 
 import (
-	"log"
+	"fmt"
 	"os"
 	"strconv"
+	"time"
 )
 
 var Verbosity int
@@ -19,44 +20,60 @@ func init() {
 
 func Printf(verbosity int, format string, args ...interface{}) {
 	if Verbosity >= verbosity {
-		log.Printf(format, args...)
+		fmt.Printf("[backend] %s | NFO | %s\n", time.Now().Format(time.RFC3339), fmt.Sprintf(format, args...))
 	}
 }
 
 func Println(verbosity int, args ...interface{}) {
 	if Verbosity >= verbosity {
-		log.Println(args...)
+		fmt.Printf("[backend] %s | NFO | %s\n", time.Now().Format(time.RFC3339), fmt.Sprint(args...))
 	}
 }
 
-func Panicf(format string, args ...interface{}) {
-	log.Panicf(format, args...)
+func Debugf(verbosity int, format string, args ...interface{}) {
+	if Verbosity >= verbosity {
+		fmt.Printf("[backend] %s | DBG | %s\n", time.Now().Format(time.RFC3339), fmt.Sprintf(format, args...))
+	}
 }
 
-func Panic(args ...interface{}) {
-	log.Panic(args...)
+func Debugln(verbosity int, args ...interface{}) {
+	if Verbosity >= verbosity {
+		fmt.Printf("[backend] %s | DBG | %s\n", time.Now().Format(time.RFC3339), fmt.Sprint(args...))
+	}
 }
 
 func Processf(format string, args ...interface{}) {
-	log.Printf(format, args...)
+	fmt.Printf("[backend] %s | PRC | %s\n", time.Now().Format(time.RFC3339), fmt.Sprintf(format, args...))
 }
 
 func Processln(args ...interface{}) {
-	log.Println(args...)
+	fmt.Printf("[backend] %s | PRC | %s\n", time.Now().Format(time.RFC3339), fmt.Sprint(args...))
 }
 
 func Errorf(format string, args ...interface{}) {
-	log.Printf(format, args...)
+	fmt.Printf("[backend] %s | ERR | %s\n", time.Now().Format(time.RFC3339), fmt.Sprintf(format, args...))
 }
 
 func Errorln(args ...interface{}) {
-	log.Println(args...)
+	fmt.Printf("[backend] %s | ERR | %s\n", time.Now().Format(time.RFC3339), fmt.Sprint(args...))
+}
+
+func Panicf(format string, args ...interface{}) {
+	fmt.Printf("[backend] %s | PAN | %s", time.Now().Format(time.RFC3339), fmt.Sprintf(format, args...))
+	panic("...")
+}
+
+func Panic(args ...interface{}) {
+	fmt.Printf("[backend] %s | PAN | %s", time.Now().Format(time.RFC3339), fmt.Sprint(args...))
+	panic("...")
 }
 
 func Fatalf(format string, args ...interface{}) {
-	log.Fatalf(format, args...)
+	fmt.Printf("[backend] %s | FTL | %s", time.Now().Format(time.RFC3339), fmt.Sprintf(format, args...))
+	os.Exit(1)
 }
 
 func Fatalln(args ...interface{}) {
-	log.Fatalln(args...)
+	fmt.Printf("[backend] %s | FTL | %s", time.Now().Format(time.RFC3339), fmt.Sprint(args...))
+	os.Exit(1)
 }
