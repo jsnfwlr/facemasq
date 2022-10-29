@@ -10,8 +10,8 @@ type Location struct {
 	ID       int64       `bun:",notnull,pk,autoincrement"`
 	Label    string      `bun:",type:varchar(64),unique,notnull"`
 	Notes    null.String `bun:",type:text"`
-	IsCloud  bool        `bun:",nullzero,notnull,default:false"`
-	IsLocked bool        `bun:",nullzero,notnull,default:false"`
+	IsCloud  bool        `bun:",type:boolean,nullzero,notnull,default:false"`
+	IsLocked bool        `bun:",type:boolean,nullzero,notnull,default:false"`
 }
 
 func GetLocationSeed() (seed []Location) {

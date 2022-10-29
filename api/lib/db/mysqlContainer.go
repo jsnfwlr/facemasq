@@ -1,11 +1,11 @@
-//go:build database || full
-
 package db
 
 import (
 	"bufio"
 	"context"
+	"facemasq/lib/logging"
 	"fmt"
+	"io"
 	"os"
 	"strings"
 	"time"
@@ -19,13 +19,17 @@ import (
 	v1 "github.com/opencontainers/image-spec/specs-go/v1"
 )
 
-type MySQL struct {
+type MySQLContainer struct {
 	ID         string
 	Connection ConnectionParams
 	Cleanup    func() error
+	dbType     string
 }
 
-func StartMySQLDB(dbName, dbUser, dbPassword, dbPort string) (*MySQL, error) {
+func StartMySQLContainer(dbName, dbUser, dbPassword, dbPort string) (testContainer *MySQLContainer, err error) {
+	var cntnr container.ContainerCreateCreatedBody
+	var containerList []types.Container
+	var logsReader io.ReadCloser
 	cli, err := client.NewClientWithOpts(client.FromEnv)
 	if err != nil {
 		panic(err)
@@ -46,11 +50,12 @@ func StartMySQLDB(dbName, dbUser, dbPassword, dbPort string) (*MySQL, error) {
 	}
 
 	if !found {
-		if _, err := cli.ImagePull(
+		_, err := cli.ImagePull(
 			context.Background(),
 			"docker.io/library/mysql:8-debian",
 			types.ImagePullOptions{},
-		); err != nil {
+		)
+		if err != nil {
 			panic(err)
 		}
 	}
@@ -58,15 +63,18 @@ func StartMySQLDB(dbName, dbUser, dbPassword, dbPort string) (*MySQL, error) {
 	filters := filters.NewArgs()
 	filters.Add("name", "mysql_facemasq")
 
-	containerList, err := cli.ContainerList(context.Background(), types.ContainerListOptions{Filters: filters})
+	containerList, err = cli.ContainerList(context.Background(), types.ContainerListOptions{Filters: filters})
+	if err != nil {
+		return
+	}
 
 	if len(containerList) > 0 {
 		for i := range containerList {
 			fmt.Printf("%+v", containerList[i])
 		}
 	}
-	// Create container
-	container, err := cli.ContainerCreate(
+	// Prepare container
+	cntnr, err = cli.ContainerCreate(
 		context.Background(),
 		&container.Config{
 			Image: "mysql:8-debian",
@@ -91,11 +99,11 @@ func StartMySQLDB(dbName, dbUser, dbPassword, dbPort string) (*MySQL, error) {
 	)
 	if err != nil {
 		cli.Close()
-		return nil, err
+		return
 	}
 
 	cleanup := func() error {
-		if err := cli.ContainerKill(context.Background(), container.ID, ""); err != nil {
+		if err := cli.ContainerKill(context.Background(), cntnr.ID, ""); err != nil {
 			return err
 		}
 		// if err := cli.ContainerRemove(context.Background(), container.ID, types.ContainerRemoveOptions{RemoveVolumes: true, RemoveLinks: true, Force: true}); err != nil {
@@ -105,27 +113,28 @@ func StartMySQLDB(dbName, dbUser, dbPassword, dbPort string) (*MySQL, error) {
 	}
 
 	// Start container
-	err = cli.ContainerStart(context.Background(), container.ID, types.ContainerStartOptions{})
+	err = cli.ContainerStart(context.Background(), cntnr.ID, types.ContainerStartOptions{})
 	if err != nil {
 		_ = cleanup()
-		return nil, err
+		return
 	}
 
-	// Get published port for container
-	inspect, err := cli.ContainerInspect(context.Background(), container.ID)
+	// Inspect the container so we can get published port for container
+	inspect, err := cli.ContainerInspect(context.Background(), cntnr.ID)
 	if err != nil {
 		_ = cleanup()
-		return nil, err
+		return
 	}
-	// bindings[0].HostIP + ":" + bindings[0].HostPort
 
+	// Get the container's network ports from the inspector
 	bindings, ok := inspect.NetworkSettings.Ports[nat.Port(dbPort+"/tcp")]
 	if !ok || len(bindings) < 1 {
 		_ = cleanup()
-		return nil, err
+		return
 	}
-	// Monitor Logs for readiness
-	logsReader, err := cli.ContainerLogs(context.Background(), container.ID, types.ContainerLogsOptions{ShowStdout: true, ShowStderr: true, Follow: true})
+
+	// Read the container's logs and scan them for a message that indicates the container has sucessessfully started and is ready for connections
+	logsReader, err = cli.ContainerLogs(context.Background(), cntnr.ID, types.ContainerLogsOptions{ShowStdout: true, ShowStderr: true, Follow: true})
 	if err != nil {
 		_ = cleanup()
 		return nil, err
@@ -153,9 +162,9 @@ func StartMySQLDB(dbName, dbUser, dbPassword, dbPort string) (*MySQL, error) {
 		_ = cleanup()
 		return nil, fmt.Errorf("timeout waiting for container")
 	}
-	fmt.Println("Container is running")
-	return &MySQL{
-		ID: container.ID,
+	logging.Println(1, "Container is running")
+	testContainer = &MySQLContainer{
+		ID: cntnr.ID,
 		Connection: ConnectionParams{
 			DBName: dbName,
 			DBUser: dbUser,
@@ -164,13 +173,15 @@ func StartMySQLDB(dbName, dbUser, dbPassword, dbPort string) (*MySQL, error) {
 			DBPort: bindings[0].HostPort,
 		},
 		Cleanup: cleanup,
-	}, nil
+		dbType:  "mysql",
+	}
+	return
 }
 
-func (mysql *MySQL) Close() error {
+func (mysql *MySQLContainer) Close() error {
 	return mysql.Cleanup()
 }
 
-func (mysql *MySQL) GetConnection() ConnectionParams {
+func (mysql *MySQLContainer) GetConnection() ConnectionParams {
 	return mysql.Connection
 }

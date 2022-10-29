@@ -12,10 +12,10 @@ type OperatingSystem struct {
 	Family       string      `bun:",type:varchar(64),notnull,unique:US_OperatingSystem"`
 	Version      string      `bun:",type:varchar(64),notnull,unique:US_OperatingSystem"`
 	Name         string      `bun:",type:varchar(64),notnull,unique:US_OperatingSystem"`
-	IsOpenSource bool        `bun:",nullzero,notnull,default:false"`
-	IsServer     bool        `bun:",nullzero,notnull,default:false"`
+	IsOpenSource bool        `bun:",type:boolean,nullzero,notnull,default:false"`
+	IsServer     bool        `bun:",type:boolean,nullzero,notnull,default:false"`
 	Notes        null.String `bun:",type:text"`
-	IsLocked     bool        `bun:",nullzero,notnull,default:false"`
+	IsLocked     bool        `bun:",type:boolean,nullzero,notnull,default:false"`
 }
 
 func GetOperatingSystemSeed() (seed []OperatingSystem) {

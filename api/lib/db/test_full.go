@@ -1,15 +1,10 @@
-//go:build database || full
-
 package db
 
 import (
 	"fmt"
-	"os"
 	"strings"
 	"time"
 
-	"facemasq/lib/files"
-	"facemasq/lib/logging"
 	"facemasq/models"
 
 	"github.com/volatiletech/null"
@@ -26,39 +21,44 @@ type ConnectionParams struct {
 	DBPass string
 	DBHost string
 	DBPort string
+	DBFile string
 }
 
-func ConnectToTest() (container TestContainer, err error) {
-	var dataPath string
+var RunningContainer TestContainer
 
+var DBEngines []string
+
+func ConnectToTest(preload bool) (cntnr TestContainer, err error) {
 	switch strings.ToLower(DBEngine) {
 	case "sqlite":
-		dataPath, err = files.GetDir("data")
+		cntnr, err = StartSQLiteContainer("network.sqlite")
 		if err != nil {
-			logging.Panic(err)
+			return
 		}
-
-		DBConnString = fmt.Sprintf("file:%[2]s%[1]c%[3]s", os.PathSeparator, dataPath, "network.sqlite")
+		connParams := cntnr.GetConnection()
+		DBConnString = fmt.Sprintf("file:%s", connParams.DBFile)
 	case "postgres":
-		container, err = StartPostgresDB("test_facemasq", "faceMasq", "testpasswd", "5432")
+		cntnr, err = StartPostgreSQLContainer("test_facemasq", "faceMasq", "testpasswd", "5432")
 		if err != nil {
-			logging.Panicf("Could not start postgres container: %v", err)
+			return
 		}
-		connParams := container.GetConnection()
+		connParams := cntnr.GetConnection()
 		DBConnString = fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable", connParams.DBUser, connParams.DBPass, connParams.DBHost, connParams.DBPort, connParams.DBName)
 	case "mysql":
-		container, err = StartMySQLDB("test_facemasq", "faceMasq", "testpasswd", "3306")
+		cntnr, err = StartMySQLContainer("test_facemasq", "faceMasq", "testpasswd", "3306")
 		if err != nil {
-			logging.Panicf("Could not start postgres container: %v", err)
+			return
 		}
-		connParams := container.GetConnection()
+		connParams := cntnr.GetConnection()
 		DBConnString = fmt.Sprintf("%s:%s@(%s:%s)/%s", connParams.DBUser, connParams.DBPass, connParams.DBHost, connParams.DBPort, connParams.DBName)
 	}
 	err = Connect()
 	if err != nil {
 		return
 	}
-	err = preloadTestData()
+	if preload {
+		err = preloadTestData()
+	}
 	return
 }
 

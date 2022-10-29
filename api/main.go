@@ -3,8 +3,8 @@ package main
 import (
 	"facemasq/lib/db"
 	"facemasq/lib/logging"
-	"facemasq/lib/netscan"
 	"facemasq/lib/network"
+	"facemasq/lib/scans/iprange"
 	"facemasq/routes"
 )
 
@@ -23,8 +23,8 @@ func main() {
 	network.ShowNetworkSummary()
 
 	if network.Target != "" {
-		logging.Processf("Active Net scan running every %v", netscan.Frequency)
-		netscan.Schedule()
+		logging.Processf("Active Net scan running every %v", iprange.Frequency)
+		iprange.Schedule()
 	}
 
 	err = routes.Run()

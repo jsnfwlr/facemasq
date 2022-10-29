@@ -15,10 +15,10 @@ type Device struct {
 	Model             null.String       `bun:",type:varchar(64)" json:"Model"`
 	Purchased         null.String       `bun:",type:varchar(10)" json:"Purchased"`
 	Serial            null.String       `bun:",type:varchar(128)" json:"Serial"`
-	FirstSeen         time.Time         `bun:",type:datetime,nullzero,notnull" json:"FirstSeen"`
-	IsTracked         null.Bool         `bun:",default:false" json:"IsTracked"`
-	IsGuest           null.Bool         `bun:",default:false" json:"IsGuest"`
-	IsOnline          null.Bool         `bun:",default:false" json:"IsOnline"`
+	FirstSeen         time.Time         `bun:",type:timestamp,nullzero,notnull" json:"FirstSeen"`
+	IsTracked         null.Bool         `bun:",type:boolean,default:false" json:"IsTracked"`
+	IsGuest           null.Bool         `bun:",type:boolean,default:false" json:"IsGuest"`
+	IsOnline          null.Bool         `bun:",type:boolean,default:false" json:"IsOnline"`
 	Label             null.String       `bun:",type:varchar(64),notnull" json:"Label"`
 	Notes             null.String       `bun:",type:text" json:"Notes"`
 	CategoryID        int64             `bun:",nullzero,notnull,default:1" json:"CategoryID"`
@@ -33,15 +33,23 @@ type Device struct {
 	Primary           PrimaryConnection `bun:"-"`
 }
 
-type PrimaryConnections []PrimaryConnection
-
-type PrimaryConnection struct {
-	IPv4            string
-	IPv6            string
-	MAC             string
-	VlanID          int64
-	InterfaceTypeID int64
-	IsReservedIP    bool
-	IsVirtualIP     bool
-	IsVirtualIFace  bool
+func GetDeviceTestData() (seed []Device) {
+	seed = []Device{
+		{
+			Label:     null.String{String: "Testing 1", Valid: true},
+			Notes:     null.String{String: "Testing", Valid: true},
+			FirstSeen: time.Now(),
+		},
+		{
+			Label:     null.String{String: "Testing 2", Valid: true},
+			Notes:     null.String{String: "Testing", Valid: true},
+			FirstSeen: time.Now(),
+		},
+		{
+			Label:     null.String{String: "Testing 3", Valid: true},
+			Notes:     null.String{String: "Testing", Valid: true},
+			FirstSeen: time.Now(),
+		},
+	}
+	return
 }

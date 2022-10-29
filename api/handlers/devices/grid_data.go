@@ -17,7 +17,7 @@ var DefaultConnTime = time.Duration(-30) * time.Minute
 
 type Investigation struct {
 	AddressID    int64
-	Connectivity []models.Connections
+	Connectivity []models.Connection
 }
 
 var upgrader = websocket.Upgrader{

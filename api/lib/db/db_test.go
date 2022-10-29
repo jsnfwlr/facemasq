@@ -1,3 +1,5 @@
+//go:build full || database
+
 package db
 
 import "testing"
@@ -65,5 +67,11 @@ func TestDBInit(t *testing.T) {
 		if DBEngine != dbTestSet[i].ExpectedEngine {
 			t.Errorf("DBEngine was expected to be `%s` - got `%s`", dbTestSet[i].ExpectedEngine, DBEngine)
 		}
+	}
+}
+
+func TestThing(t *testing.T) {
+	for e := range DBEngines {
+		t.Log(DBEngines[e])
 	}
 }

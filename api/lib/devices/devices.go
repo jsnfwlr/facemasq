@@ -29,7 +29,7 @@ type DeviceChildren struct {
 
 type InterfaceChildren string
 
-type Connectivity []models.Connections
+type Connectivity []models.Connection
 
 func (a Connectivity) Less(i, j int) bool { return a[i].Time.Before(a[j].Time) }
 func (a Connectivity) Len() int           { return len(a) }
@@ -56,7 +56,7 @@ func ParseConnectivityData(addresses []int64, connections []models.ConnectionGro
 		// 	fmt.Printf("Looking at %d - ", address) // DEBUG
 		// } // DEBUG
 		for i := range connections {
-			conn := models.Connections{Time: connections[i].Time, State: false}
+			conn := models.Connection{Time: connections[i].Time, State: false}
 			if strings.Contains(connections[i].AddressList, strconv.Itoa(int(address))) {
 				conn.State = true
 			}
@@ -285,7 +285,7 @@ func GetChangesSince(lastSeen time.Time, includeConnectivity bool) (matchedDevic
 	return
 }
 
-func GetSpecificAddressConnectivityData(addressID int64, connTime string) (connections []models.Connections, err error) {
+func GetSpecificAddressConnectivityData(addressID int64, connTime string) (connections []models.Connection, err error) {
 	sql := `SELECT scans.time, CASE WHEN address_id IS NULL THEN false ELSE true END as state FROM scans LEFT JOIN histories ON histories.scan_id = scans.id AND histories.address_id = ? WHERE scans.time > ? ORDER BY scans.id DESC;`
 	err = db.Conn.NewRaw(sql, addressID, connTime).Scan(db.Context, &connections)
 	if err != nil {

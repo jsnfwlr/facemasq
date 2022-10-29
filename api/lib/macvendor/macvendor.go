@@ -9,22 +9,31 @@ import (
 
 const uri = "https://api.macvendors.com/%s"
 
-func Lookup(mac string) (vendor string, err error) {
-	var response *http.Response
-	response, err = http.Get(fmt.Sprintf(uri, mac))
-	if err != nil {
-		return
-	}
-	buf := new(strings.Builder)
-	_, err = io.Copy(buf, response.Body)
-	if err != nil {
-		return
-	}
-	vendor = buf.String()
-	if vendor == `{"errors":{"detail":"Not Found"}}` {
-		vendor = ""
-		err = fmt.Errorf("could not determine vendor of `%s`", mac)
+var TooManyRequests = false
 
+func Lookup(mac string) (vendor string, err error) {
+	if !TooManyRequests {
+		var response *http.Response
+		response, err = http.Get(fmt.Sprintf(uri, mac))
+		if err != nil {
+			return
+		}
+		buf := new(strings.Builder)
+		_, err = io.Copy(buf, response.Body)
+		if err != nil {
+			return
+		}
+		vendor = buf.String()
+		if strings.Contains(vendor, "errors") {
+			if strings.Contains(vendor, "Too Many Requests") {
+				TooManyRequests = true
+			}
+			err = fmt.Errorf("could not determine vendor of `%s`: %v", mac, vendor)
+			vendor = ""
+		}
+		return
 	}
+	err = fmt.Errorf("too many vendor requests")
 	return
+
 }

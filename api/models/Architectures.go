@@ -11,7 +11,7 @@ type Architecture struct {
 	Label    string      `bun:",type:varchar(64),unique,notnull"`
 	BitSpace int64       `bun:",nullzero,notnull,default:64"`
 	Notes    null.String `bun:",type:text"`
-	IsLocked bool        `bun:",nullzero,notnull,default:false"`
+	IsLocked bool        `bun:",type:boolean,nullzero,notnull,default:false"`
 }
 
 func GetArchitectureSeed() (seed []Architecture) {

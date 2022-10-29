@@ -11,9 +11,9 @@ import (
 	"facemasq/lib/files"
 	"facemasq/lib/formats"
 	"facemasq/lib/logging"
-	"facemasq/lib/netscan"
 	"facemasq/lib/network"
-	"facemasq/lib/portscan"
+	"facemasq/lib/scans/iprange"
+	scanPorts "facemasq/lib/scans/port"
 	"facemasq/lib/utils"
 	"facemasq/models"
 
@@ -40,8 +40,8 @@ func Status(out http.ResponseWriter, in *http.Request) {
 	var settings models.Meta
 	details := make(map[string]string)
 
-	details["NetScanFrequency"] = netscan.Frequency.String()
-	details["PortScanActive"] = utils.Ternary(portscan.PortScan, "true", "false").(string)
+	details["NetScanFrequency"] = iprange.Frequency.String()
+	details["PortScanActive"] = utils.Ternary(scanPorts.PortScan, "true", "false").(string)
 	details["DBEngine"] = db.DBEngine
 	details["NetMask"] = network.Target
 	details["FormatHostnames"] = ""

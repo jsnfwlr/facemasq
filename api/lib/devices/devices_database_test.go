@@ -10,7 +10,7 @@ import (
 
 func TestGetDeviceChildren(t *testing.T) {
 	db.DBEngine = "mysql"
-	container, err := db.ConnectToTest()
+	container, err := db.ConnectToTest(true)
 	if err != nil {
 		t.Fatalf("Could not connect to DB: %v", err)
 	}

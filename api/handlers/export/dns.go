@@ -1,4 +1,4 @@
-package dnsmasq
+package export
 
 import (
 	"encoding/json"

@@ -10,7 +10,7 @@ import (
 
 func TestGetTrendData(t *testing.T) {
 	db.DBEngine = "mysql"
-	container, err := db.ConnectToTest()
+	container, err := db.ConnectToTest(true)
 	if err != nil {
 		t.Fatal(err)
 	}

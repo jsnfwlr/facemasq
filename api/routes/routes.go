@@ -7,7 +7,7 @@ import (
 
 	"facemasq/handlers/control"
 	"facemasq/handlers/devices"
-	"facemasq/handlers/dnsmasq"
+	"facemasq/handlers/export"
 	"facemasq/handlers/params"
 	"facemasq/handlers/settings"
 )
@@ -39,10 +39,10 @@ func (router *Router) controlRoutes() {
 }
 
 func (router *Router) masqRoutes() {
-	router.Mux.HandleFunc(`/api/dhcp`, dnsmasq.WriteDHCPConfig).Methods("GET").Name("WriteDHCPConfigGet")
-	router.Mux.HandleFunc(`/api/dhcp`, dnsmasq.WriteDHCPConfig).Methods("PUT").Name("WriteDHCPConfigPut")
-	router.Mux.HandleFunc(`/api/dns`, dnsmasq.WriteDNSConfig).Methods("GET").Name("WriteDNSConfigGet")
-	router.Mux.HandleFunc(`/api/dns`, dnsmasq.WriteDNSConfig).Methods("PUT").Name("WriteDNSConfigPut")
+	router.Mux.HandleFunc(`/api/dhcp`, export.WriteDHCPConfig).Methods("GET").Name("WriteDHCPConfigGet")
+	router.Mux.HandleFunc(`/api/dhcp`, export.WriteDHCPConfig).Methods("PUT").Name("WriteDHCPConfigPut")
+	router.Mux.HandleFunc(`/api/dns`, export.WriteDNSConfig).Methods("GET").Name("WriteDNSConfigGet")
+	router.Mux.HandleFunc(`/api/dns`, export.WriteDNSConfig).Methods("PUT").Name("WriteDNSConfigPut")
 }
 
 func (router *Router) deviceRoutes() {

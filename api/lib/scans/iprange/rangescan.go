@@ -1,4 +1,4 @@
-package netscan
+package iprange
 
 import (
 	"context"
@@ -16,9 +16,10 @@ import (
 
 	"facemasq/lib/db"
 	"facemasq/lib/logging"
+	"facemasq/lib/macvendor"
 	"facemasq/lib/network"
-	"facemasq/lib/portscan"
-	"facemasq/lib/scanresults"
+	"facemasq/lib/scans"
+	portscan "facemasq/lib/scans/port"
 	"facemasq/models"
 )
 
@@ -48,7 +49,7 @@ func Schedule() {
 		if err != nil {
 			logging.Printf(0, "error: %v", err)
 		}
-		err = portscan.DiscoverScanAndStoreAsync(scanID)
+		err = portscan.ScanAysnc(scanID, false)
 		if err != nil {
 			logging.Printf(0, "%v", err)
 		}
@@ -56,18 +57,10 @@ func Schedule() {
 	sched.StartAsync()
 }
 
-func ScanAndStore() (scanID int64, err error) {
-	var records scanresults.Records
-
+func Scan(scanID int64) (records scans.DeviceRecords, err error) {
+	macvendor.TooManyRequests = false
 	lastSeen := time.Now().Format("2006-01-02 15:04:05")
-	scanRecord := models.Scan{
-		Time: time.Now(),
-	}
-	_, err = db.Conn.NewInsert().Model(&scanRecord).Exec(db.Context)
-	if err != nil {
-		return
-	}
-	scanID = scanRecord.ID
+
 	// Get details of local interfaces
 	logging.Println(1, "Processing local interfaces")
 	records, err = getLocalIFaces(scanID, lastSeen)
@@ -100,10 +93,9 @@ func ScanAndStore() (scanID int64, err error) {
 		err = fmt.Errorf("could not complete scan: %v", err)
 		return
 	}
-
 	for _, result := range results {
 		if result.MAC != "" { // && result.IsHostUp() {
-			record := scanresults.Record{
+			record := scans.DeviceRecord{
 				ScanID:   scanID,
 				MAC:      strings.ToUpper(result.MAC),
 				IPv4:     result.Host.String(),
@@ -117,7 +109,10 @@ func ScanAndStore() (scanID int64, err error) {
 			records = append(records, record)
 		}
 	}
+	return
+}
 
+func Store(records scans.DeviceRecords, scanID int64) (err error) {
 	err = records.Store()
 	if err != nil {
 		logging.Printf(0, "error recording netscan results: %v", err)
@@ -155,8 +150,28 @@ func ScanAndStore() (scanID int64, err error) {
 	return
 }
 
-func getLocalIFaces(scanID int64, lastSeen string) (records scanresults.Records, err error) {
-	var record scanresults.Record
+func ScanAndStore() (scanID int64, err error) {
+	scanRecord := models.Scan{
+		Time: time.Now(),
+	}
+	_, err = db.Conn.NewInsert().Model(&scanRecord).Exec(db.Context)
+	if err != nil {
+		return
+	}
+	scanID = scanRecord.ID
+
+	var records scans.DeviceRecords
+	records, err = Scan(scanID)
+	if err != nil {
+		return
+	}
+	err = Store(records, scanID)
+
+	return
+}
+
+func getLocalIFaces(scanID int64, lastSeen string) (records scans.DeviceRecords, err error) {
+	var record scans.DeviceRecord
 	var ipv6 null.String
 	var ipv4 string
 
@@ -185,7 +200,7 @@ func getLocalIFaces(scanID int64, lastSeen string) (records scanresults.Records,
 					}
 
 				}
-				record = scanresults.Record{
+				record = scans.DeviceRecord{
 					ScanID:   scanID,
 					MAC:      strings.ToUpper(netFace.HardwareAddr.String()),
 					IPv4:     ipv4,

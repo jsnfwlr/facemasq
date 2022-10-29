@@ -1,6 +1,6 @@
 //go:build database || full
 
-package scanresults
+package scans
 
 import (
 	"testing"
@@ -14,7 +14,7 @@ import (
 func TestBulkStore(t *testing.T) {
 	lastSeen := time.Now()
 
-	container, err := db.ConnectToTest()
+	container, err := db.ConnectToTest(true)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -28,7 +28,7 @@ func TestBulkStore(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	results := Records{
+	results := DeviceRecords{
 		// {
 		// 	ScanID: scan.ID,
 		// 	IPv4:   address1.IPv4.String,

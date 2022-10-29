@@ -14,11 +14,11 @@ type User struct {
 	Username        null.String `bun:",type:varchar(64),unique,nullzero"`
 	Password        null.String `bun:",type:varchar(256)" json:"-"`
 	Label           string      `bun:",type:varchar(64),unique,notnull"`
-	CanAuthenticate bool        `bun:",nullzero,notnull,default:false"`
+	CanAuthenticate bool        `bun:",type:boolean,nullzero,notnull,default:false"`
 	AccessLevel     int64       `bun:",nullzero,notnull,default:0"`
-	IsInternal      bool        `bun:",nullzero,notnull,default:false"`
+	IsInternal      bool        `bun:",type:boolean,nullzero,notnull,default:false"`
 	Notes           null.String `bun:",type:text"`
-	IsLocked        bool        `bun:",nullzero,notnull,default:false"`
+	IsLocked        bool        `bun:",type:boolean,nullzero,notnull,default:false"`
 	NewPassword     null.String `bun:"-"`
 }
 

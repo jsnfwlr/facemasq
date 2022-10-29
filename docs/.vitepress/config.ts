@@ -1,5 +1,4 @@
 import { defineConfig } from "vitepress"
-
 import fr from "../fr/definition"
 import en from "../en/definition"
 import es from "../es/definition"
@@ -12,6 +11,8 @@ const langs = [
   es,
   zh,
 ]
+
+const modules = import.meta.glob('../**/definition.ts')
 
 
 export default defineConfig({

@@ -96,6 +96,7 @@ func Connect() (err error) {
 		}
 		Conn = bun.NewDB(conn, mysqldialect.New())
 	case "postgres":
+		DBEngine = "postgres"
 		config, err := pgx.ParseConfig(DBConnString)
 		if err != nil {
 			logging.Panic(err)
@@ -155,20 +156,24 @@ func prepare(ctx context.Context, db *bun.DB) (err error) {
 	drops = append(
 		drops,
 
-		// Users & Maintainers
-
-		// Devices
+		// Settings
+		(*models.Meta)(nil),
 
 		// Scans
-		(*models.Meta)(nil),
 		(*models.Port)(nil),
 		(*models.Scan)(nil),
 		(*models.History)(nil),
+
+		// Devices
 		(*models.Hostname)(nil),
 		(*models.Address)(nil),
 		(*models.Interface)(nil),
 		(*models.Device)(nil),
+
+		// Users & Maintainers
 		(*models.User)(nil),
+
+		// Params
 		(*models.VLAN)(nil),
 		(*models.Status)(nil),
 		(*models.OperatingSystem)(nil),
@@ -180,6 +185,7 @@ func prepare(ctx context.Context, db *bun.DB) (err error) {
 	)
 	creates = append(
 		creates,
+
 		// Params
 		(*models.Architecture)(nil),
 		(*models.Category)(nil),
@@ -198,11 +204,13 @@ func prepare(ctx context.Context, db *bun.DB) (err error) {
 		(*models.Interface)(nil),
 		(*models.Address)(nil),
 		(*models.Hostname)(nil),
-		(*models.History)(nil),
 
 		// Scans
+		(*models.History)(nil),
 		(*models.Scan)(nil),
 		(*models.Port)(nil),
+
+		// Settings
 		(*models.Meta)(nil),
 	)
 	for _, drop := range drops {

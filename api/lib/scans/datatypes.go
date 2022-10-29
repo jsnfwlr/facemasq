@@ -1,10 +1,10 @@
-package scanresults
+package scans
 
 import (
 	"github.com/volatiletech/null"
 )
 
-type Record struct {
+type DeviceRecord struct {
 	ScanID      int64       `bun:"-"`
 	Hostname    string      `bun:"-"`
 	IPv4        string      `bun:"IPv4"`
@@ -19,4 +19,11 @@ type Record struct {
 	AddressID   int64       `bun:"-"`
 }
 
-type Records []Record
+type DeviceRecords []DeviceRecord
+
+type AddressToPortScan struct {
+	AddressID int    `bun:"address_id"`
+	IPv4      string `bun:"ipv4"`
+}
+
+type AddressesToPortScan []AddressToPortScan

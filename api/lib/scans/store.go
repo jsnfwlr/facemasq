@@ -1,4 +1,4 @@
-package scanresults
+package scans
 
 import (
 	"fmt"
@@ -14,7 +14,7 @@ import (
 	"github.com/volatiletech/null"
 )
 
-func (records Records) GroupParams() (ipv4, mac []string) {
+func (records DeviceRecords) GroupParams() (ipv4, mac []string) {
 	for i := range records {
 		ipv4 = append(ipv4, records[i].IPv4)
 		mac = append(mac, records[i].MAC)
@@ -33,7 +33,7 @@ func getDevices() (allDevices []models.Device, err error) {
 	return
 }
 
-func (records Records) filterNew(allDevices []models.Device) (newAddressRecords, newDeviceRecords []Record) {
+func (records DeviceRecords) filterNew(allDevices []models.Device) (newAddressRecords, newDeviceRecords []DeviceRecord) {
 	for r := range records {
 		newInterface := true
 		newAddress := true
@@ -41,7 +41,6 @@ func (records Records) filterNew(allDevices []models.Device) (newAddressRecords,
 			for i := range allDevices[d].Interfaces {
 				if allDevices[d].Interfaces[i].MAC == records[r].MAC {
 					newInterface = false
-
 					for a := range allDevices[d].Interfaces[i].Addresses {
 						if allDevices[d].Interfaces[i].Addresses[a].IPv4.String == records[r].IPv4 {
 							newAddress = false
@@ -61,7 +60,7 @@ func (records Records) filterNew(allDevices []models.Device) (newAddressRecords,
 	return
 }
 
-func (records Records) Store() (err error) {
+func (records DeviceRecords) Store() (err error) {
 	var allDevices []models.Device
 
 	allDevices, err = getDevices()
@@ -108,7 +107,7 @@ func (records Records) Store() (err error) {
 
 	logging.Printf(1, "Updating %d History\n", len(ipv4))
 	var history []models.History
-	err = db.Conn.NewRaw(`SELECT id AS address_id, ? AS scan_id FROM addresses WHERE ipv4 IN (?) AND interface_id IN (SELECT id FROM interfaces WHERE mac IN (?));`, records[0].ScanID, bun.In(ipv4), bun.In(mac)).Scan(db.Context, &history)
+	err = db.Conn.NewRaw(`SELECT id AS address_id, ? AS scan_id, 0 as is_port_scan FROM addresses WHERE ipv4 IN (?) AND interface_id IN (SELECT id FROM interfaces WHERE mac IN (?));`, records[0].ScanID, bun.In(ipv4), bun.In(mac)).Scan(db.Context, &history)
 	if err != nil {
 		err = fmt.Errorf("could not generate bulk-insert history: %v", err)
 		logging.Printf(0, "could not generate bulk-insert history %v\n", err)
@@ -123,7 +122,7 @@ func (records Records) Store() (err error) {
 	return
 }
 
-func (record *Record) CreateDevice() (err error) {
+func (record *DeviceRecord) CreateDevice() (err error) {
 	device := models.Device{
 		MachineName: "",
 		Label:       null.String{String: "Unknown Device", Valid: true},
@@ -135,7 +134,7 @@ func (record *Record) CreateDevice() (err error) {
 
 	vendor, err := macvendor.Lookup(record.MAC)
 	if err != nil {
-		logging.Printf(0, "could not lookup vendor for MAC Address (%s): %v\n", record.MAC, err)
+		logging.Printf(3, "could not lookup vendor for MAC Address (%s): %v\n", record.MAC, err)
 		err = nil
 	}
 	if vendor != "" {
@@ -150,7 +149,7 @@ func (record *Record) CreateDevice() (err error) {
 	return
 }
 
-func (record *Record) CreateInterface() (err error) {
+func (record *DeviceRecord) CreateInterface() (err error) {
 	netface := models.Interface{
 		MAC:      record.MAC,
 		StatusID: 1,
@@ -167,7 +166,7 @@ func (record *Record) CreateInterface() (err error) {
 	return
 }
 
-func (record *Record) CreateAddress() (err error) {
+func (record *DeviceRecord) CreateAddress() (err error) {
 	address := models.Address{
 		InterfaceID: record.InterfaceID,
 		Notes:       null.String{String: record.Notes, Valid: true},
@@ -184,7 +183,7 @@ func (record *Record) CreateAddress() (err error) {
 	return
 }
 
-func (record *Record) CreateHostname() (err error) {
+func (record *DeviceRecord) CreateHostname() (err error) {
 	hostname := models.Hostname{
 		AddressID: record.AddressID,
 		Notes:     null.String{String: record.Notes, Valid: true},
@@ -205,7 +204,7 @@ func PrepareForTest() (err error) {
 	if err != nil {
 		return
 	}
-	records := Records{
+	records := DeviceRecords{
 		{
 			ScanID: scan.ID,
 			IPv4:   "192.168.0.1",
@@ -227,5 +226,4 @@ func PrepareForTest() (err error) {
 	err = records.Store()
 
 	return
-
 }
