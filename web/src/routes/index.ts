@@ -88,7 +88,7 @@ router.beforeEach(async (to, from, next) => {
   }
 
   // use locale if paramsLocale is not in SUPPORT_LOCALES
-  if (!SUPPORT_LOCALES.includes(paramsLocale)) {
+  if (paramsLocale === "" || !SUPPORT_LOCALES.includes(paramsLocale)) {
     return next(`/${locale}`)
   }
 
