@@ -514,7 +514,7 @@
           <td data-label="IP" class="ip">
             <div :class="columnClass('ip', row.Primary.IsReservedIP)">{{ row.Primary.IPv4 }}</div>
           </td>
-          <td data-label="MAC" class="mac">
+          <td data-label="MAC" class="whitespace-nowrap mac">
             <div><mdIcon :icon="iconIFace(row.Primary.InterfaceTypeID)" size="10" />{{ row.Primary.MAC }}</div>
           </td>
           <td data-label="First Seen" class="firstseen">

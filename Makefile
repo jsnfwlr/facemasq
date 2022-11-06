@@ -34,25 +34,25 @@ api-vet:
 	@cd api; go vet -tags test ./...
 api-test:
 	@cd api; go test ./...
-
 api-coverage:
 	@rm data/test.sqlite data/test2.sqlite; cd api; go test -v --tags "full" ./... -covermode=count -coverpkg=./... -coverprofile ../dist/coverage.out; go tool cover -html ../dist/coverage.out -o ../dist/coverage.html
-
-api-test-tests:
-	@cd api; go test -tags test ./...
-# API - build local version
-api: api-test
+api-test-db: 					# API - run unit-tests against mysql, pgsql, and sqlite
+	@cd api; go test -tags database ./...
+api-test-testing:			# API - run unit-tests to ensure the functions used to facilitate testing are working
+	@cd api; go test -tags testing ./...
+api-test-full: 				# API - run  test-suite
+	@cd api; go test --tags full ./...
+api: api-test 				# API - build local version
 	cd api; CGO_ENABLED=1 go build -ldflags "-linkmode external -extldflags -static" --tags "linux sqlite_foreign_keys=1" -o ../dist/api/facemasq .
 
 # CONTAINER - build various versions of the container
 container-release:
 	docker buildx build --platform linux/arm64,linux/amd64 -t $(IMAGENAME):dev -t $(IMAGENAME):$(CURRENTVERSION) --push -f docker/Dockerfile.multiarch .
-
 container-dev:
 	docker buildx build --platform linux/arm64,linux/amd64 -t $(IMAGENAME):dev --push -f docker/Dockerfile.multiarch .
-
 container-basic:
 	docker build -t $(IMAGENAME):basic-$(ARCH) -t $(IMAGENAME):basic-$(ARCH)-$(CURRENTVERSION) -f docker/Dockerfile .
+
 # WEB - testing
 web-test:
 	@echo "No Testing Yet"
@@ -60,7 +60,7 @@ web-coverage:
 	@echo "No Testing Yet"
 # WEB - build the web UI
 web: web-test
-	cd web; pnpm build
+	cd web; pnpm install; pnpm build
 
 # Docs - generation, serving
 docs:

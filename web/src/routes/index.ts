@@ -6,7 +6,6 @@ import ParamPage from "@/pages/params.vue"
 import InfoPage from "@/pages/info.vue"
 
 import { setupI18n, setI18nLanguage, loadLocaleMessages, SUPPORT_LOCALES } from "@/i18n"
-
 // import en fro../../../i18n/web/facemasq.en.json"
 // import fr fro../../../i18n/web/facemasq.fr.json"
 
@@ -82,10 +81,10 @@ const defaultDocumentTitle = "faceMasq"
 router.beforeEach(async (to, from, next) => {
   const locale = "en"
   let paramsLocale = ""
-  if (typeof to.params.locale === "string") {
+  if (typeof to.params?.locale === "string") {
     paramsLocale = to.params.locale
-  } else {
-    paramsLocale = to.params.locale[0]
+  } else if (typeof to.params?.locale === "object" && Array.isArray(to.params.locale)) {
+    paramsLocale = to.params?.locale[0]
   }
 
   // use locale if paramsLocale is not in SUPPORT_LOCALES
