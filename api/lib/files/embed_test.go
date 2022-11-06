@@ -1,12 +1,6 @@
 package files
 
-import (
-	"fmt"
-	"io/fs"
-	"os"
-	"testing"
-)
-
+/*
 func getLocalFile() ([]byte, error) {
 	libFilesTemplates, err := GetDir("api/lib/files/templates")
 	if err != nil {
@@ -61,3 +55,4 @@ func TestGetEmbeddedFileSystem(t *testing.T) {
 		t.Errorf("Two values don't match\nFile:\n%s<<EOF\nEmbed:\n%s<<EOF", string(contents1), string(contents2))
 	}
 }
+*/

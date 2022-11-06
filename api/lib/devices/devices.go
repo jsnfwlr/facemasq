@@ -36,10 +36,10 @@ func (a Connectivity) Len() int           { return len(a) }
 func (a Connectivity) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
 
 func GetConnectivityData(connTime string) (connections []models.ConnectionGroup, err error) {
-	sql := `SELECT time, CASE WHEN addresses IS NULL THEN 204 ELSE addresses END AS addresses FROM (SELECT scans.time, GROUP_CONCAT(address_id, ',') as addresses FROM scans LEFT JOIN histories ON scans.id = histories.scan_id WHERE scans.time > ? GROUP BY scans.time) as scans ORDER BY scans.time ASC;`
+	sql := `SELECT time, CASE WHEN addresses IS NULL THEN 204 ELSE addresses END AS addresses FROM (SELECT scans.time, GROUP_CONCAT(address_id) as addresses FROM scans LEFT JOIN histories ON scans.id = histories.scan_id WHERE scans.time > ? GROUP BY scans.time) as scans ORDER BY scans.time ASC;`
 	err = db.Conn.NewRaw(sql, connTime).Scan(db.Context, &connections)
 	if err != nil {
-		logging.Errorf("Error getting connectivity data: %v", err)
+		logging.Error("Error getting connectivity data: %v", err)
 		return
 	}
 	for i := range connections {
@@ -289,7 +289,7 @@ func GetSpecificAddressConnectivityData(addressID int64, connTime string) (conne
 	sql := `SELECT scans.time, CASE WHEN address_id IS NULL THEN false ELSE true END as state FROM scans LEFT JOIN histories ON histories.scan_id = scans.id AND histories.address_id = ? WHERE scans.time > ? ORDER BY scans.id DESC;`
 	err = db.Conn.NewRaw(sql, addressID, connTime).Scan(db.Context, &connections)
 	if err != nil {
-		logging.Errorf("Error getting connectivity data: %v", err)
+		logging.Error("Error getting connectivity data: %v", err)
 		return
 	}
 	sort.Sort(Connectivity(connections))

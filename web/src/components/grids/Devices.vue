@@ -669,6 +669,7 @@
             }
             &.mac {
               @apply flex lg:table-cell lg:w-[160px];
+              white-space: nowrap;
             }
             &.ip {
               @apply flex lg:table-cell lg:w-[160px];

@@ -12,7 +12,10 @@ type Hostname struct {
 	IsDNS     bool        `bun:",type:boolean,nullzero,notnull,default:false"`
 	IsSelfSet bool        `bun:",type:boolean,nullzero,notnull,default:false"`
 	Notes     null.String `bun:",type:text"`
-	AddressID int64       `bun:""`
+	// CreatedAt time.Time   `bun:",nullzero,notnull,default:current_timestamp"`
+	// DeletedAt time.Time   `bun:",soft_delete,nullzero"`
+	AddressID int64    `bun:""`
+	Address   *Address `bun:"rel:belongs-to,join:address_id=id"`
 }
 
 func GetHostnameTestData(addresses []Address) (seed []Hostname) {

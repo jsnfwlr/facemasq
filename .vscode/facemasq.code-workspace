@@ -2,14 +2,17 @@
   "folders": [
     {
       "path": ".."
+    },
+    {
+      "path": "../../../work/grainmarket/api/core/logging"
     }
   ],
   "settings": {
     "editor.codeActionsOnSave": {
       "source.fixAll.eslint": true
     },
-    "go.buildTags": "database sqlite postgresql mysql testing",
-  "go.testTags": "database sqlite postgresql mysql testing",
+    "go.buildTags": "database sqlite postgresql mysql testing extensions",
+    "go.testTags": "database sqlite postgresql mysql testing extensions",
     "eslint.validate": ["javascript", "typescript"],
     "css.customData": ["./facemasq.css-data.json"],
     "html.format.indentInnerHtml": true,

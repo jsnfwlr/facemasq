@@ -2,7 +2,8 @@ package main
 
 import (
 	"fmt"
-	"time"
+
+	"facemasq/lib/logging"
 )
 
 func main() {
@@ -31,17 +32,33 @@ func main() {
 	// 	// }
 	// 	fmt.Println()
 	// }
+	logging.New("", "")
+	logging.Verbosity = logging.DEBUG1
 	var portList []int64
 	for i := int64(1); i <= 1024; i++ {
 		portList = append(portList, i)
 	}
 
-	for a := 0; a < 3; a++ {
+	for a := 0; a < 6; a++ {
 		j := 0
 		for i := range portList {
 			if i != 0 && i%(len(portList)/10) == 0 {
-				time.Sleep(500 * time.Millisecond)
-				fmt.Printf("%d", j)
+				// time.Sleep(500 * time.Millisecond)
+				switch a {
+				case 0:
+					logging.Debug1("s: %d", j)
+				case 1:
+					logging.Error("s: %d", j)
+				case 2:
+					logging.Warning("s: %d", j)
+
+				case 3:
+					logging.System("s: %d", j)
+				case 4:
+					logging.Notice("s: %d", j)
+				case 5:
+					logging.Info("s: %d", j)
+				}
 				j++
 
 			}

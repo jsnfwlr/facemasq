@@ -13,7 +13,7 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-var DefaultConnTime = time.Duration(-30) * time.Minute
+var DefaultConnTime = time.Duration(-60) * time.Minute
 
 type Investigation struct {
 	AddressID    int64
@@ -30,7 +30,7 @@ func InvestigateAddresses(out http.ResponseWriter, in *http.Request) {
 	var investigations []Investigation
 	err := formats.ReadJSONBody(in, &input)
 	if err != nil {
-		logging.Errorf("Unable to parse Address IDs: %v\n", err)
+		logging.Error("Unable to parse Address IDs: %v\n", err)
 		http.Error(out, "Unable to parse Address IDs", http.StatusInternalServerError)
 		return
 	}
@@ -40,7 +40,7 @@ func InvestigateAddresses(out http.ResponseWriter, in *http.Request) {
 		}
 		investigation.Connectivity, err = helper.GetSpecificAddressConnectivityData(address, time.Now().Add(time.Duration(7*24*-1)*time.Hour).Format("2006-01-02 15:04"))
 		if err != nil {
-			logging.Errorf("Unable to get connection data: %v\n", err)
+			logging.Error("Unable to get connection data: %v\n", err)
 			http.Error(out, "Unable to get connection data", http.StatusInternalServerError)
 			return
 		}
@@ -55,11 +55,15 @@ func GetActive(out http.ResponseWriter, in *http.Request) {
 		Netfaces:  `SELECT * FROM interfaces ORDER BY is_primary DESC, is_virtual ASC;`,
 		Addresses: `SELECT * FROM addresses WHERE last_seen = (SELECT time FROM scans ORDER BY time DESC LIMIT 1) ORDER BY is_primary DESC, is_virtual ASC;`,
 		Hostnames: `SELECT * FROM hostnames;`,
+		// Devices:   `SELECT * FROM devices;`,
+		// Netfaces:  `SELECT * FROM interfaces ORDER BY is_primary DESC, is_virtual ASC;`,
+		// Addresses: `SELECT * FROM addresses WHERE last_seen = (SELECT time FROM scans ORDER BY time DESC LIMIT 1) ORDER BY is_primary DESC, is_virtual ASC;`,
+		// Hostnames: `SELECT * FROM hostnames;`,
 	}
 
 	activeDevices, err := helper.GetDevices(queries, time.Now().Add(DefaultConnTime).Format("2006-01-02 15:04"), true)
 	if err != nil {
-		logging.Panicf("Error: %v", err)
+		logging.Panic("Error: %v", err)
 		http.Error(out, fmt.Sprintf("Unable to retrieve data: %v", err), http.StatusInternalServerError)
 		return
 	}
@@ -76,7 +80,7 @@ func GetAll(out http.ResponseWriter, in *http.Request) {
 	}
 	allDevices, err := helper.GetDevices(queries, time.Now().Add(DefaultConnTime).Format("2006-01-02 15:04"), true)
 	if err != nil {
-		logging.Panicf("Error: %v", err)
+		logging.Panic("Error: %v", err)
 		http.Error(out, fmt.Sprintf("Unable to retrieve data: %v", err), http.StatusInternalServerError)
 		return
 	}
@@ -86,7 +90,7 @@ func GetAll(out http.ResponseWriter, in *http.Request) {
 
 func GetUnknown(out http.ResponseWriter, in *http.Request) {
 	queries := helper.DeviceQueries{
-		Devices:   `SELECT * FROM devices WHERE is_tracked = 0;`,
+		Devices:   `SELECT * FROM devices WHERE status_id = 1;`,
 		Netfaces:  `SELECT * FROM interfaces ORDER BY is_primary DESC, is_virtual ASC;`,
 		Addresses: `SELECT * FROM addresses ORDER BY is_primary DESC, is_virtual ASC;`,
 		Hostnames: `SELECT * FROM hostnames;`,
@@ -94,7 +98,7 @@ func GetUnknown(out http.ResponseWriter, in *http.Request) {
 
 	unknownDevices, err := helper.GetDevices(queries, time.Now().Add(DefaultConnTime).Format("2006-01-02 15:04"), true)
 	if err != nil {
-		logging.Panicf("Error: %v", err)
+		logging.Panic("Error: %v", err)
 		http.Error(out, fmt.Sprintf("Unable to retrieve data: %v", err), http.StatusInternalServerError)
 		return
 	}
@@ -106,7 +110,7 @@ func GetRecentChanges(out http.ResponseWriter, in *http.Request) {
 	socket, err := upgrader.Upgrade(out, in, nil)
 	if err != nil {
 		if _, ok := err.(websocket.HandshakeError); !ok {
-			logging.Errorln(err)
+			logging.Error(err)
 		}
 		return
 	}

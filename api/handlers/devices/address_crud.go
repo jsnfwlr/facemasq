@@ -14,7 +14,7 @@ func SaveAddress(out http.ResponseWriter, in *http.Request) {
 	var input models.Address
 	err := formats.ReadJSONBody(in, &input)
 	if err != nil {
-		logging.Errorf("Unable to parse Address: %v", err)
+		logging.Error("Unable to parse Address: %v", err)
 		http.Error(out, "Unable to parse Address", http.StatusInternalServerError)
 		return
 	}
@@ -24,7 +24,7 @@ func SaveAddress(out http.ResponseWriter, in *http.Request) {
 		_, err = db.Conn.NewInsert().Model(&input).Exec(db.Context)
 	}
 	if err != nil {
-		logging.Errorf("Unable to save Address: %v", err)
+		logging.Error("Unable to save Address: %v", err)
 		http.Error(out, "Unable to save Address", http.StatusInternalServerError)
 		return
 
@@ -36,14 +36,14 @@ func DeleteAddress(out http.ResponseWriter, in *http.Request) {
 	var input models.Device
 	err := formats.ReadJSONBody(in, &input)
 	if err != nil {
-		logging.Errorf("Unable to parse Device: %v", err)
+		logging.Error("Unable to parse Device: %v", err)
 		http.Error(out, "Unable to parse Device", http.StatusInternalServerError)
 		return
 	}
 
 	err = devices.DeleteAddress(input.ID)
 	if err != nil {
-		logging.Errorf("Unable to delete Device: %v", err)
+		logging.Error("Unable to delete Device: %v", err)
 		http.Error(out, "Unable to delete Device", http.StatusInternalServerError)
 		return
 

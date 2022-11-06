@@ -81,11 +81,13 @@ func GetAppRoot() (rootDir string, err error) {
 }
 
 func GetDir(which string) (dir string, err error) {
+
 	var rootDir string
 	rootDir, err = GetAppRoot()
 	if err != nil {
 		return
 	}
+
 	lowerWhich := strings.ToLower(which)
 	switch lowerWhich {
 	default:

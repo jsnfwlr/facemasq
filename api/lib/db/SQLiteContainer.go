@@ -1,10 +1,11 @@
 package db
 
 import (
-	"facemasq/lib/files"
-	"facemasq/lib/logging"
 	"fmt"
 	"os"
+
+	"facemasq/lib/files"
+	"facemasq/lib/logging"
 )
 
 type SQLiteContainer struct {
@@ -27,7 +28,7 @@ func StartSQLiteContainer(filename string) (testContainer *SQLiteContainer, err 
 		}
 		return nil
 	}
-	logging.Printf(1, "Dummy container is running %s", dbFile)
+	logging.Debug1("Dummy container is running %s", dbFile)
 
 	testContainer = &SQLiteContainer{
 		ID: filename,

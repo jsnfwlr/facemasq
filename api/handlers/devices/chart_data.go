@@ -35,13 +35,13 @@ func GetDashboardChartData(out http.ResponseWriter, in *http.Request) {
 
 	series["full"], err = getAddressCountPerScan(time.Duration(-24) * time.Hour)
 	if err != nil {
-		logging.Errorf("error getting intial chart data: %v\n", err)
+		logging.Error("error getting intial chart data: %v", err)
 		http.Error(out, "Unable to retrieve inital chart data", http.StatusInternalServerError)
 	}
 
 	series["averaged"], err = getAverageAddressCountPerPeriod(time.Duration(-24)*time.Hour, time.Duration(5)*frequency)
 	if err != nil {
-		logging.Errorf("error getting averaged chart data: %v\n", err)
+		logging.Error("error getting averaged chart data: %v", err)
 		http.Error(out, "Unable to retrieve averaged chart data", http.StatusInternalServerError)
 	}
 

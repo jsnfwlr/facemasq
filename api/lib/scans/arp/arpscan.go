@@ -51,7 +51,7 @@ func ScanAndStore() {
 	// Get a list of all interfaces.
 	netFaces, err := net.Interfaces()
 	if err != nil {
-		logging.Errorf("ArpScan: %+v\n", err.Error())
+		logging.Log.Error("ArpScan: %+v\n", err.Error())
 		return
 	}
 	var wg sync.WaitGroup
@@ -59,7 +59,7 @@ func ScanAndStore() {
 		if !strings.Contains(netFace.Name, "veth") && !strings.Contains(netFace.Name, "lo") && !strings.Contains(netFace.Name, "br-") && !strings.Contains(netFace.Name, "docker0") {
 			addresses, err := netFace.Addrs()
 			if err != nil {
-				logging.Errorf("ArpScan: %+v\n", err.Error())
+				logging.Log.Error("ArpScan: %+v\n", err.Error())
 				continue
 			}
 			if len(addresses) > 0 {
@@ -68,7 +68,7 @@ func ScanAndStore() {
 				go func(iface net.Interface) {
 					defer wg.Done()
 					if err := ScanARP(&iface); err != nil {
-						logging.Errorf("interface %v: %v", iface.Name, err)
+						logging.Log.Error("interface %v: %v", iface.Name, err)
 					}
 				}(netFace)
 			}
@@ -123,7 +123,7 @@ func ScanARP(iface *net.Interface) error {
 	for {
 		// Write our scan packets out to the handle.
 		if err := writeARP(handle, iface, addr); err != nil {
-			logging.Errorf("error writing packets on %v: %v", iface.Name, err)
+			logging.Log.Error("error writing packets on %v: %v", iface.Name, err)
 			return err
 		}
 		// We don't know exactly how long it'll take for packets to be
@@ -143,7 +143,7 @@ func readARP(handle *pcap.Handle, iface *net.Interface, stop chan struct{}) {
 		var packet gopacket.Packet
 		select {
 		case <-stop:
-			logging.Processln("Stopping ARP Scan")
+			logging.Log.System("Stopping ARP Scan")
 			return
 		case packet = <-in:
 			arpLayer := packet.Layer(layers.LayerTypeARP)
@@ -167,11 +167,11 @@ func readARP(handle *pcap.Handle, iface *net.Interface, stop chan struct{}) {
 					sql := `INSERT INTO Scans (Time) VALUES (?);`
 					sqlres, err = db.Conn.Exec(sql, time.Now().Format("2006-01-02 15:04:05"))
 					if err != nil {
-						logging.Errorf("api/lib/arpscan/arpscan.go:177 Err: %v\n", err)
+						logging.Log.Error("api/lib/arpscan/arpscan.go:177 Err: %v\n", err)
 					}
 					scanID, _ = sqlres.LastInsertId()
 				} else {
-					logging.Errorf("api/lib/arpscan/arpscan.go:181 Err: %v\n", err)
+					logging.Log.Error("api/lib/arpscan/arpscan.go:181 Err: %v\n", err)
 				}
 			}
 
@@ -182,7 +182,7 @@ func readARP(handle *pcap.Handle, iface *net.Interface, stop chan struct{}) {
 				MAC:      strings.ToUpper(net.HardwareAddr(arp.SourceHwAddress).String()),
 			}
 			record.Store()
-			logging.Printf(1, "Updating %v (%v) via ARP\n", record.IPv4, record.MAC)
+			logging.Log.Debug1("Updating %v (%v) via ARP\n", record.IPv4, record.MAC)
 		}
 	}
 }

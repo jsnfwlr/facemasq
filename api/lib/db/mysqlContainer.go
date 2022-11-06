@@ -3,12 +3,13 @@ package db
 import (
 	"bufio"
 	"context"
-	"facemasq/lib/logging"
 	"fmt"
 	"io"
 	"os"
 	"strings"
 	"time"
+
+	"facemasq/lib/logging"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
@@ -162,7 +163,7 @@ func StartMySQLContainer(dbName, dbUser, dbPassword, dbPort string) (testContain
 		_ = cleanup()
 		return nil, fmt.Errorf("timeout waiting for container")
 	}
-	logging.Println(1, "Container is running")
+	logging.Debug1("Container is running")
 	testContainer = &MySQLContainer{
 		ID: cntnr.ID,
 		Connection: ConnectionParams{

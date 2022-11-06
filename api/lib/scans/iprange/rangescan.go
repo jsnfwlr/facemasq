@@ -15,6 +15,7 @@ import (
 	"github.com/volatiletech/null"
 
 	"facemasq/lib/db"
+	"facemasq/lib/events"
 	"facemasq/lib/logging"
 	"facemasq/lib/macvendor"
 	"facemasq/lib/network"
@@ -47,12 +48,13 @@ func Schedule() {
 	sched.Every(Frequency).Do(func() {
 		scanID, err := ScanAndStore()
 		if err != nil {
-			logging.Errorf("error: %v", err)
+			logging.Error("error: %v", err)
 		}
 		err = portscan.ScanAysnc(scanID, false)
 		if err != nil {
-			logging.Errorf("%v", err)
+			logging.Error("%v", err)
 		}
+
 	})
 	sched.StartAsync()
 }
@@ -62,7 +64,7 @@ func Scan(scanID int64) (records scans.DeviceRecords, err error) {
 	lastSeen := time.Now().Format("2006-01-02 15:04:05")
 
 	// Get details of local interfaces
-	logging.Println(1, "Processing local interfaces")
+	logging.Debug1("Processing local interfaces")
 	records, err = getLocalIFaces(scanID, lastSeen)
 	if err != nil {
 		err = fmt.Errorf("could not get local interfaces: %v", err)
@@ -71,7 +73,7 @@ func Scan(scanID int64) (records scans.DeviceRecords, err error) {
 	}
 
 	// Scan the $target network
-	logging.Println(1, "Scanning network")
+	logging.Debug1("Scanning network")
 	ctx, cancel := context.WithCancel(context.Background())
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)
@@ -104,7 +106,7 @@ func Scan(scanID int64) (records scans.DeviceRecords, err error) {
 				Notes:    result.Manufacturer,
 			}
 
-			logging.Printf(3, "Found %s (%s) via NET", record.IPv4, record.MAC)
+			logging.Debug3("Found %s (%s) via NET", record.IPv4, record.MAC)
 
 			records = append(records, record)
 		}
@@ -115,7 +117,7 @@ func Scan(scanID int64) (records scans.DeviceRecords, err error) {
 func Store(records scans.DeviceRecords, scanID int64) (err error) {
 	err = records.Store()
 	if err != nil {
-		logging.Errorf("error recording netscan results: %v", err)
+		logging.Error("error recording netscan results: %v", err)
 		err = nil // a single error here shouldn't stop the whole process
 	}
 
@@ -123,28 +125,28 @@ func Store(records scans.DeviceRecords, scanID int64) (err error) {
 	sqlQ := `UPDATE devices SET is_online = false WHERE is_online = true;`
 	_, err = db.Conn.Exec(sqlQ)
 	if err != nil {
-		logging.Errorf("could not update device statuses: %v", err)
+		logging.Error("could not update device statuses: %v", err)
 		// return
 	}
 
 	sqlQ = `UPDATE interfaces SET is_online = false WHERE is_online = true;`
 	_, err = db.Conn.Exec(sqlQ)
 	if err != nil {
-		logging.Errorf("could not update Interfaces statuses: %v", err)
+		logging.Error("could not update Interfaces statuses: %v", err)
 		// return
 	}
 
 	sqlQ = `UPDATE devices SET is_online = true WHERE is_online = false AND id IN (SELECT interfaces.device_id FROM interfaces JOIN addresses ON addresses.interface_id = interfaces.id JOIN histories ON histories.address_id = addresses.id AND histories.scan_id = ?);`
 	_, err = db.Conn.Exec(sqlQ, scanID)
 	if err != nil {
-		logging.Errorf("could not update device statuses: %v", err)
+		logging.Error("could not update device statuses: %v", err)
 		// return
 	}
 
 	sqlQ = `UPDATE interfaces SET is_online = true WHERE is_online = false AND ID IN (SELECT addresses.interface_id FROM addresses JOIN histories ON histories.address_id = addresses.id AND histories.scan_id = ?);`
 	_, err = db.Conn.Exec(sqlQ, scanID)
 	if err != nil {
-		logging.Errorf("could not updatie Interfaces statuses: %v", err)
+		logging.Error("could not updatie Interfaces statuses: %v", err)
 		// return
 	}
 	return
@@ -166,7 +168,7 @@ func ScanAndStore() (scanID int64, err error) {
 		return
 	}
 	err = Store(records, scanID)
-
+	events.Emit(events.Event{Kind: "scan:range:complete"})
 	return
 }
 
@@ -177,14 +179,14 @@ func getLocalIFaces(scanID int64, lastSeen string) (records scans.DeviceRecords,
 
 	netFaces, err := net.Interfaces()
 	if err != nil {
-		logging.Errorf("ProcessLocal: %+v", err.Error())
+		logging.Error("ProcessLocal: %+v", err.Error())
 		return
 	}
 	for _, netFace := range netFaces {
 		if !strings.Contains(netFace.Name, "veth") && !strings.Contains(netFace.Name, "lo") && !strings.Contains(netFace.Name, "br-") && !strings.Contains(netFace.Name, "docker0") {
 			addresses, err := netFace.Addrs()
 			if err != nil {
-				logging.Errorf("ProcessLocal: %+v", err.Error())
+				logging.Error("ProcessLocal: %+v", err.Error())
 				continue
 			}
 			if len(addresses) > 0 {

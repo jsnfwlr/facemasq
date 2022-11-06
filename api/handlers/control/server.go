@@ -21,7 +21,7 @@ import (
 )
 
 func Exit(out http.ResponseWriter, in *http.Request) {
-	logging.Processln("Remote exit invoked")
+	logging.System("Remote exit invoked")
 	os.Exit(0)
 }
 
@@ -48,7 +48,7 @@ func Status(out http.ResponseWriter, in *http.Request) {
 
 	err := db.Conn.NewSelect().Model(&settings).Where(`name = 'formatHostnames' AND user_id IS NULL`).Scan(db.Context)
 	if err != nil {
-		logging.Errorf("error getting settings: %v", err)
+		logging.Error("error getting settings: %v", err)
 		http.Error(out, "Unable to retrieve data", http.StatusInternalServerError)
 		return
 	}

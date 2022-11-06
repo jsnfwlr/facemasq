@@ -14,7 +14,7 @@ func SaveHostname(out http.ResponseWriter, in *http.Request) {
 	var input models.Hostname
 	err := formats.ReadJSONBody(in, &input)
 	if err != nil {
-		logging.Errorf("Unable to parse Hostname: %v", err)
+		logging.Error("Unable to parse Hostname: %v", err)
 		http.Error(out, "Unable to parse Hostname", http.StatusInternalServerError)
 		return
 	}
@@ -24,7 +24,7 @@ func SaveHostname(out http.ResponseWriter, in *http.Request) {
 		_, err = db.Conn.NewInsert().Model(&input).Exec(db.Context)
 	}
 	if err != nil {
-		logging.Errorf("Unable to save Hostname: %v", err)
+		logging.Error("Unable to save Hostname: %v", err)
 		http.Error(out, "Unable to save Hostname", http.StatusInternalServerError)
 		return
 
@@ -36,7 +36,7 @@ func DeleteHostname(out http.ResponseWriter, in *http.Request) {
 	var input models.Hostname
 	err := formats.ReadJSONBody(in, &input)
 	if err != nil {
-		logging.Errorf("Unable to parse Hostname: %v", err)
+		logging.Error("Unable to parse Hostname: %v", err)
 		http.Error(out, "Unable to parse Hostname", http.StatusInternalServerError)
 		return
 	}
@@ -46,7 +46,7 @@ func DeleteHostname(out http.ResponseWriter, in *http.Request) {
 		err = fmt.Errorf("input (%v) is not a valid hostname record", input)
 	}
 	if err != nil {
-		logging.Errorf("Unable to delete Hostname: %v", err)
+		logging.Error("Unable to delete Hostname: %v", err)
 		http.Error(out, "Unable to delete Hostname", http.StatusInternalServerError)
 		return
 

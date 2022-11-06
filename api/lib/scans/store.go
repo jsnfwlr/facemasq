@@ -6,6 +6,7 @@ import (
 
 	"facemasq/lib/db"
 	"facemasq/lib/devices"
+	"facemasq/lib/events"
 	"facemasq/lib/logging"
 	"facemasq/lib/macvendor"
 	"facemasq/models"
@@ -77,6 +78,7 @@ func (records DeviceRecords) Store() (err error) {
 				return
 			}
 		}
+		events.Emit(events.Event{Kind: "scan:addresses:new"})
 	}
 	if len(newDeviceRecords) > 0 {
 		for d := range newDeviceRecords {
@@ -85,37 +87,39 @@ func (records DeviceRecords) Store() (err error) {
 				return
 			}
 		}
+		events.Emit(events.Event{Kind: "scan:devices:new"})
 	}
 
 	ipv4, mac := records.GroupParams()
 
-	logging.Printf(1, "Updating %d Interfaces", len(mac))
-
+	logging.Debug1("Updating %d Interfaces", len(mac))
 	_, err = db.Conn.NewUpdate().Model((*models.Interface)(nil)).Set("last_seen = ?", records[0].LastSeen).Where("mac IN (?)", bun.In(mac)).Exec(db.Context)
+	// _, err = db.Conn.NewUpdate().Model((*models.Interface)(nil)).Set("last_seen = ?, deleted_at = NULL", records[0].LastSeen).Where("mac IN (?)", bun.In(mac)).Exec(db.Context)
 	if err != nil {
-		logging.Errorf("Err with bulk update of interfaces %v", err)
+		logging.Error("Err with bulk update of interfaces %v", err)
 		err = fmt.Errorf("could not bulk-update Inteface last_seen: %v", err)
 		return
 	}
 
-	logging.Printf(1, "Updating %d Addresses", len(ipv4))
+	logging.Debug1("Updating %d Addresses", len(ipv4))
 	_, err = db.Conn.NewUpdate().Table("addresses").Set("last_seen = ?", records[0].LastSeen).Where("ipv4 IN (?)", bun.In(ipv4)).Where("interface_id IN (SELECT id FROM interfaces WHERE mac IN (?))", bun.In(mac)).Exec(db.Context)
+	// _, err = db.Conn.NewUpdate().Table("addresses").Set("last_seen = ?, deleted_at = NULL", records[0].LastSeen).Where("ipv4 IN (?)", bun.In(ipv4)).Where("interface_id IN (SELECT id FROM interfaces WHERE mac IN (?))", bun.In(mac)).Exec(db.Context)
 	if err != nil {
 		err = fmt.Errorf("could not bulk-update Address last_seen: %v", err)
 		return
 	}
 
-	logging.Printf(1, "Updating %d History", len(ipv4))
+	logging.Debug1("Updating %d History", len(ipv4))
 	var history []models.History
 	err = db.Conn.NewRaw(`SELECT id AS address_id, ? AS scan_id, 0 as is_port_scan FROM addresses WHERE ipv4 IN (?) AND interface_id IN (SELECT id FROM interfaces WHERE mac IN (?));`, records[0].ScanID, bun.In(ipv4), bun.In(mac)).Scan(db.Context, &history)
 	if err != nil {
-		logging.Errorf("could not generate bulk-insert history %v", err)
+		logging.Error("could not generate bulk-insert history %v", err)
 		err = fmt.Errorf("could not generate bulk-insert history: %v", err)
 		return
 	}
 	_, err = db.Conn.NewInsert().Model(&history).Exec(db.Context)
 	if err != nil {
-		logging.Errorf("could not bulk-insert history: %v", err)
+		logging.Error("could not bulk-insert history: %v", err)
 		err = fmt.Errorf("could not bulk-insert history: %v", err)
 		return
 	}
@@ -134,7 +138,7 @@ func (record *DeviceRecord) CreateDevice() (err error) {
 
 	vendor, err := macvendor.Lookup(record.MAC)
 	if err != nil {
-		logging.Printf(3, "could not lookup vendor for MAC Address (%s): %v", record.MAC, err)
+		logging.Debug3("could not lookup vendor for MAC Address (%s): %v", record.MAC, err)
 		err = nil
 	}
 	if vendor != "" {

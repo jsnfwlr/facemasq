@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"facemasq/lib/db"
+	"facemasq/lib/events"
 	"facemasq/lib/logging"
 	"facemasq/lib/scans"
 	"facemasq/models"
@@ -48,7 +49,7 @@ func init() {
 		PortScan = true
 	}
 
-	logging.Processf("%v timeout", time.Duration(timeOut)*time.Millisecond)
+	//logging.System("%v timeout", 2000*time.Millisecond)
 }
 
 func Scan(scanID int64, scanAll bool) (err error) {
@@ -61,7 +62,7 @@ func Scan(scanID int64, scanAll bool) (err error) {
 		}
 		var ports []models.Port
 		for _, scan := range addresses {
-			logging.Printf(2, "Scanning %s", scan.IPv4)
+			logging.Debug2("Scanning %s", scan.IPv4)
 			result := ScanAddress(scan.IPv4)
 			for _, result := range result.Ports {
 				ports = append(ports, models.Port{AddressID: int64(scan.AddressID), ScanID: scanID, Port: result.Number, Protocol: result.Protocol})
@@ -70,10 +71,11 @@ func Scan(scanID int64, scanAll bool) (err error) {
 		if len(ports) > 0 {
 			_, err = db.Conn.NewInsert().Model(&ports).Exec(db.Context)
 			if err != nil {
-				logging.Errorf("could not record port state: %v", err)
+				logging.Error("could not record port state: %v", err)
 				return
 			}
 		}
+		events.Emit(events.Event{Kind: "scan:port:complete"})
 	}
 	return
 }
@@ -84,7 +86,7 @@ func Discover(scanAll bool) (devices []scans.AddressToPortScan, err error) {
 	if scanAll {
 		sql = `SELECT addresses.id AS address_id, ipv4 FROM addresses JOIN interfaces ON interfaces.id = addresses.interface_id JOIN devices ON devices.id = interfaces.device_id WHERE devices.is_online = true;`
 	}
-	logging.Println(2, sql)
+	logging.Debug2(sql)
 	err = db.Conn.NewRaw(sql).Scan(db.Context, &devices)
 	if err != nil {
 		if err.Error() != "sql: no rows in result set" {
@@ -101,7 +103,7 @@ func Discover(scanAll bool) (devices []scans.AddressToPortScan, err error) {
 
 func ScanPort(protocol, ipv4 string, portNum int64) portDetails {
 	address := fmt.Sprintf("%s:%d", ipv4, portNum)
-	logging.Printf(2, "Scanning %s", address)
+	logging.Debug2("Scanning %s", address)
 	conn, err := net.DialTimeout(protocol, address, time.Duration(timeOut)*time.Millisecond)
 	port := portDetails{
 		Number:   portNum,
@@ -132,7 +134,7 @@ func ScanAddress(ipv4 string) (scan addressPortRecord) {
 		for _, portNum := range portList {
 			port := ScanPort(protocol, ipv4, portNum)
 			if port.State == "open" {
-				logging.Printf(0, "%s has port %d open", ipv4, portNum)
+				logging.Debug1("%s has port %d open", ipv4, portNum)
 				scan.Ports = append(scan.Ports, port)
 			}
 		}

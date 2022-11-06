@@ -150,7 +150,7 @@ func checkPrepare() (doPrepare bool, err error) {
 }
 
 func prepare(ctx context.Context, db *bun.DB) (err error) {
-	logging.Processln("Preparing db")
+	logging.System("Preparing db")
 	var drops, creates []interface{}
 	// Params
 	drops = append(

@@ -29,7 +29,7 @@ type Concurrency struct {
 func GetTrendData(out http.ResponseWriter, in *http.Request) {
 	durations, err := getTrendData()
 	if err != nil {
-		logging.Errorln(err.Error())
+		logging.Error(err.Error())
 		http.Error(out, "Error getting trend data", http.StatusInternalServerError)
 	}
 	formats.WriteJSONResponse(durations, out, in)
@@ -121,5 +121,4 @@ func getTrendData() (durations []TrendWindow, err error) {
 		}
 	}
 	return
-
 }

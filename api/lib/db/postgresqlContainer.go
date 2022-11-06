@@ -3,11 +3,12 @@ package db
 import (
 	"bufio"
 	"context"
-	"facemasq/lib/logging"
 	"fmt"
 	"os"
 	"strings"
 	"time"
+
+	"facemasq/lib/logging"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
@@ -146,7 +147,7 @@ func StartPostgreSQLContainer(dbName, dbUser, dbPassword, dbPort string) (testCo
 		err = fmt.Errorf("timeout waiting for postgres")
 		return
 	}
-	logging.Println(1, "Container is running")
+	logging.Debug1("Container is running")
 	testContainer = &PostgreSQLContainer{
 		ID: cntnr.ID,
 		Connection: ConnectionParams{

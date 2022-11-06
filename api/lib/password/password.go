@@ -22,7 +22,7 @@ func init() {
 		salt = os.Getenv("PASSWORDSALT")
 	}
 	if salt == "" {
-		logging.Fatalln("A password salt is required. See https://jsnfwlr.github.io/facemasq/errors/#PasswordSalt for more details")
+		logging.Fatal("A password salt is required. See https://jsnfwlr.github.io/facemasq/errors/#PasswordSalt for more details")
 	}
 }
 

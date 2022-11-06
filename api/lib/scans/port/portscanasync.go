@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"facemasq/lib/db"
+	"facemasq/lib/events"
 	"facemasq/lib/logging"
 	"facemasq/lib/scans"
 	"facemasq/models"
@@ -26,10 +27,11 @@ func ScanAysnc(scanID int64, scanAll bool) (err error) {
 		if len(ports) > 0 {
 			_, err = db.Conn.NewInsert().Model(&ports).Exec(db.Context)
 			if err != nil {
-				logging.Errorf("could not record port state: %v", err)
+				logging.Error("could not record port state: %v", err)
 				return
 			}
 		}
+		events.Emit(events.Event{Kind: "scan:port:complete"})
 	}
 	return
 }
