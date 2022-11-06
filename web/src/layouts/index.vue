@@ -1,5 +1,5 @@
 <script setup lang="ts">
-  import { ref, watch, computed } from "vue"
+  import { shallowRef, watch, computed } from "vue"
   import { useRoute } from "vue-router"
 
   import { useUser } from "@/stores/user"
@@ -10,8 +10,8 @@
   const route = useRoute()
   const userStore = useUser()
 
-  const routeLayout = ref<string | unknown>(Standard)
-  const layoutName = ref<string>("Standard")
+  const routeLayout = shallowRef<string | unknown>(Standard)
+  const layoutName = shallowRef<string>("Standard")
 
   const theme = computed(() => userStore.theme())
 

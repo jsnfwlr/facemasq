@@ -4,7 +4,7 @@
   import { icons } from "@/data/icons"
 
   interface Props {
-    icon: string
+    icon?: string
     w?: string
     h?: string
     p?: string
@@ -34,7 +34,7 @@
 </script>
 
 <template>
-  <span :class="spanClass">
+  <span v-show="typeof icon !== 'undefined'" :class="spanClass">
     <svg v-if="size" viewBox="0 0 24 24" :width="size" :height="size" class="inline-block" :class="svgClass">
       <path fill="currentColor" :d="svgPath" />
     </svg>

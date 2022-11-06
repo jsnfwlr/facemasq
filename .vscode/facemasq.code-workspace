@@ -11,8 +11,8 @@
     "editor.codeActionsOnSave": {
       "source.fixAll.eslint": true
     },
-    "go.buildTags": "database sqlite postgresql mysql testing extensions",
-    "go.testTags": "database sqlite postgresql mysql testing extensions",
+    "go.buildTags": "database sqlite postgresql mysql testing extensions !extensions",
+    "go.testTags": "database sqlite postgresql mysql testing extensions !extensions",
     "eslint.validate": ["javascript", "typescript"],
     "css.customData": ["./facemasq.css-data.json"],
     "html.format.indentInnerHtml": true,

@@ -11,12 +11,12 @@ import (
 )
 
 func main() {
-
-	manager, err := extensions.LoadPlugins()
+	var err error
+	extensions.Extensions, err = extensions.LoadPlugins()
 	if err != nil {
 		log.Fatalf("%v", err)
 	}
-	routes := manager.GetRoutes()
+	routes := extensions.Extensions.GetRoutes()
 	for r := range routes {
 		logging.System(routes[r].Name)
 	}
@@ -30,11 +30,11 @@ func main() {
 		logging.System(eventList[e])
 	}
 
-	manager.GetCoordinator().Listen("device:after:change", func(e events.Event) {
+	extensions.Extensions.GetCoordinator().Listen("device:after:change", func(e events.Event) {
 		logging.System("main: %+v", e)
 	})
 
-	err = manager.GetCoordinator().Emit(events.Event{Kind: "device:after:change"})
+	err = extensions.Extensions.GetCoordinator().Emit(events.Event{Kind: "device:after:change"})
 	if err != nil {
 		logging.Error("Error with event: %v", err)
 	}

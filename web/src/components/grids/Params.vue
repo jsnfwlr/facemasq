@@ -4,7 +4,8 @@
   import { storeToRefs } from "pinia"
 
   import { icons } from "@/data/icons"
-  import { useParams, CategoryArr, StatusArr, DeviceTypeArr, InterfaceTypeArr, LocationArr, ArchitectureArr, OperatingSystemArr, UserArr, MaintainerArr, VLANArr, Category, Status, DeviceType, InterfaceType, Location, Architecture, OperatingSystem, User, Maintainer, VLAN, ColumnSort } from "@/stores/params"
+  import { useParams, Category, Status, DeviceType, InterfaceType, Location, Architecture, OperatingSystem, User, Maintainer, VLAN, ColumnSort } from "@/stores/params"
+  // import { CategoryArr, StatusArr, DeviceTypeArr, InterfaceTypeArr, LocationArr, ArchitectureArr, OperatingSystemArr, UserArr, MaintainerArr, VLANArr } from "@/stores/params"
 
   import Btns from "@/components/elements/Btns.vue"
   import Btn from "@/components/elements/Btn.vue"
@@ -16,6 +17,17 @@
   const props = defineProps<{
     mode: string
   }>()
+
+  type CategoryArr = Array<Category>
+  type StatusArr = Array<Status>
+  type DeviceTypeArr = Array<DeviceType>
+  type InterfaceTypeArr = Array<InterfaceType>
+  type LocationArr = Array<Location>
+  type ArchitectureArr = Array<Architecture>
+  type OperatingSystemArr = Array<OperatingSystem>
+  type UserArr = Array<User>
+  type MaintainerArr = Array<Maintainer>
+  type VLANArr = Array<VLAN>
 
   const getItems = computed<CategoryArr | StatusArr | DeviceTypeArr | InterfaceTypeArr | LocationArr | ArchitectureArr | OperatingSystemArr | UserArr | MaintainerArr | VLANArr>(() => {
     switch (props.mode) {

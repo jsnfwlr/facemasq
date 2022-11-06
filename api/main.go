@@ -4,6 +4,7 @@ package main
 
 import (
 	"facemasq/lib/db"
+	"facemasq/lib/extensions"
 	"facemasq/lib/logging"
 	"facemasq/lib/network"
 	"facemasq/lib/scans/iprange"
@@ -11,17 +12,18 @@ import (
 )
 
 func main() {
-	logging.= logging.New("", "")
 	logging.System("Running faceMasq as a daemon")
+
 	err := db.Connect()
 	if err != nil {
 		logging.Panic(err)
 	}
+	logging.System("Connected: %+v", db.DBEngine)
 
+	extensions.Extensions, err = extensions.LoadPlugins()
 	if err != nil {
 		logging.Fatal("%v", err)
 	}
-	logging.System("Connected: %+v", db.DBEngine)
 
 	network.ShowNetworkSummary()
 
