@@ -25,15 +25,15 @@ func BuildRoutes() (router Router) {
 
 	// For now, plugin routes go first, to prevent them over riding the built in routes.
 	// This may change in the future, but will require some sort of plugin security, with user confirmation and signed binaries
-	routes = extensions.Extensions.GetRoutes()
 
-	routes = append(staticRoutes(), routes...)
-	routes = append(statusRoutes(), routes...)
-	routes = append(paramRoutes(), routes...)
-	routes = append(settingsRoutes(), routes...)
-	routes = append(deviceRoutes(), routes...)
-	routes = append(uiRoutes(), routes...)
-	routes = append(controlRoutes(), routes...)
+	routes = append(routes, controlRoutes()...)
+	routes = append(routes, uiRoutes()...)
+	routes = append(routes, deviceRoutes()...)
+	routes = append(routes, settingsRoutes()...)
+	routes = append(routes, paramRoutes()...)
+	routes = append(routes, statusRoutes()...)
+	routes = append(routes, staticRoutes()...)
+	routes = append(routes, extensions.Extensions.GetRoutes()...)
 
 	for r := range routes {
 		if handlerFunc, ok := routes[r].Handler.(func(http.ResponseWriter, *http.Request)); ok {

@@ -4,6 +4,9 @@ import (
 	"bytes"
 	"encoding/json"
 	"facemasq/lib/apiclient"
+	"facemasq/lib/events"
+	"facemasq/lib/extensions"
+	"facemasq/lib/logging"
 	"os"
 )
 
@@ -27,7 +30,20 @@ type MsgBody struct {
 	Title    string
 }
 
-func SendMessage(title, message string, priority int64) (err error) {
+func LoadExtension(manager *extensions.Manager) (err error) {
+
+	manager.RegisterListeners([]extensions.Listener{
+		{Kind: `notification:send:.*`, Listener: SendMessage},
+	})
+	return
+}
+
+func SendMessage(event events.Event) {
+	var err error
+	payload := event.Payload.Interface()
+	title := payload.(map[string]interface{})["title"].(string)
+	message := payload.(map[string]interface{})["message"].(string)
+	priority := payload.(map[string]interface{})["priority"].(int64)
 	// var response *http.Response
 	if EnableGotify {
 		var bodyJSON []byte
@@ -45,6 +61,7 @@ func SendMessage(title, message string, priority int64) (err error) {
 
 		bodyJSON, err = json.Marshal(body)
 		if err != nil {
+			logging.Error("Error sending notification via gotify: %v", err)
 			return
 		}
 
@@ -58,8 +75,8 @@ func SendMessage(title, message string, priority int64) (err error) {
 		}
 		_, err = client.Do(&request)
 		if err != nil {
+			logging.Error("Error sending notification via gotify: %v", err)
 			return
 		}
 	}
-	return
 }

@@ -21,13 +21,13 @@ const primaryMenu = [
       {
         To: "/",
         Icon: "ViewDashboardVariant",
-        Label: "dashboard",
+        Label: "Dashboard",
         Tooltip: "Test",
       },
       {
         To: "/devices",
         Icon: "AccessPointNetwork",
-        Label: "devices",
+        Label: "Devices",
       },
     ],
   },
@@ -37,42 +37,42 @@ const primaryMenu = [
       {
         To: "/manage/categories",
         Icon: "Shape",
-        Label: "categories",
+        Label: "Categories",
       },
       {
         To: "/manage/status",
         Icon: "ListStatus",
-        Label: "statuses",
+        Label: "Statuses",
       },
       {
         To: "/manage/maintainers",
         Icon: "Account",
-        Label: "maintainers",
+        Label: "Maintainers",
       },
       {
         To: "/manage/locations",
         Icon: "MapMarker",
-        Label: "locations",
+        Label: "Locations",
       },
       {
         To: "/manage/devicetypes",
         Icon: "Devices",
-        Label: "deviceTypes",
+        Label: "DeviceTypes",
       },
       {
         To: "/manage/operatingsystems",
         Icon: "MicrosoftWindowsClassic",
-        Label: "osTypes",
+        Label: "OS Types",
       },
       {
         To: "/manage/architectures",
         Icon: "Chip",
-        Label: "cpuTypes",
+        Label: "CPU Types",
       },
       {
         To: "/manage/vlans",
         Icon: "Vpn",
-        Label: "vLANs",
+        Label: "VLANs",
       },
     ],
   },
@@ -81,8 +81,8 @@ const primaryMenu = [
     Items: [
       {
         To: "/admin/users",
-        Label: "users",
         Icon: "AccountCircle",
+        Label: "Users",
       },
     ],
   },
@@ -94,8 +94,8 @@ const secondaryMenu = [
     Items: [
       {
         To: "/about/info",
-        Label: "info",
         Icon: "Information",
+        Label: "Info",
       },
     ],
   },

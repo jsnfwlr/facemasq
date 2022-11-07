@@ -1,6 +1,7 @@
 package control
 
 import (
+	"fmt"
 	"mime"
 	"net/http"
 	"os"
@@ -27,7 +28,13 @@ func Exit(out http.ResponseWriter, in *http.Request) {
 
 func Static(out http.ResponseWriter, in *http.Request) {
 	file := mux.Vars(in)["filename"]
-	if files.FileExists("../web/" + file) {
+	if strings.Contains(file, "i18n") {
+		i18nDir, _ := files.GetDir("i18n")
+		file = fmt.Sprintf("%[2]s%[1]c%[3]s", os.PathSeparator, i18nDir, strings.Replace(file, "i18n/", "web/", -1))
+		logging.System(file)
+		out.Header().Set("Content-Type", mime.TypeByExtension(strings.TrimRight(filepath.Ext(file), "/")))
+		http.ServeFile(out, in, file)
+	} else if files.FileExists("../web/" + file) {
 		out.Header().Set("Content-Type", mime.TypeByExtension(strings.TrimRight(filepath.Ext(file), "/")))
 		http.ServeFile(out, in, "../web/"+file)
 	} else {
