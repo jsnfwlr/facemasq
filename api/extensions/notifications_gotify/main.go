@@ -39,11 +39,23 @@ func LoadExtension(manager *extensions.Manager) (err error) {
 }
 
 func SendMessage(event events.Event) {
-	var err error
-	payload := event.Payload.Interface()
-	title := payload.(map[string]interface{})["title"].(string)
-	message := payload.(map[string]interface{})["message"].(string)
-	priority := payload.(map[string]interface{})["priority"].(int64)
+
+	payload, err := json.Marshal(event.Payload)
+	if err != nil {
+		logging.Error("Error sending notification via gotify: %v", err)
+		return
+	}
+
+	var payLoad interface{}
+
+	err = json.Unmarshal(payload, &payLoad)
+	if err != nil {
+		logging.Error("Error sending notification via gotify: %v", err)
+		return
+	}
+	title := payLoad.(map[string]interface{})["title"].(string)
+	message := payLoad.(map[string]interface{})["message"].(string)
+	priority := int64(payLoad.(map[string]interface{})["priority"].(float64))
 	// var response *http.Response
 	if EnableGotify {
 		var bodyJSON []byte

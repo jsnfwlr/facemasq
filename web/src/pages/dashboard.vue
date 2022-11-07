@@ -12,6 +12,7 @@
   import Chart from "@/components/charts/LineChart.vue"
   import TrendIndicator from "@/components/indicators/Trend.vue"
   import ThingsGrid from "@/components/grids/Things.vue"
+  import DeviceGrid from "@/components/grids/Devices.vue"
   import Card from "@/components/containers/Card.vue"
   import Banner from "@/components/indicators/Banner.vue"
   import Btn from "@/components/elements/Btn.vue"
@@ -80,7 +81,11 @@
 
   // Devices seen in the last 30 minutes
   const recentDevices = computed(() => {
-    return allDevices.value.filter((device) => device.Interfaces[0].Addresses[0].LastSeen !== null && parse(device.Interfaces[0].Addresses[0].LastSeen.replace("T", " ").replace("Z", ""), "yyyy-MM-dd HH:mm:ss", new Date()) > subMinutes(new Date(), 30))
+    return allDevices.value.filter((device) => device.IsTracked && device.Interfaces[0].Addresses[0].LastSeen !== null && parse(device.Interfaces[0].Addresses[0].LastSeen.replace("T", " ").replace("Z", ""), "yyyy-MM-dd HH:mm:ss", new Date()) > subMinutes(new Date(), 60))
+  })
+
+  const invadingDevices = computed(() => {
+    return allDevices.value.filter((device) => !device.IsTracked && device.Interfaces[0].Addresses[0].LastSeen !== null && parse(device.Interfaces[0].Addresses[0].LastSeen.replace("T", " ").replace("Z", ""), "yyyy-MM-dd HH:mm:ss", new Date()) > subMinutes(new Date(), 60))
   })
 </script>
 
@@ -98,6 +103,15 @@
   <div v-else class="grid grid-cols-2 gap-6 lg:grid-cols-6 mb-6">
     <trend-indicator v-for="(trend, index) in fakeTrends" :trend="trend" color="text-teal-500" icon="Radar" :key="'fake-trends-' + index" :prefix="''" :suffix="''" />
   </div>
+  <card :icon="'MonitorCellphone'" :headingTitle="'Unknown Devices - ' + invadingDevices.length" has-table class="mb-6">
+    <!-- <device-grid :perPage="200" :items="allDevices" mode="administrative" @discard="discardItem" @delete="deleteItem" @save="saveItem" @edit="editItem" /> -->
+    <device-grid :perPage="50" :items="invadingDevices" mode="administrative" />
+  </card>
+  <card :icon="'MonitorCellphone'" :headingTitle="'Known Devices - ' + recentDevices.length" has-table class="mb-6">
+    <!-- <device-grid :perPage="200" :items="allDevices" mode="administrative" @discard="discardItem" @delete="deleteItem" @save="saveItem" @edit="editItem" /> -->
+    <device-grid :perPage="50" :items="recentDevices" mode="administrative" />
+  </card>
+
   <div class="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-6">
     <div>
       <card headingTitle="Devices over time" icon="Finance" class="mb-6">

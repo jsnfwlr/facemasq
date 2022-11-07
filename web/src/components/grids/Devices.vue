@@ -1,5 +1,5 @@
 <script setup lang="ts">
-  import { ref } from "vue"
+  import { ref, computed } from "vue"
   import { storeToRefs } from "pinia"
   import { parse, differenceInWeeks, differenceInHours, differenceInDays, differenceInMinutes } from "date-fns"
   import clonedeep from "lodash.clonedeep"
@@ -7,6 +7,7 @@
   import { useDevices, Device, DomainName, Connection, ColumnSort } from "@/stores/devices"
   import { useParams } from "@/stores/params"
   import { useUser } from "@/stores/user"
+  import { useApp } from "@/stores/app"
 
   import Btn from "@/components/elements/Btn.vue"
   import Btngrp from "@/components/elements/BtnGrp.vue"
@@ -17,7 +18,7 @@
   import InterfacesGrid from "@/components/grids/Interfaces.vue"
   import AddressesGrid from "@/components/grids/Addresses.vue"
   import HostnamesGrid from "@/components/grids/Hostnames.vue"
-
+  import Paginator from "@/components/grids/extensions/Paginator.vue"
   import mdIcon from "@/components/elements/MDIcon.vue"
 
   import ModalBox from "@/components/justboil/ModalBox.vue"
@@ -46,6 +47,7 @@
     items: Array<Device>
     mode?: string
     filtered?: boolean
+    perPage: number
   }
 
   interface MaxCols {
@@ -54,7 +56,7 @@
   }
 
   const props = withDefaults(defineProps<Props>(), {
-    perPage: 10,
+    perPage: 100,
     mode: "Informative",
     filtered: false,
   })
@@ -64,11 +66,28 @@
     administrative: 14,
   } as MaxCols
 
+  const perPageCalc = computed(() => {
+    if (props.perPage !== null) {
+      return props.perPage
+    } else if (appStore.values.perPage === 0) {
+      return props.items.length
+    } else {
+      return appStore.values.perPage
+    }
+  })
+
+  const itemsPaginated = computed(() => props.items.slice(perPageCalc.value * currentPage.value, perPageCalc.value * (currentPage.value + 1)))
+
+  const currentPage = ref(0)
+  const setCurrentPage = (page: number) => {
+    currentPage.value = page
+  }
+
   const deviceStore = useDevices()
   const { editingItems, deletingItems, focusedItems, investigations } = storeToRefs(deviceStore)
 
   const userStore = useUser()
-
+  const appStore = useApp()
   const paramsStore = useParams()
   const { Locations, Maintainers, OperatingSystems, InterfaceTypes, Statuses, Categories, DeviceTypes, Architectures } = storeToRefs(paramsStore)
 
@@ -490,7 +509,7 @@
           <th v-if="userStore.hasAccess('details', 'read')" class="actions" />
         </tr>
       </thead>
-      <tbody v-for="(row, index) in items" :key="row.Interfaces[0].Addresses[0].ID">
+      <tbody v-for="(row, index) in itemsPaginated" :key="row.Interfaces[0].Addresses[0].ID">
         <tr :class="rowClass(index)" @click="toggleRowFocus(index)">
           <td v-if="hasExpand(index)" class="expand" @click.stop="toggleRowExpand(index)">
             <div>
@@ -618,6 +637,7 @@
         </tr>
       </tbody>
     </table>
+    <paginator v-if="perPage == null || (perPage !== null && items.length > perPage)" class="table-pagination" :numItems="items.length" @changePage="setCurrentPage" />
   </div>
 </template>
 

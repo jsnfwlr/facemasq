@@ -13,6 +13,7 @@
   import Paginator from "@/components/grids/extensions/Paginator.vue"
 
   const paramsStore = useParams()
+  const appStore = useApp()
 
   const { InterfaceTypes, DeviceTypes } = storeToRefs(paramsStore)
 
@@ -33,11 +34,12 @@
     },
   })
 
-  const appStore = useApp()
-
   const iconIFace = (interfaceTypeID: number) => {
     return InterfaceTypes.value.find((item) => item.ID === interfaceTypeID)?.Icon as string
   }
+
+  const isModalActive = ref(false)
+  const isModalDangerActive = ref(false)
 
   const perPageCalc = computed(() => {
     if (props.perPage !== null) {
@@ -48,9 +50,6 @@
       return appStore.values.perPage
     }
   })
-
-  const isModalActive = ref(false)
-  const isModalDangerActive = ref(false)
 
   const itemsPaginated = computed(() => props.items.slice(perPageCalc.value * currentPage.value, perPageCalc.value * (currentPage.value + 1)))
 
