@@ -10,8 +10,6 @@
   import Btns from "@/components/elements/Btns.vue"
   import Control from "@/components/elements/Control.vue"
 
-  // import UserAvatar from '@/components/justboil/UserAvatar.vue'
-
   const deviceStore = useDevices()
   const { deletingItems, editingItems } = storeToRefs(deviceStore)
 

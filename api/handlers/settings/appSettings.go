@@ -41,9 +41,9 @@ func SaveAppSetting(out http.ResponseWriter, in *http.Request) {
 		newSetting = true
 	}
 	if newSetting {
-		_, err = db.Conn.NewUpdate().Model(&input).Exec(db.Context)
-	} else {
 		_, err = db.Conn.NewInsert().Model(&input).Exec(db.Context)
+	} else {
+		_, err = db.Conn.NewUpdate().Model(&input).Where(`user_id IS NULL AND name = ?`, input.Name).Exec(db.Context)
 	}
 	if err != nil {
 		logging.Error("error saving setting: %v", err)

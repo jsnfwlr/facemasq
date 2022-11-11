@@ -84,9 +84,15 @@
     return allDevices.value.filter((device) => device.IsTracked && device.Interfaces[0].Addresses[0].LastSeen !== null && parse(device.Interfaces[0].Addresses[0].LastSeen.replace("T", " ").replace("Z", ""), "yyyy-MM-dd HH:mm:ss", new Date()) > subMinutes(new Date(), 60))
   })
 
-  const invadingDevices = computed(() => {
+  const intrudingDevices = computed(() => {
     return allDevices.value.filter((device) => !device.IsTracked && device.Interfaces[0].Addresses[0].LastSeen !== null && parse(device.Interfaces[0].Addresses[0].LastSeen.replace("T", " ").replace("Z", ""), "yyyy-MM-dd HH:mm:ss", new Date()) > subMinutes(new Date(), 60))
   })
+  // const saveDashboardIntrudingPageSize = (size: number) => {
+  //   userStore.saveSetting("dashboardIntruderPageSize", size)
+  // }
+  // const saveDashboardKnownPageSize = (size: number) => {
+  //   userStore.saveSetting("dashboardKnownPageSize", size)
+  // }
 </script>
 
 <template>
@@ -103,13 +109,13 @@
   <div v-else class="grid grid-cols-2 gap-6 lg:grid-cols-6 mb-6">
     <trend-indicator v-for="(trend, index) in fakeTrends" :trend="trend" color="text-teal-500" icon="Radar" :key="'fake-trends-' + index" :prefix="''" :suffix="''" />
   </div>
-  <card :icon="'MonitorCellphone'" :headingTitle="'Unknown Devices - ' + invadingDevices.length" has-table class="mb-6">
-    <!-- <device-grid :perPage="200" :items="allDevices" mode="administrative" @discard="discardItem" @delete="deleteItem" @save="saveItem" @edit="editItem" /> -->
-    <device-grid :perPage="50" :items="invadingDevices" mode="administrative" />
+  <card :icon="'MonitorCellphone'" :headingTitle="'Unknown Devices - ' + intrudingDevices.length" has-table class="mb-6">
+    <!-- <device-grid :items="intrudingDevices" mode="administrative" @setPageSize="saveDashboardIntrudingPageSize" /> -->
+    <device-grid :items="intrudingDevices" mode="administrative" />
   </card>
   <card :icon="'MonitorCellphone'" :headingTitle="'Known Devices - ' + recentDevices.length" has-table class="mb-6">
-    <!-- <device-grid :perPage="200" :items="allDevices" mode="administrative" @discard="discardItem" @delete="deleteItem" @save="saveItem" @edit="editItem" /> -->
-    <device-grid :perPage="50" :items="recentDevices" mode="administrative" />
+    <!-- <device-grid :items="recentDevices" mode="administrative" @setPageSize="saveDashboardKnownPageSize" /> -->
+    <device-grid :items="recentDevices" mode="administrative" />
   </card>
 
   <div class="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-6">

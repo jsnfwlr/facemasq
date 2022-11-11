@@ -1,7 +1,7 @@
 <script setup>
   import CardComponent from "@/components/justboil/CardComponent.vue"
   import GrowingNumber from "@/components/justboil/GrowingNumber.vue"
-  import Icon from "@/components/justboil/Icon.vue"
+  import Icon from "@/components/justboil/_Icon.vue"
   import Level from "@/components/containers/Level.vue"
   import TrendPill from "@/components/justboil/TrendPill.vue"
 

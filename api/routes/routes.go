@@ -22,10 +22,8 @@ func BuildRoutes() (router Router) {
 	}
 
 	var routes []extensions.RouteDefinition
-
-	// For now, plugin routes go first, to prevent them over riding the built in routes.
+	// For now, plugin routes go last, to prevent them over riding the built in routes.
 	// This may change in the future, but will require some sort of plugin security, with user confirmation and signed binaries
-
 	routes = append(routes, controlRoutes()...)
 	routes = append(routes, uiRoutes()...)
 	routes = append(routes, deviceRoutes()...)

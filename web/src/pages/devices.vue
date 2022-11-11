@@ -5,6 +5,7 @@
 
   import { useDevices, Device } from "@/stores/devices"
   import { useParams } from "@/stores/params"
+  // import { useUser } from "@/stores/user"
 
   import Btn from "@/components/elements/Btn.vue"
   import Card from "@/components/containers/Card.vue"
@@ -12,9 +13,9 @@
   import DeviceGrid from "@/components/grids/Devices.vue"
   import Field from "@/components/containers/Field.vue"
 
-  // const userStore = useUser()
   const paramsStore = useParams()
   const deviceStore = useDevices()
+  // const userStore = useUser()
 
   const { Maintainers, Statuses, Locations, DeviceTypes, Categories, InterfaceTypes } = storeToRefs(paramsStore)
 
@@ -209,6 +210,10 @@
     { value: 7, label: "> Day" },
     { value: 8, label: "> Week" },
   ]
+
+  // const savePageSize = (size: number) => {
+  //   userStore.saveSetting("devicesPageSize", size)
+  // }
 </script>
 
 <template>
@@ -241,7 +246,8 @@
       </field>
       <btn color="danger" title="Clear filters" icon="CloseBox" :outline="false" small @click="resetFilters" />
     </template>
-    <device-grid :perPage="200" :items="filteredDevices" mode="administrative" />
+    <device-grid :perPage="0" :items="filteredDevices" mode="administrative" />
+    <!-- <device-grid :items="filteredDevices" mode="administrative" @savePageSize="savePageSize" /> -->
   </card>
 </template>
 

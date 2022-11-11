@@ -1,9 +1,11 @@
 import { defineStore } from "pinia"
+import { mande } from "mande"
 
 export interface AppStore {
   styles: AppStyles
   toggles: AppToggles
   values: AppValues
+  settings: AppSettings
 }
 export interface AppStyles {
   lightBorderStyle: string
@@ -37,10 +39,21 @@ export interface AppValues {
   pageSizes: Array<PageSize>
 }
 
+export interface AppSettings {
+  avatarType: string
+}
+export interface AppSetting {
+  Name: string
+  Value: string
+}
+
 export interface PageSize {
   label: string
   value: number
 }
+
+const settings = import.meta.env.DEV ? mande("http://192.168.0.41:6135/api") : mande("/api")
+const setting = import.meta.env.DEV ? mande("http://192.168.0.41:6135/api") : mande("/api")
 
 export const useApp = defineStore("app", {
   state: () => {
@@ -70,7 +83,7 @@ export const useApp = defineStore("app", {
         isFieldFocusRegistered: false,
       },
       values: {
-        perPage: 10,
+        perPage: 1000,
         pageSizes: [
           {
             label: "10",
@@ -90,7 +103,41 @@ export const useApp = defineStore("app", {
           },
         ],
       },
+      settings: {
+        avatarType: "",
+      },
     } as AppStore
   },
-  actions: {},
+  actions: {
+    updateSetting(name: string, value: string | boolean | number) {
+      switch (name) {
+        case "avatarType":
+          this.settings.avatarType = value as string
+          break
+      }
+    },
+    getSettings() {
+      settings.get<{ Name: string; Value: string }[]>("/settings").then((response) => {
+        if (response !== null && response.length > 0) {
+          response.forEach((elem) => {
+            this.updateSetting(elem.Name, elem.Value)
+          })
+        }
+      })
+    },
+    saveSetting(name: string, value: boolean | string | number) {
+      switch (typeof value) {
+        case "boolean":
+          value = value ? "true" : "false"
+          break
+        case "number":
+          value = value.toString()
+          break
+      }
+
+      setting.post<AppSetting>("/setting", { Name: name, Value: value }).then((response) => {
+        this.updateSetting(response.Name, response.Value)
+      })
+    },
+  },
 })

@@ -8,18 +8,17 @@
   import Btns from "@/components/elements/Btns.vue"
   import Level from "@/components/containers/Level.vue"
 
-  const userStore = useUser()
   const appStore = useApp()
-  // const { settings } = storeToRefs(userStore)
+  const userStore = useUser()
 
   interface Props {
     numItems: number
-    perPage: number | null
+    perPage?: number
   }
 
   const props = withDefaults(defineProps<Props>(), {
     numItems: 1,
-    perPage: null,
+    perPage: 0,
   })
 
   const currentPage = ref(0)
@@ -36,16 +35,14 @@
   })
 
   const perPageCalc = computed(() => {
-    if (props.perPage !== null) {
+    if (props.perPage !== 0) {
       return props.perPage
-    } else if (appStore.values.perPage === 0) {
-      return props.numItems
     } else {
-      return appStore.values.perPage
+      return props.numItems
     }
   })
 
-  const emit = defineEmits(["changePage"])
+  const emit = defineEmits(["changePage", "setPageSize"])
 
   const setPageSize = (size: number) => {
     if (size === 0) {
@@ -54,9 +51,7 @@
       let target = Math.round((appStore.values.perPage * currentPage.value + 1) / size) - 1 < 0 ? 0 : Math.round((appStore.values.perPage * currentPage.value + 1) / size) - 1
       setCurrentPage(target)
     }
-    appStore.$patch((state) => {
-      state.values.perPage = size
-    })
+    emit("setPageSize", size)
   }
   const setCurrentPage = (page: number) => {
     currentPage.value = page

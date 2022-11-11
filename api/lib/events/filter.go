@@ -6,18 +6,16 @@ import (
 	"facemasq/lib/events/safe"
 )
 
-// Filter compiles the string as a regex and returns
-// the original listener wrapped in a new listener
-// that filters incoming events by the Kind
-func Filter(s string, fn Listener) Listener {
-	if s == "" || s == "*" {
-		return fn
+// Filter compiles the string as a regex and returns the original listener (lstnr) wrapped in a new listener that filters incoming events by the Kind
+func Filter(match string, original Listener) Listener {
+	if match == "" || match == "*" {
+		return original
 	}
-	rx := regexp.MustCompile(s)
-	return func(e Event) {
-		if rx.MatchString(e.Kind) {
+	regex := regexp.MustCompile(match)
+	return func(event Event) {
+		if regex.MatchString(event.Kind) {
 			safe.Run(func() {
-				fn(e)
+				original(event)
 			})
 		}
 	}

@@ -2,7 +2,7 @@
   import { h } from "vue"
 
   export default {
-    name: "Buttons",
+    name: "JbButtons",
     props: {
       noWrap: Boolean,
       type: {
@@ -18,7 +18,6 @@
         default: "-mb-3",
       },
     },
-
     render() {
       const hasSlot = this.$slots && this.$slots.default
 

@@ -1,17 +1,16 @@
 <script setup>
-import mdIcon from '@/components/elements/MDIcon.vue'
+  import mdIcon from "@/components/elements/MDIcon.vue"
 
-defineProps({
-  icon: {
-    type: String,
-    default: null
-  },
-  h: {
-    type: String,
-    default: null
-  }
-}
-)
+  defineProps({
+    icon: {
+      type: String,
+      default: null,
+    },
+    h: {
+      type: String,
+      default: null,
+    },
+  })
 </script>
 
 <template>

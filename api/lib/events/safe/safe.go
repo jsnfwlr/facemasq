@@ -5,8 +5,7 @@ import (
 	"fmt"
 )
 
-// Run the function safely knowing that if it panics
-// the panic will be caught and returned as an error
+// Run the function safely knowing that if it panics the panic will be caught and returned as an error
 func Run(fn func()) (err error) {
 	return RunE(func() error {
 		fn()
@@ -14,8 +13,7 @@ func Run(fn func()) (err error) {
 	})
 }
 
-// Run the function safely knowing that if it panics
-// the panic will be caught and returned as an error
+// Run the function safely knowing that if it panics the panic will be caught and returned as an error
 func RunE(fn func() error) (err error) {
 	defer func() {
 		if err != nil {

@@ -2,11 +2,7 @@ package events
 
 import (
 	"strings"
-
-	"facemasq/lib/events/mapi"
 )
-
-type Payload = mapi.Mapi
 
 const (
 	// ErrGeneral is emitted for general errors

@@ -9,14 +9,11 @@
   import NavbarItemLabel from "@/components/menus/NavbarItemLabel.vue"
   import NavbarMenu from "@/components/menus/NavbarMenu.vue"
   import mdIcon from "@/components/elements/MDIcon.vue"
-
-  import UserAvatar from "@/components/justboil/UserAvatar.vue"
+  import UserAvatar from "@/components/elements/UserAvatar.vue"
 
   const userStore = useUser()
   const appStore = useApp()
   const { account } = storeToRefs(userStore)
-
-  const userName = account.value.Username
 
   const isNavBarVisible = computed(() => !appStore.toggles.isFullScreen)
   const isSidebarActive = computed(() => appStore.toggles.isSidebarActive)
@@ -65,9 +62,9 @@
         </navbar-item> -->
 
         <navbar-menu has-divider>
-          <user-avatar class="w-10 h-10 lg:w-6 lg:h-6 mr-3 inline-flex" :username="userName" />
+          <user-avatar class="w-10 h-10 lg:w-6 lg:h-6 mr-3 inline-flex" :username="account.Username" />
           <div class="text-xl lg:text-lg leading-8">
-            <span>{{ userName }}</span>
+            <span>{{ account.Label }}</span>
           </div>
 
           <template #dropdown>

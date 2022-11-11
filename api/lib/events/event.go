@@ -6,19 +6,6 @@ import (
 	"strings"
 )
 
-// Event represents different events
-// in the lifecycle of a Buffalo app
-type Event struct {
-	// Kind is the "type" of event "app:start"
-	Kind string `json:"kind"`
-	// Message is optional
-	Message string `json:"message"`
-	// Payload is optional
-	Payload Payload `json:"payload"`
-	// Error is optional
-	Error error `json:"-"`
-}
-
 func (e Event) String() string {
 	b, _ := e.MarshalJSON()
 

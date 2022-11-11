@@ -1,14 +1,15 @@
 <script setup>
-import { mdiThemeLightDark } from '@mdi/js'
-import { computed } from 'vue'
-import Level from '@/components/containers/Level.vue'
-import JbButton from '@/components/justboil/JbButton.vue'
-import { useUser } from '@/stores/user'
-import { storeToRefs } from 'pinia'
+  import { mdiThemeLightDark } from "@mdi/js"
+  import Level from "@/components/containers/Level.vue"
+  import JbButton from "@/components/justboil/_JbButton.vue"
+  import { useUser } from "@/stores/user"
+  import { storeToRefs } from "pinia"
 
-const userStore = useUser()
-const { darkMode } = storeToRefs(userStore)
-const darkModeToggle = () => { userStore.toggleDarkMode() }
+  const userStore = useUser()
+  const { darkMode } = storeToRefs(userStore)
+  const darkModeToggle = () => {
+    userStore.toggleDarkMode()
+  }
 </script>
 
 <template>
@@ -18,7 +19,6 @@ const darkModeToggle = () => { userStore.toggleDarkMode() }
         <slot />
       </h1>
       <jb-button :label="darkMode ? 'Go Light' : 'Go Dark'" :icon="mdiThemeLightDark" :outline="darkMode" @click="darkModeToggle" />
-
     </level>
   </section>
 </template>

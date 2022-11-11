@@ -13,12 +13,26 @@ export interface UserState {
 export interface User {
   ID: number
   Username: string
+  Label: string
   AccessLevel: number
 }
 
 export interface Settings {
   darkMode: boolean | null
   lastDismissed: string
+  dashboardKnownPageSize: number
+  dashboardIntruderPageSize: number
+  devicesPageSize: number
+  categoriesPageSize: number
+  statusesPageSize: number
+  deviceTypesPageSize: number
+  interfaceTypesPageSize: number
+  locationsPageSize: number
+  maintainersPageSize: number
+  operatingSystemsPageSize: number
+  architecturesPageSize: number
+  vLansPageSize: number
+  usersPageSize: number
 }
 
 // const topics = ["details", "params", "devices", "users"]
@@ -35,10 +49,24 @@ export const useUser = defineStore("user", {
       settings: {
         darkMode: null,
         lastDismissed: "2021-12-21 08:55:56",
+        dashboardKnownPageSize: 0,
+        dashboardIntruderPageSize: 0,
+        devicesPageSize: 0,
+        categoriesPageSize: 0,
+        statusesPageSize: 0,
+        deviceTypesPageSize: 0,
+        interfaceTypesPageSize: 0,
+        locationsPageSize: 0,
+        maintainersPageSize: 0,
+        operatingSystemsPageSize: 0,
+        architecturesPageSize: 0,
+        vLansPageSize: 0,
+        usersPageSize: 0,
       },
       account: {
         ID: 1,
-        Username: "jsnfwlr",
+        Username: "jason@jsnfwlr.com",
+        Label: "Jason Fowler",
         AccessLevel: 1,
       },
     } as UserState
@@ -49,13 +77,52 @@ export const useUser = defineStore("user", {
         return true
       }
     },
-    updateSetting(name: string, value: string) {
+    updateSetting(name: string, value: string | boolean | number) {
       switch (name) {
         case "darkMode":
-          this.settings.darkMode = value === "true"
+          this.settings.darkMode = value as boolean
           break
         case "lastDismissed":
-          this.settings.lastDismissed = value
+          this.settings.lastDismissed = value as string
+          break
+        case "dashboardKnownPageSize":
+          this.settings.dashboardKnownPageSize = value as number
+          break
+        case "dashboardIntruderPageSize":
+          this.settings.dashboardIntruderPageSize = value as number
+          break
+        case "devicesPageSize":
+          this.settings.devicesPageSize = value as number
+          break
+        case "categoriesPageSize":
+          this.settings.categoriesPageSize = value as number
+          break
+        case "statusesPageSize":
+          this.settings.statusesPageSize = value as number
+          break
+        case "deviceTypesPageSize":
+          this.settings.deviceTypesPageSize = value as number
+          break
+        case "interfaceTypesPageSize":
+          this.settings.interfaceTypesPageSize = value as number
+          break
+        case "locationsPageSize":
+          this.settings.locationsPageSize = value as number
+          break
+        case "maintainersPageSize":
+          this.settings.maintainersPageSize = value as number
+          break
+        case "operatingSystemsPageSize":
+          this.settings.operatingSystemsPageSize = value as number
+          break
+        case "architecturesPageSize":
+          this.settings.architecturesPageSize = value as number
+          break
+        case "vLansPageSize":
+          this.settings.vLansPageSize = value as number
+          break
+        case "usersPageSize":
+          this.settings.usersPageSize = value as number
           break
       }
     },

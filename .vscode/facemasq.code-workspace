@@ -2,9 +2,6 @@
   "folders": [
     {
       "path": ".."
-    },
-    {
-      "path": "../../../work/grainmarket/api/core/logging"
     }
   ],
   "settings": {
@@ -21,8 +18,32 @@
     "prettier.semi": false,
     "prettier.vueIndentScriptAndStyle": true,
     "css.validate": false, // Disable css built-in lint
-    "stylelint.enable": true, // Enable sytlelint
     "scss.validate": false,
-    "editor.tabSize": 2 // Disable scss lint (optional if using scss)
+    "editor.tabSize": 2,
+    "[go]": {
+      "editor.rulers": [
+        80, 180
+      ]
+    },
+    "[typescript]": {
+      "editor.rulers": [
+        80, 180
+      ]
+    },
+    "[vue]": {
+      "editor.rulers": [
+        80, 180
+      ]
+    },
+    "[json]": {
+      "editor.rulers": [
+        80, 180
+      ]
+    },
+    "[markdown]": {
+      "editor.rulers": [
+        80, 180
+      ]
+    }
   }
 }

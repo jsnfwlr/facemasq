@@ -7,7 +7,6 @@
   import { useDevices, Device, DomainName, Connection, ColumnSort } from "@/stores/devices"
   import { useParams } from "@/stores/params"
   import { useUser } from "@/stores/user"
-  import { useApp } from "@/stores/app"
 
   import Btn from "@/components/elements/Btn.vue"
   import Btngrp from "@/components/elements/BtnGrp.vue"
@@ -18,10 +17,10 @@
   import InterfacesGrid from "@/components/grids/Interfaces.vue"
   import AddressesGrid from "@/components/grids/Addresses.vue"
   import HostnamesGrid from "@/components/grids/Hostnames.vue"
-  import Paginator from "@/components/grids/extensions/Paginator.vue"
+  // import Paginator from "@/components/grids/extensions/Paginator.vue"
   import mdIcon from "@/components/elements/MDIcon.vue"
 
-  import ModalBox from "@/components/justboil/ModalBox.vue"
+  import ModalBox from "@/components/modals/ModalBox.vue"
 
   interface MultiRecord {
     DeviceID: number | null
@@ -56,41 +55,42 @@
   }
 
   const props = withDefaults(defineProps<Props>(), {
-    perPage: 100,
+    perPage: 10,
     mode: "Informative",
     filtered: false,
   })
-
+  // const emit = defineEmits(["setPageSize"])
   const maxCols = {
     default: 12,
     administrative: 14,
   } as MaxCols
 
+  const deviceStore = useDevices()
+  const { editingItems, deletingItems, focusedItems, investigations } = storeToRefs(deviceStore)
+  const userStore = useUser()
+  // const { settings } = storeToRefs(userStore)
+
+  const paramsStore = useParams()
+  const { Locations, Maintainers, OperatingSystems, InterfaceTypes, Statuses, Categories, DeviceTypes, Architectures } = storeToRefs(paramsStore)
+
   const perPageCalc = computed(() => {
-    if (props.perPage !== null) {
+    if (props.perPage !== null && props.perPage !== 0) {
       return props.perPage
-    } else if (appStore.values.perPage === 0) {
-      return props.items.length
     } else {
-      return appStore.values.perPage
+      return props.items.length
     }
   })
 
   const itemsPaginated = computed(() => props.items.slice(perPageCalc.value * currentPage.value, perPageCalc.value * (currentPage.value + 1)))
-
   const currentPage = ref(0)
-  const setCurrentPage = (page: number) => {
-    currentPage.value = page
-  }
+  // const setCurrentPage = (page: number) => {
+  //   currentPage.value = page
+  // }
 
-  const deviceStore = useDevices()
-  const { editingItems, deletingItems, focusedItems, investigations } = storeToRefs(deviceStore)
-
-  const userStore = useUser()
-  const appStore = useApp()
-  const paramsStore = useParams()
-  const { Locations, Maintainers, OperatingSystems, InterfaceTypes, Statuses, Categories, DeviceTypes, Architectures } = storeToRefs(paramsStore)
-
+  // const forwardPageSize = (size: number) => {
+  //   emit("setPageSize", size)
+  //   userStore.saveSetting("devicesPageSize", size)
+  // }
   const iconIFace = (interfaceTypeID: number) => {
     return InterfaceTypes.value.find((item) => item.ID === interfaceTypeID)?.Icon as string
   }
@@ -221,15 +221,17 @@
     }
   }
 
-  // const editAddresses = (deviceIndex: number ) => {
-  //   let addresses = [] as Array<Address>
-  //   editingItems.value.interfaces.forEach((netFace, index) => {
-  //     if (netFace.DeviceID == props.items[deviceIndex].ID) {
-  //       addresses = props.items[deviceIndex].Interfaces[index].Addresses
-  //     }
-  //   })
-  //   return addresses
-  // }
+  /*
+  const editAddresses = (deviceIndex: number ) => {
+    let addresses = [] as Array<Address>
+    editingItems.value.interfaces.forEach((netFace, index) => {
+      if (netFace.DeviceID == props.items[deviceIndex].ID) {
+        addresses = props.items[deviceIndex].Interfaces[index].Addresses
+      }
+    })
+    return addresses
+  }
+  */
 
   /* Open/Close rows with additional interfaces/addresses */
   interface ExpandedRow {
@@ -637,7 +639,7 @@
         </tr>
       </tbody>
     </table>
-    <paginator v-if="perPage == null || (perPage !== null && items.length > perPage)" class="table-pagination" :numItems="items.length" @changePage="setCurrentPage" />
+    <!-- <paginator v-if="perPage == null || (perPage !== null && items.length > perPage)" class="table-pagination" :perPage="settings.devicesPageSize" :numItems="items.length" @changePage="setCurrentPage" @setPageSize="forwardPageSize" />-->
   </div>
 </template>
 

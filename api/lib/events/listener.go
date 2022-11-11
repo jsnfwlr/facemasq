@@ -5,12 +5,7 @@ import (
 	"runtime"
 )
 
-// Listener is a function capable of handling events
-type Listener func(e Event)
-
-// NamedListen for events. Name is the name of the
-// listener NOT the events you want to listen for,
-// so something like "my-listener", "kafka-listener", etc...
+// NamedListen for events. Name is the name of the listener NOT the events you want to listen for, so something like "my-listener", "kafka-listener", etc...
 func NamedListen(name string, l Listener) (DeleteFn, error) {
 	return boss.Listen(name, l)
 }

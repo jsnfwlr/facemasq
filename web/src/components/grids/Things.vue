@@ -7,14 +7,14 @@
   import { useApp } from "@/stores/app"
   import { useParams } from "@/stores/params"
 
-  import ModalBox from "@/components/justboil/ModalBox.vue"
+  import ModalBox from "@/components/modals/ModalBox.vue"
   import ConnectivityIndicator from "@/components/indicators/Connectivity.vue"
   import mdIcon from "@/components/elements/MDIcon.vue"
   import Paginator from "@/components/grids/extensions/Paginator.vue"
 
-  const paramsStore = useParams()
   const appStore = useApp()
 
+  const paramsStore = useParams()
   const { InterfaceTypes, DeviceTypes } = storeToRefs(paramsStore)
 
   const props = defineProps({

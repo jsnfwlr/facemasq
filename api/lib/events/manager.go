@@ -7,14 +7,8 @@ import (
 	"facemasq/lib/events/safe"
 )
 
-type DeleteFn func()
-
-// Manager can be implemented to replace the default
-// events manager
-type Manager interface {
-	Listen(string, Listener) (DeleteFn, error)
-	Emit(Event) error
-}
+var boss Manager = DefaultManager()
+var _ listable = &manager{}
 
 // DefaultManager implements a map backed Manager
 func DefaultManager() Manager {
@@ -23,17 +17,9 @@ func DefaultManager() Manager {
 	}
 }
 
-// SetManager allows you to replace the default
-// event manager with a custom one
+// SetManager allows you to replace the default event manager with a custom one
 func SetManager(m Manager) {
 	boss = m
-}
-
-var boss Manager = DefaultManager()
-var _ listable = &manager{}
-
-type manager struct {
-	listeners listenerMap
 }
 
 func (m *manager) Listen(name string, l Listener) (DeleteFn, error) {
