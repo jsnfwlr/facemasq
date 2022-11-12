@@ -1,3 +1,4 @@
+SHELL := /bin/zsh
 GITVERSION != git describe --tags --abbrev=0
 CURRENTVERSION != npm version | jq -r .facemasq
 ARCH != go env GOARCH
@@ -42,7 +43,12 @@ api-test-testing:			# API - run unit-tests to ensure the functions used to facil
 	@cd api; go test -tags testing ./...
 api-test-full: 				# API - run  test-suite
 	@cd api; go test --tags full ./...
-api: api-test 				# API - build local version
+api-extensions:
+	cd api; find ./extensions -maxdepth 1 -type d | grep "\/.*\/" | xargs -n 1 -I {} go build -buildmode=plugin {}
+	mv ./api/*.so ./extensions
+api-dev: api-extensions
+	source env.sh; cd api; go run ./
+api: api-test api-extensions 				# API - build local version
 	cd api; CGO_ENABLED=1 go build -ldflags "-linkmode external -extldflags -static" --tags "linux sqlite_foreign_keys=1" -o ../dist/api/facemasq .
 
 # CONTAINER - build various versions of the container
@@ -58,8 +64,9 @@ web-test:
 	@echo "No Testing Yet"
 web-coverage:
 	@echo "No Testing Yet"
-# WEB - build the web UI
-web: web-test
+web-dev:              # WEB - start dev server
+	cd web; pnpm run dev
+web: web-test			    # WEB - build the web UI
 	cd web; pnpm install; pnpm build
 
 # Docs - generation, serving

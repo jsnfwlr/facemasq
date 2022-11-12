@@ -14,3 +14,5 @@ node_modules
 debug.log
 build/*.tar.gz
 /extensions
+**/experiments
+env.sh
