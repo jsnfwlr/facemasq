@@ -2,6 +2,7 @@ package devices
 
 import (
 	"net/http"
+	"time"
 
 	"facemasq/lib/db"
 	"facemasq/lib/devices"
@@ -10,29 +11,33 @@ import (
 	"facemasq/models"
 )
 
-func SaveInterface(out http.ResponseWriter, in *http.Request) {
-	var input models.Interface
+func Save(out http.ResponseWriter, in *http.Request) {
+	var input models.Device
 	err := formats.ReadJSONBody(in, &input)
 	if err != nil {
-		logging.Error("Unable to parse Inteface: %v", err)
-		http.Error(out, "Unable to parse Inteface", http.StatusInternalServerError)
+		logging.Error("Unable to parse Device: %v", err)
+		http.Error(out, "Unable to parse Device", http.StatusInternalServerError)
 		return
 	}
+	if input.FirstSeen.Format("2006-01-02") == "0001-01-01" {
+		input.FirstSeen = time.Now()
+	}
+	logging.Debug2("%v", input)
 	if input.ID > 0 {
 		_, err = db.Conn.NewUpdate().Model(&input).Where("id = ?", input.ID).Exec(db.Context)
 	} else {
 		_, err = db.Conn.NewInsert().Model(&input).Exec(db.Context)
 	}
 	if err != nil {
-		logging.Error("Unable to save Inteface: %v", err)
-		http.Error(out, "Unable to save Inteface", http.StatusInternalServerError)
+		logging.Error("Unable to save Device: %v", err)
+		http.Error(out, "Unable to save Device", http.StatusInternalServerError)
 		return
 
 	}
 	formats.WriteJSONResponse(input, out, in)
 }
 
-func DeleteInterface(out http.ResponseWriter, in *http.Request) {
+func Delete(out http.ResponseWriter, in *http.Request) {
 	var input models.Device
 	err := formats.ReadJSONBody(in, &input)
 	if err != nil {
@@ -41,7 +46,7 @@ func DeleteInterface(out http.ResponseWriter, in *http.Request) {
 		return
 	}
 
-	err = devices.DeleteInterface(input.ID)
+	err = devices.DeleteDevice(input.ID)
 	if err != nil {
 		logging.Error("Unable to delete Device: %v", err)
 		http.Error(out, "Unable to delete Device", http.StatusInternalServerError)

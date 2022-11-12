@@ -5,10 +5,26 @@ import (
 
 	"github.com/gorilla/mux"
 
+	"facemasq/handlers/addresses"
+	"facemasq/handlers/architectures"
+	"facemasq/handlers/categories"
+	"facemasq/handlers/charts"
 	"facemasq/handlers/control"
 	"facemasq/handlers/devices"
+	"facemasq/handlers/devicetypes"
+	"facemasq/handlers/grids"
+	"facemasq/handlers/hostnames"
+	"facemasq/handlers/interfaces"
+	"facemasq/handlers/interfacetypes"
+	"facemasq/handlers/locations"
+	"facemasq/handlers/meta"
+	"facemasq/handlers/operatingsystems"
 	"facemasq/handlers/params"
-	"facemasq/handlers/settings"
+	"facemasq/handlers/statuses"
+	"facemasq/handlers/trends"
+	"facemasq/handlers/users"
+	"facemasq/handlers/users/maintainers"
+	"facemasq/handlers/vlans"
 	"facemasq/lib/extensions"
 )
 
@@ -22,15 +38,30 @@ func BuildRoutes() (router Router) {
 	}
 
 	var routes []extensions.RouteDefinition
+	routes = append(routes, control.GetRoutes()...)          // Control, UI, State Routes
+	routes = append(routes, charts.GetRoutes()...)           // Chart Routes
+	routes = append(routes, grids.GetRoutes()...)            // Grid Routes
+	routes = append(routes, trends.GetRoutes()...)           // Trend Routes
+	routes = append(routes, devices.GetRoutes()...)          // Device Routes
+	routes = append(routes, interfaces.GetRoutes()...)       // Interface Routes
+	routes = append(routes, addresses.GetRoutes()...)        // Addresse Routes
+	routes = append(routes, hostnames.GetRoutes()...)        // Hostname Routes
+	routes = append(routes, meta.GetRoutes()...)             // User & App Settings Routes
+	routes = append(routes, params.GetRoutes()...)           // Combined Params Routes
+	routes = append(routes, categories.GetRoutes()...)       // Category Routes
+	routes = append(routes, statuses.GetRoutes()...)         // Status Routes
+	routes = append(routes, locations.GetRoutes()...)        // Location Routes
+	routes = append(routes, maintainers.GetRoutes()...)      // Maintainer Routes
+	routes = append(routes, devicetypes.GetRoutes()...)      // DeviceType Routes
+	routes = append(routes, architectures.GetRoutes()...)    // Architecture Routes
+	routes = append(routes, operatingsystems.GetRoutes()...) // OperatingSystem Routes
+	routes = append(routes, vlans.GetRoutes()...)            // VLAN Routes
+	routes = append(routes, users.GetRoutes()...)            // User Routes
+	routes = append(routes, interfacetypes.GetRoutes()...)   // InterfaceType Routes
+	routes = append(routes, control.GetStaticRoutes()...)    // Static Routes
+
 	// For now, plugin routes go last, to prevent them over riding the built in routes.
 	// This may change in the future, but will require some sort of plugin security, with user confirmation and signed binaries
-	routes = append(routes, controlRoutes()...)
-	routes = append(routes, uiRoutes()...)
-	routes = append(routes, deviceRoutes()...)
-	routes = append(routes, settingsRoutes()...)
-	routes = append(routes, paramRoutes()...)
-	routes = append(routes, statusRoutes()...)
-	routes = append(routes, staticRoutes()...)
 	routes = append(routes, extensions.Extensions.GetRoutes()...)
 
 	for r := range routes {
@@ -44,89 +75,5 @@ func BuildRoutes() (router Router) {
 		}
 	}
 
-	return
-}
-
-func controlRoutes() (routes []extensions.RouteDefinition) {
-	routes = []extensions.RouteDefinition{
-		{Path: `/api/exit`, Handler: control.Exit, Methods: "GET", Name: "APIExit"},
-		{Path: `/exit`, Handler: control.Exit, Methods: "GET", Name: "Exit"},
-	}
-	return
-}
-
-func deviceRoutes() (routes []extensions.RouteDefinition) {
-	routes = []extensions.RouteDefinition{
-		{Path: `/api/records/all`, Handler: devices.GetAll, Methods: "GET", Name: "GetAllDevices"},
-		{Path: `/api/records/active`, Handler: devices.GetActive, Methods: "GET", Name: "GetActiveDevices"},
-		{Path: `/api/records/chart`, Handler: devices.GetDashboardChartData, Methods: "GET", Name: "GetDashboardChartData"},
-		{Path: `/api/records/unknown`, Handler: devices.GetUnknown, Methods: "GET", Name: "GetUnknownDevices"},
-		{Path: `/api/records/trends`, Handler: devices.GetTrendData, Methods: "GET", Name: "GetDeviceTrendData"},
-		{Path: `/api/records/investigate`, Handler: devices.InvestigateAddresses, Methods: "POST", Name: "InvestigateAddresses"},
-		{Path: `/api/records/device`, Handler: devices.SaveDevice, Methods: "POST", Name: "SaveDevice"},
-		{Path: `/api/records/interface`, Handler: devices.SaveInterface, Methods: "POST", Name: "SaveInterface"},
-		{Path: `/api/records/address`, Handler: devices.SaveAddress, Methods: "POST", Name: "SaveAddress"},
-		{Path: `/api/records/hostname`, Handler: devices.SaveHostname, Methods: "POST", Name: "SaveHostname"},
-
-		{Path: `/ws/records/changed`, Handler: devices.GetRecentChanges, Methods: "WS", Name: "WSRecentlyChangedDevices"},
-	}
-	return
-}
-
-func settingsRoutes() (routes []extensions.RouteDefinition) {
-	routes = []extensions.RouteDefinition{
-		{Path: `/api/settings/{userID:[0-9]+}`, Handler: settings.GetUserSettings, Methods: "GET", Name: "GetUserSettings"},
-		{Path: `/api/settings`, Handler: settings.GetAppSettings, Methods: "GET", Name: "GetAppSettings"},
-		{Path: `/api/setting/{userID:[0-9]+}`, Handler: settings.SaveUserSetting, Methods: "POST", Name: "SaveUserSetting"},
-		{Path: `/api/setting`, Handler: settings.SaveAppSetting, Methods: "POST", Name: "SaveAppSetting"},
-	}
-	return
-}
-
-func statusRoutes() (routes []extensions.RouteDefinition) {
-	routes = []extensions.RouteDefinition{
-		{Path: `/status`, Handler: control.Status, Methods: "GET", Name: "GetStatus"},
-	}
-	return
-}
-
-func paramRoutes() (routes []extensions.RouteDefinition) {
-	routes = []extensions.RouteDefinition{
-		{Path: `/api/params`, Handler: params.GetAll, Methods: "GET", Name: "GetAllParams"},
-		{Path: `/api/categories`, Handler: params.SaveCategory, Methods: "POST", Name: "SaveCategory"},
-		{Path: `/api/categories/{ID:[0-9]+}`, Handler: params.DeleteCategory, Methods: "DELETE", Name: "DeleteCategory"},
-		{Path: `/api/statuses`, Handler: params.SaveStatus, Methods: "POST", Name: "SaveStatus"},
-		{Path: `/api/statuses/{ID:[0-9]+}`, Handler: params.DeleteStatus, Methods: "DELETE", Name: "DeleteStatus"},
-		{Path: `/api/locations`, Handler: params.SaveLocation, Methods: "POST", Name: "SaveLocation"},
-		{Path: `/api/locations/{ID:[0-9]+}`, Handler: params.DeleteLocation, Methods: "DELETE", Name: "DeleteLocation"},
-		{Path: `/api/maintainers`, Handler: params.SaveMaintainer, Methods: "POST", Name: "SaveMaintainer"},
-		{Path: `/api/maintainers/{ID:[0-9]+}`, Handler: params.DeleteMaintainer, Methods: "DELETE", Name: "DeleteMaintainer"},
-		{Path: `/api/deviceTypes`, Handler: params.SaveDeviceType, Methods: "POST", Name: "SaveDeviceType"},
-		{Path: `/api/deviceTypes/{ID:[0-9]+}`, Handler: params.DeleteDeviceType, Methods: "DELETE", Name: "DeleteDeviceType"},
-		{Path: `/api/architectures`, Handler: params.SaveArchitecture, Methods: "POST", Name: "SaveArchitecture"},
-		{Path: `/api/architectures/{ID:[0-9]+}`, Handler: params.DeleteArchitecture, Methods: "DELETE", Name: "DeleteArchitecture"},
-		{Path: `/api/operatingSystems`, Handler: params.SaveOperatingSystem, Methods: "POST", Name: "SaveOperatingSystem"},
-		{Path: `/api/operatingSystems/{ID:[0-9]+}`, Handler: params.DeleteOperatingSystem, Methods: "DELETE", Name: "DeleteOperatingSystem"},
-		{Path: `/api/vlans`, Handler: params.SaveVLAN, Methods: "POST", Name: "SaveVLAN"},
-		{Path: `/api/vlans/{ID:[0-9]+}`, Handler: params.DeleteVLAN, Methods: "DELETE", Name: "DeleteVLAN"},
-		{Path: `/api/users`, Handler: params.SaveUser, Methods: "POST", Name: "SaveUser"},
-		{Path: `/api/users/{ID:[0-9]+}`, Handler: params.DeleteUser, Methods: "DELETE", Name: "DeleteUser"},
-		{Path: `/api/interfaceTypes`, Handler: params.SaveInterfaceType, Methods: "POST", Name: "SaveInterfaceType"},
-		{Path: `/api/interfaceTypes/{ID:[0-9]+}`, Handler: params.DeleteInterfaceType, Methods: "DELETE", Name: "DeleteInterfaceType"},
-	}
-	return
-}
-
-func uiRoutes() (routes []extensions.RouteDefinition) {
-	routes = []extensions.RouteDefinition{
-		{Path: `/`, Handler: http.FileServer(http.Dir("../web")), Methods: "GET", Name: "ServeUI"},
-	}
-	return
-}
-
-func staticRoutes() (routes []extensions.RouteDefinition) {
-	routes = []extensions.RouteDefinition{
-		{Path: `/{filename:[a-zA-Z0-9=\.\/]+}`, Handler: control.Static, Methods: "GET", Name: "ServeStatic"},
-	}
 	return
 }

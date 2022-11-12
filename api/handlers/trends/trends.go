@@ -1,4 +1,4 @@
-package devices
+package trends
 
 import (
 	"fmt"
@@ -26,8 +26,8 @@ type Concurrency struct {
 	Time  time.Time `bun:"time"`
 }
 
-func GetTrendData(out http.ResponseWriter, in *http.Request) {
-	durations, err := getTrendData()
+func GetConnectionTrends(out http.ResponseWriter, in *http.Request) {
+	durations, err := getConnectionTrends()
 	if err != nil {
 		logging.Error(err.Error())
 		http.Error(out, "Error getting trend data", http.StatusInternalServerError)
@@ -35,7 +35,7 @@ func GetTrendData(out http.ResponseWriter, in *http.Request) {
 	formats.WriteJSONResponse(durations, out, in)
 }
 
-func getTrendData() (durations []TrendWindow, err error) {
+func getConnectionTrends() (durations []TrendWindow, err error) {
 	var firstSeen time.Time
 	var concurrency Concurrency
 	err = db.Conn.NewRaw("SELECT first_seen FROM devices ORDER BY first_seen ASC LIMIT 1;").Scan(db.Context, &firstSeen)

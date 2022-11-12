@@ -1,4 +1,4 @@
-package devices
+package interfaces
 
 import (
 	"net/http"
@@ -10,29 +10,29 @@ import (
 	"facemasq/models"
 )
 
-func SaveAddress(out http.ResponseWriter, in *http.Request) {
-	var input models.Address
+func Save(out http.ResponseWriter, in *http.Request) {
+	var input models.Interface
 	err := formats.ReadJSONBody(in, &input)
 	if err != nil {
-		logging.Error("Unable to parse Address: %v", err)
-		http.Error(out, "Unable to parse Address", http.StatusInternalServerError)
+		logging.Error("Unable to parse Inteface: %v", err)
+		http.Error(out, "Unable to parse Inteface", http.StatusInternalServerError)
 		return
 	}
 	if input.ID > 0 {
-		_, err = db.Conn.NewUpdate().Model(&input).Where(`id = ?`, input.ID).Exec(db.Context)
+		_, err = db.Conn.NewUpdate().Model(&input).Where("id = ?", input.ID).Exec(db.Context)
 	} else {
 		_, err = db.Conn.NewInsert().Model(&input).Exec(db.Context)
 	}
 	if err != nil {
-		logging.Error("Unable to save Address: %v", err)
-		http.Error(out, "Unable to save Address", http.StatusInternalServerError)
+		logging.Error("Unable to save Inteface: %v", err)
+		http.Error(out, "Unable to save Inteface", http.StatusInternalServerError)
 		return
 
 	}
 	formats.WriteJSONResponse(input, out, in)
 }
 
-func DeleteAddress(out http.ResponseWriter, in *http.Request) {
+func Delete(out http.ResponseWriter, in *http.Request) {
 	var input models.Device
 	err := formats.ReadJSONBody(in, &input)
 	if err != nil {
@@ -41,7 +41,7 @@ func DeleteAddress(out http.ResponseWriter, in *http.Request) {
 		return
 	}
 
-	err = devices.DeleteAddress(input.ID)
+	err = devices.DeleteInterface(input.ID)
 	if err != nil {
 		logging.Error("Unable to delete Device: %v", err)
 		http.Error(out, "Unable to delete Device", http.StatusInternalServerError)

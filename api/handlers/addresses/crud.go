@@ -1,8 +1,7 @@
-package devices
+package addresses
 
 import (
 	"net/http"
-	"time"
 
 	"facemasq/lib/db"
 	"facemasq/lib/devices"
@@ -11,33 +10,29 @@ import (
 	"facemasq/models"
 )
 
-func SaveDevice(out http.ResponseWriter, in *http.Request) {
-	var input models.Device
+func Save(out http.ResponseWriter, in *http.Request) {
+	var input models.Address
 	err := formats.ReadJSONBody(in, &input)
 	if err != nil {
-		logging.Error("Unable to parse Device: %v", err)
-		http.Error(out, "Unable to parse Device", http.StatusInternalServerError)
+		logging.Error("Unable to parse Address: %v", err)
+		http.Error(out, "Unable to parse Address", http.StatusInternalServerError)
 		return
 	}
-	if input.FirstSeen.Format("2006-01-02") == "0001-01-01" {
-		input.FirstSeen = time.Now()
-	}
-	logging.Debug2("%v", input)
 	if input.ID > 0 {
-		_, err = db.Conn.NewUpdate().Model(&input).Where("id = ?", input.ID).Exec(db.Context)
+		_, err = db.Conn.NewUpdate().Model(&input).Where(`id = ?`, input.ID).Exec(db.Context)
 	} else {
 		_, err = db.Conn.NewInsert().Model(&input).Exec(db.Context)
 	}
 	if err != nil {
-		logging.Error("Unable to save Device: %v", err)
-		http.Error(out, "Unable to save Device", http.StatusInternalServerError)
+		logging.Error("Unable to save Address: %v", err)
+		http.Error(out, "Unable to save Address", http.StatusInternalServerError)
 		return
 
 	}
 	formats.WriteJSONResponse(input, out, in)
 }
 
-func DeleteDevice(out http.ResponseWriter, in *http.Request) {
+func Delete(out http.ResponseWriter, in *http.Request) {
 	var input models.Device
 	err := formats.ReadJSONBody(in, &input)
 	if err != nil {
@@ -46,7 +41,7 @@ func DeleteDevice(out http.ResponseWriter, in *http.Request) {
 		return
 	}
 
-	err = devices.DeleteDevice(input.ID)
+	err = devices.DeleteAddress(input.ID)
 	if err != nil {
 		logging.Error("Unable to delete Device: %v", err)
 		http.Error(out, "Unable to delete Device", http.StatusInternalServerError)

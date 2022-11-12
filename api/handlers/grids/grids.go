@@ -1,4 +1,4 @@
-package devices
+package grids
 
 import (
 	"fmt"
@@ -25,7 +25,7 @@ var upgrader = websocket.Upgrader{
 	WriteBufferSize: 1024,
 }
 
-func InvestigateAddresses(out http.ResponseWriter, in *http.Request) {
+func GetDeviceDosier(out http.ResponseWriter, in *http.Request) {
 	var input []int64
 	var investigations []Investigation
 	err := formats.ReadJSONBody(in, &input)
@@ -49,7 +49,7 @@ func InvestigateAddresses(out http.ResponseWriter, in *http.Request) {
 	formats.WriteJSONResponse(investigations, out, in)
 }
 
-func GetActive(out http.ResponseWriter, in *http.Request) {
+func GetActiveDevices(out http.ResponseWriter, in *http.Request) {
 	queries := helper.DeviceQueries{
 		Devices:   `SELECT * FROM devices;`,
 		Netfaces:  `SELECT * FROM interfaces ORDER BY is_primary DESC, is_virtual ASC;`,
@@ -71,7 +71,7 @@ func GetActive(out http.ResponseWriter, in *http.Request) {
 	formats.WriteJSONResponse(activeDevices, out, in)
 }
 
-func GetAll(out http.ResponseWriter, in *http.Request) {
+func GetAllDevices(out http.ResponseWriter, in *http.Request) {
 	queries := helper.DeviceQueries{
 		Devices:   `SELECT * FROM devices;`,
 		Netfaces:  `SELECT * FROM interfaces ORDER BY is_primary DESC, is_virtual ASC;`,
@@ -88,7 +88,7 @@ func GetAll(out http.ResponseWriter, in *http.Request) {
 	formats.WriteJSONResponse(allDevices, out, in)
 }
 
-func GetUnknown(out http.ResponseWriter, in *http.Request) {
+func GetUnknownDevices(out http.ResponseWriter, in *http.Request) {
 	queries := helper.DeviceQueries{
 		Devices:   `SELECT * FROM devices WHERE status_id = 1;`,
 		Netfaces:  `SELECT * FROM interfaces ORDER BY is_primary DESC, is_virtual ASC;`,
@@ -106,7 +106,7 @@ func GetUnknown(out http.ResponseWriter, in *http.Request) {
 	formats.WriteJSONResponse(unknownDevices, out, in)
 }
 
-func GetRecentChanges(out http.ResponseWriter, in *http.Request) {
+func GetRecentlyChangedDevices(out http.ResponseWriter, in *http.Request) {
 	socket, err := upgrader.Upgrade(out, in, nil)
 	if err != nil {
 		if _, ok := err.(websocket.HandshakeError); !ok {

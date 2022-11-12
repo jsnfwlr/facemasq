@@ -1,4 +1,4 @@
-package devices
+package hostnames
 
 import (
 	"fmt"
@@ -10,7 +10,7 @@ import (
 	"facemasq/models"
 )
 
-func SaveHostname(out http.ResponseWriter, in *http.Request) {
+func Save(out http.ResponseWriter, in *http.Request) {
 	var input models.Hostname
 	err := formats.ReadJSONBody(in, &input)
 	if err != nil {
@@ -32,7 +32,7 @@ func SaveHostname(out http.ResponseWriter, in *http.Request) {
 	formats.WriteJSONResponse(input, out, in)
 }
 
-func DeleteHostname(out http.ResponseWriter, in *http.Request) {
+func Delete(out http.ResponseWriter, in *http.Request) {
 	var input models.Hostname
 	err := formats.ReadJSONBody(in, &input)
 	if err != nil {

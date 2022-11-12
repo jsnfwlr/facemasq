@@ -1,6 +1,6 @@
 //go:build database
 
-package devices
+package trends
 
 import (
 	"testing"
@@ -15,7 +15,7 @@ func TestGetTrendData(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer container.Close()
-	data, err := getTrendData()
+	data, err := getConnectionTrends()
 	if err != nil {
 		t.Error(err)
 	}

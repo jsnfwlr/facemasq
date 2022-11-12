@@ -1,4 +1,4 @@
-package devices
+package charts
 
 import (
 	"net/http"
@@ -27,7 +27,7 @@ func init() {
 	}
 }
 
-func GetDashboardChartData(out http.ResponseWriter, in *http.Request) {
+func GetDevicesOverTime(out http.ResponseWriter, in *http.Request) {
 	var series map[string][]DevicesOverTime
 	var err error
 

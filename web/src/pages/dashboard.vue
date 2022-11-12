@@ -11,8 +11,9 @@
   // Components
   import Chart from "@/components/charts/LineChart.vue"
   import TrendIndicator from "@/components/indicators/Trend.vue"
-  import ThingsGrid from "@/components/grids/Things.vue"
+
   import DeviceGrid from "@/components/grids/Devices.vue"
+  import IntrusionGrid from "@/components/grids/Intrusions.vue"
   import Card from "@/components/containers/Card.vue"
   import Banner from "@/components/indicators/Banner.vue"
   import Btn from "@/components/elements/Btn.vue"
@@ -103,33 +104,27 @@
       <btn icon="Close" small @click="dismissUnknown" />
     </template>
   </banner>
-  <div v-if="trends.length > 0" class="grid grid-cols-2 gap-6 lg:grid-cols-6 mb-6">
-    <trend-indicator v-for="(trend, index) in trends" :trend="trend" color="text-teal-500" icon="Radar" :key="'trends-' + index" :prefix="''" :suffix="''" />
-  </div>
-  <div v-else class="grid grid-cols-2 gap-6 lg:grid-cols-6 mb-6">
-    <trend-indicator v-for="(trend, index) in fakeTrends" :trend="trend" color="text-teal-500" icon="Radar" :key="'fake-trends-' + index" :prefix="''" :suffix="''" />
-  </div>
-  <card :icon="'MonitorCellphone'" :headingTitle="'Unknown Devices - ' + intrudingDevices.length" has-table class="mb-6">
-    <!-- <device-grid :items="intrudingDevices" mode="administrative" @setPageSize="saveDashboardIntrudingPageSize" /> -->
-    <device-grid :items="intrudingDevices" mode="administrative" />
-  </card>
-  <card :icon="'MonitorCellphone'" :headingTitle="'Known Devices - ' + recentDevices.length" has-table class="mb-6">
-    <!-- <device-grid :items="recentDevices" mode="administrative" @setPageSize="saveDashboardKnownPageSize" /> -->
-    <device-grid :items="recentDevices" mode="administrative" />
+
+  <card :icon="'MonitorCellphone'" :headingTitle="'Intrusions - ' + intrudingDevices.length" has-table class="mb-6">
+    <intrusion-grid :items="intrudingDevices" mode="administrative" :perPage="100" />
   </card>
 
-  <div class="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-6">
-    <div>
-      <card headingTitle="Devices over time" icon="Finance" class="mb-6">
-        <div v-if="devicesOverTime">
-          <chart :colors="['#00D1B2', '#3399CC']" :data="devicesOverTime" :height="625.5" :min="getMin" :max="getMax" />
-        </div>
-      </card>
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+    <card headingTitle="Devices over time" icon="Finance" class="mb-6">
+      <div v-if="devicesOverTime">
+        <chart :colors="['#00D1B2', '#3399CC']" :data="devicesOverTime" :height="675.5" :min="getMin" :max="getMax" />
+      </div>
+    </card>
+
+    <div v-if="trends.length > 0" class="grid grid-cols-6 lg:grid-cols-1 gap-6 mb-6">
+      <trend-indicator v-for="(trend, index) in trends" :trend="trend" color="text-teal-500" icon="Radar" :key="'trends-' + index" :prefix="''" :suffix="''" />
     </div>
-    <div>
-      <card icon="MonitorCellphone" :headingTitle="'Recent Devices (' + recentDevices.length + ')'" has-table class="mb-6">
-        <things-grid :maxHeight="625.5" :items="recentDevices" />
-      </card>
+    <div v-else class="grid grid-cols-1 gap-6 mb-6">
+      <trend-indicator v-for="(trend, index) in fakeTrends" :trend="trend" color="text-teal-500" icon="Radar" :key="'fake-trends-' + index" :prefix="''" :suffix="''" />
     </div>
   </div>
+
+  <card :icon="'MonitorCellphone'" :headingTitle="'Known Devices - ' + recentDevices.length" has-table class="mb-6">
+    <device-grid :items="recentDevices" mode="administrative" :perPage="100" />
+  </card>
 </template>

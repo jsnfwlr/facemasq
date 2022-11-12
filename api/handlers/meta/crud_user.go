@@ -1,4 +1,4 @@
-package settings
+package meta
 
 import (
 	"net/http"

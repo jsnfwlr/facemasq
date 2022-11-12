@@ -43,7 +43,7 @@ func Static(out http.ResponseWriter, in *http.Request) {
 	}
 }
 
-func Status(out http.ResponseWriter, in *http.Request) {
+func State(out http.ResponseWriter, in *http.Request) {
 	var settings models.Meta
 	details := make(map[string]string)
 

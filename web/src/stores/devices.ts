@@ -3,8 +3,160 @@ import { mande } from "mande"
 import { useStorage } from "@vueuse/core"
 import { format } from "date-fns"
 
-const url = import.meta.env.DEV ? "http://192.168.0.41:6135/api/records" : "/api/records"
-const deviceRecords = mande(url)
+const gridsURL = import.meta.env.DEV ? "http://192.168.0.41:6135/api/grids" : "/api/grids"
+const gridsSRC = mande(gridsURL)
+const chartsURL = import.meta.env.DEV ? "http://192.168.0.41:6135/api/charts" : "/api/charts"
+const chartsSRC = mande(chartsURL)
+const trendsURL = import.meta.env.DEV ? "http://192.168.0.41:6135/api/trends" : "/api/trends"
+const trendsSRC = mande(trendsURL)
+const defaultURL = import.meta.env.DEV ? "http://192.168.0.41:6135/api" : "/api"
+const defaultSRC = mande(defaultURL)
+// const URL = import.meta.env.DEV ? "http://192.168.0.41:6135/api/" : "/api/"
+// const SRC = mande()
+
+export interface Device {
+  ID: number | null
+  MachineName: string
+  Brand: string | null
+  Model: string | null
+  Purchased: string | null
+  Serial: string | null
+  IsTracked: boolean
+  FirstSeen: string | null
+  IsGuest: boolean
+  IsOnline: boolean
+  Label: string | null
+  Notes: string | null
+  CategoryID: number
+  StatusID: number
+  MaintainerID: number
+  LocationID: number
+  DeviceTypeID: number
+  OperatingSystemID: number
+  ArchitectureID: number
+  Interfaces: Array<Netface>
+  Primary: PrimaryConnection
+  SortOrder: string
+}
+
+export interface Netface {
+  ID: number
+  MAC: string
+  IsPrimary: boolean
+  IsVirtual: boolean
+  IsOnline: boolean
+  Label: string | null
+  Notes: string | null
+  LastSeen: string
+  StatusID: number
+  InterfaceTypeID: number
+  VlanID: number
+  DeviceID: number | null
+  Primary: PrimaryConnection
+  Addresses: Array<Address>
+}
+
+export interface Address {
+  ID: number
+  IPv4: string | null
+  IPv6: string | null
+  IsPrimary: boolean
+  IsVirtual: boolean
+  IsReserved: boolean
+  LastSeen: string | null
+  Label: string | null
+  Notes: string | null
+  InterfaceID: number
+  Connectivity: Array<Connection> | null
+  Hostnames: Array<DomainName>
+}
+
+export interface Connection {
+  State: boolean
+  Time: string
+}
+
+export interface DomainName {
+  ID: number
+  Hostname: string
+  IsDNS: boolean
+  IsSelfSet: boolean
+  Notes: string | null
+  AddressID: number | null
+}
+
+export interface ChartValues {
+  full: Array<TimeLog>
+  averaged: Array<TimeLog>
+}
+
+export interface TimeLog {
+  Time: string
+  Addresses: number
+}
+
+export interface Trend {
+  Label: string
+  Current: number
+  Compare: number
+  Tooltip: string | null
+}
+
+export interface ColumnSort {
+  column: string
+  direction: string
+}
+
+export interface DeviceState {
+  columnSort: ColumnSort
+  allDevices: Array<Device>
+  activeDevices: Array<Device>
+  unknownDevices: Array<Device>
+  devicesOverTime: ChartValues
+  trends: Array<Trend>
+  lastUnknown: string
+  editingItems: EditSets
+  focusedItems: FocusSets
+  deletingItems: DeleteSets
+  dosiers: Map<number, Array<Dosier>>
+}
+
+export interface PrimaryConnection {
+  IPv4: string | null
+  IPv6: string | null
+  InterfaceTypeID: number
+  VlanID: number
+  MAC: string | null
+  IsReservedIP: boolean | null
+  IsVirtualIP: boolean | null
+  IsVirtualIFace: boolean | null
+}
+
+export interface EditSets {
+  devices: Map<string, Device>
+  interfaces: Map<string, Netface>
+  addresses: Map<string, Address>
+  hostnames: Map<string, DomainName>
+}
+
+export interface FocusSets {
+  devices: Map<string, Device>
+  interfaces: Map<string, Netface>
+  addresses: Map<string, Address>
+  hostnames: Map<string, DomainName>
+}
+
+export interface DeleteSets {
+  devices: Array<number>
+  interfaces: Array<number>
+  addresses: Array<number>
+  hostnames: Array<number>
+}
+
+export interface Dosier {
+  AddressID: number
+  Connectivity: Array<Connection> | null
+}
 
 export const useDevices = defineStore("devices", {
   state: () => {
@@ -22,7 +174,7 @@ export const useDevices = defineStore("devices", {
       },
       trends: [],
       lastUnknown: "2021-12-31 08:55:00",
-      investigations: new Map<number, Array<Investigation>>(),
+      dosiers: new Map<number, Array<Dosier>>(),
       editingItems: {
         devices: new Map<string, Device>(),
         interfaces: new Map<string, Netface>(),
@@ -54,7 +206,7 @@ export const useDevices = defineStore("devices", {
   },
   actions: {
     getTrends() {
-      deviceRecords.get<Array<Trend>>("/trends").then((response) => {
+      trendsSRC.get<Array<Trend>>("/connections").then((response) => {
         this.trends = response
         // for (let i = 0; i < response.length; i++) {
         //   for (let j = 0; j < this.trends.length; j++) {
@@ -68,7 +220,7 @@ export const useDevices = defineStore("devices", {
       })
     },
     getCharts() {
-      deviceRecords.get<ChartValues>("/chart").then((response) => {
+      chartsSRC.get<ChartValues>("/devicesovertime").then((response) => {
         // this.devicesOverTime = []
         // for (let i = 1400; i < response.length; i++) {
         //   this.devicesOverTime.push(response[i])
@@ -77,14 +229,14 @@ export const useDevices = defineStore("devices", {
       })
     },
     getAll() {
-      deviceRecords.get<Array<Device>>("/all").then((response) => {
+      gridsSRC.get<Array<Device>>("/alldevices").then((response) => {
         if (this.canChangeSort) {
           this.allDevices = response
           this.SortDevices()
         }
       })
     },
-    investigateDevice(deviceID: number) {
+    getDosier(deviceID: number) {
       const addresses = [] as Array<number>
       this.allDevices
         .find((dev) => dev.ID === deviceID)
@@ -93,8 +245,8 @@ export const useDevices = defineStore("devices", {
             addresses.push(address.ID)
           })
         })
-      deviceRecords.post("/investigate", addresses).then((response) => {
-        this.investigations.set(deviceID, response as Array<Investigation>)
+      gridsSRC.post("/dosier", addresses).then((response) => {
+        this.dosiers.set(deviceID, response as Array<Dosier>)
       })
     },
     Add(indexes: Array<number>) {
@@ -455,7 +607,7 @@ export const useDevices = defineStore("devices", {
             OperatingSystemID: this.allDevices[indexes[0]].OperatingSystemID,
             ArchitectureID: this.allDevices[indexes[0]].ArchitectureID,
           }
-          deviceRecords.post("/device", deviceOnly).then((response) => {
+          defaultSRC.post("/device", deviceOnly).then((response) => {
             this.allDevices[indexes[0]].ID = (response as Device).ID
             if (isNew) {
               this.allDevices[indexes[0]].Interfaces.forEach((_, n) => {
@@ -490,7 +642,7 @@ export const useDevices = defineStore("devices", {
             VlanID: this.allDevices[indexes[0]].Interfaces[indexes[1]].VlanID,
             DeviceID: this.allDevices[indexes[0]].ID,
           }
-          deviceRecords.post("/interface", interfaceOnly).then((response) => {
+          defaultSRC.post("/interface", interfaceOnly).then((response) => {
             this.allDevices[indexes[0]].Interfaces[indexes[1]].ID = (response as Netface).ID
             if (isNew) {
               this.allDevices[indexes[0]].Interfaces[indexes[1]].Addresses.forEach((_, a) => {
@@ -524,7 +676,7 @@ export const useDevices = defineStore("devices", {
             Notes: this.allDevices[indexes[0]].Interfaces[indexes[1]].Addresses[indexes[2]].Notes,
             InterfaceID: this.allDevices[indexes[0]].Interfaces[indexes[1]].ID,
           }
-          deviceRecords.post("/address", addressOnly).then((response) => {
+          defaultSRC.post("/address", addressOnly).then((response) => {
             this.allDevices[indexes[0]].Interfaces[indexes[1]].Addresses[indexes[2]].ID = (response as Address).ID
             if (isNew) {
               this.allDevices[indexes[0]].Interfaces[indexes[1]].Addresses[indexes[2]].Hostnames.forEach((_, h) => {
@@ -554,7 +706,7 @@ export const useDevices = defineStore("devices", {
               Notes: this.allDevices[indexes[0]].Interfaces[indexes[1]].Addresses[indexes[2]].Hostnames[indexes[3]].Notes,
               AddressID: this.allDevices[indexes[0]].Interfaces[indexes[1]].Addresses[indexes[2]].ID,
             }
-            deviceRecords.post("/hostname", hostnameOnly).then((response) => {
+            defaultSRC.post("/hostname", hostnameOnly).then((response) => {
               this.allDevices[indexes[0]].Interfaces[indexes[1]].Addresses[indexes[2]].Hostnames[indexes[3]].ID = (response as DomainName).ID
               if (isNew) {
                 const move = this.allDevices[indexes[0]].Interfaces[indexes[1]].Addresses[indexes[2]].Hostnames.splice(indexes[3], 1)
@@ -635,147 +787,3 @@ export const useDevices = defineStore("devices", {
     },
   },
 })
-
-export interface Device {
-  ID: number | null
-  MachineName: string
-  Brand: string | null
-  Model: string | null
-  Purchased: string | null
-  Serial: string | null
-  IsTracked: boolean
-  FirstSeen: string | null
-  IsGuest: boolean
-  IsOnline: boolean
-  Label: string | null
-  Notes: string | null
-  CategoryID: number
-  StatusID: number
-  MaintainerID: number
-  LocationID: number
-  DeviceTypeID: number
-  OperatingSystemID: number
-  ArchitectureID: number
-  Interfaces: Array<Netface>
-  Primary: PrimaryConnection
-  SortOrder: string
-}
-
-export interface Netface {
-  ID: number
-  MAC: string
-  IsPrimary: boolean
-  IsVirtual: boolean
-  IsOnline: boolean
-  Label: string | null
-  Notes: string | null
-  LastSeen: string
-  StatusID: number
-  InterfaceTypeID: number
-  VlanID: number
-  DeviceID: number | null
-  Primary: PrimaryConnection
-  Addresses: Array<Address>
-}
-
-export interface Address {
-  ID: number
-  IPv4: string | null
-  IPv6: string | null
-  IsPrimary: boolean
-  IsVirtual: boolean
-  IsReserved: boolean
-  LastSeen: string | null
-  Label: string | null
-  Notes: string | null
-  InterfaceID: number
-  Connectivity: Array<Connection> | null
-  Hostnames: Array<DomainName>
-}
-
-export interface Connection {
-  State: boolean
-  Time: string
-}
-
-export interface DomainName {
-  ID: number
-  Hostname: string
-  IsDNS: boolean
-  IsSelfSet: boolean
-  Notes: string | null
-  AddressID: number | null
-}
-
-export interface ChartValues {
-  full: Array<TimeLog>
-  averaged: Array<TimeLog>
-}
-
-export interface TimeLog {
-  Time: string
-  Addresses: number
-}
-
-export interface Trend {
-  Label: string
-  Current: number
-  Compare: number
-  Tooltip: string | null
-}
-
-export interface ColumnSort {
-  column: string
-  direction: string
-}
-
-export interface DeviceState {
-  columnSort: ColumnSort
-  allDevices: Array<Device>
-  activeDevices: Array<Device>
-  unknownDevices: Array<Device>
-  devicesOverTime: ChartValues
-  trends: Array<Trend>
-  lastUnknown: string
-  editingItems: EditSets
-  focusedItems: FocusSets
-  deletingItems: DeleteSets
-  investigations: Map<number, Array<Investigation>>
-}
-
-export interface PrimaryConnection {
-  IPv4: string | null
-  IPv6: string | null
-  InterfaceTypeID: number
-  VlanID: number
-  MAC: string | null
-  IsReservedIP: boolean | null
-  IsVirtualIP: boolean | null
-  IsVirtualIFace: boolean | null
-}
-
-export interface EditSets {
-  devices: Map<string, Device>
-  interfaces: Map<string, Netface>
-  addresses: Map<string, Address>
-  hostnames: Map<string, DomainName>
-}
-
-export interface FocusSets {
-  devices: Map<string, Device>
-  interfaces: Map<string, Netface>
-  addresses: Map<string, Address>
-  hostnames: Map<string, DomainName>
-}
-
-export interface DeleteSets {
-  devices: Array<number>
-  interfaces: Array<number>
-  addresses: Array<number>
-  hostnames: Array<number>
-}
-
-export interface Investigation {
-  AddressID: number
-  Connectivity: Array<Connection> | null
-}
