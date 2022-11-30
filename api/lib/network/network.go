@@ -21,6 +21,6 @@ func ShowNetworkSummary() (err error) {
 	if err != nil {
 		return
 	}
-	logging.System("Network: %s, Broadcast: %s, Mask: %s, Addresses: %d", network, broadcast, mask, len(addresses))
+	logging.Info("Network: %s, Broadcast: %s, Mask: %s, Addresses: %d", network, broadcast, mask, len(addresses))
 	return
 }

@@ -22,7 +22,7 @@ func Save(out http.ResponseWriter, in *http.Request) {
 	if input.FirstSeen.Format("2006-01-02") == "0001-01-01" {
 		input.FirstSeen = time.Now()
 	}
-	logging.Debug2("%v", input)
+	logging.Debug("%v", input)
 	if input.ID > 0 {
 		_, err = db.Conn.NewUpdate().Model(&input).Where("id = ?", input.ID).Exec(db.Context)
 	} else {

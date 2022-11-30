@@ -44,7 +44,7 @@ func Start() (err error) {
 		return
 	}
 	Bundle.MustLoadMessageFile(translationFile)
-	logging.System("Translations loaded from %s", translationFile)
+	logging.Info("Translations loaded from %s", translationFile)
 	Localiser = i18n.NewLocalizer(Bundle, Language, fmt.Sprintf("%s;q=0.9", Language))
 	return
 }

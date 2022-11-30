@@ -6,8 +6,10 @@ import (
 	"facemasq/lib/logging"
 )
 
-func LoadExtension(manager *extensions.Manager) (err error) {
-	logging.Debug1("Loading Extension")
+const ExtensionName = "DNSMasq Exporter"
+
+func LoadExtension(manager *extensions.ExtensionManager) (extensionName string, err error) {
+	extensionName = ExtensionName
 	manager.RegisterRoutes(getRoutes())
 	manager.RegisterListeners([]extensions.Listener{
 		{Kind: `device:after:.*`, Listener: ExportOnSave},
@@ -17,9 +19,9 @@ func LoadExtension(manager *extensions.Manager) (err error) {
 }
 
 func ExportOnSave(e events.Event) {
-	logging.System("dnsmasq ExportOnSave %+v ", e)
+	logging.Info("dnsmasq ExportOnSave %+v ", e)
 }
 
 func AlertOnLoad(e events.Event) {
-	logging.System("dnsmasq AlertOnLoad %+v ", e)
+	logging.Info("dnsmasq AlertOnLoad %+v ", e)
 }

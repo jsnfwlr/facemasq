@@ -64,7 +64,7 @@ func Scan(scanID int64) (records scans.DeviceRecords, err error) {
 	lastSeen := time.Now().Format("2006-01-02 15:04:05")
 
 	// Get details of local interfaces
-	logging.Debug1("Processing local interfaces")
+	logging.Debug("Processing local interfaces")
 	records, err = getLocalIFaces(scanID, lastSeen)
 	if err != nil {
 		err = fmt.Errorf("could not get local interfaces: %v", err)
@@ -73,7 +73,7 @@ func Scan(scanID int64) (records scans.DeviceRecords, err error) {
 	}
 
 	// Scan the $target network
-	logging.Debug1("Scanning network")
+	logging.Debug("Scanning network")
 	ctx, cancel := context.WithCancel(context.Background())
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)
@@ -106,7 +106,7 @@ func Scan(scanID int64) (records scans.DeviceRecords, err error) {
 				Notes:    result.Manufacturer,
 			}
 
-			logging.Debug3("Found %s (%s) via NET", record.IPv4, record.MAC)
+			logging.Debug("Found %s (%s) via NET", record.IPv4, record.MAC)
 
 			records = append(records, record)
 		}
@@ -183,7 +183,7 @@ func getLocalIFaces(scanID int64, lastSeen string) (records scans.DeviceRecords,
 		return
 	}
 	for _, netFace := range netFaces {
-		if !strings.Contains(netFace.Name, "veth") && !strings.Contains(netFace.Name, "lo") && !strings.Contains(netFace.Name, "br-") && !strings.Contains(netFace.Name, "docker0") {
+		if !strings.Contains(netFace.Name, "veth") && !strings.Contains(netFace.Name, "cni") && !strings.Contains(netFace.Name, "flannel") && !strings.Contains(netFace.Name, "lo") && !strings.Contains(netFace.Name, "br-") && !strings.Contains(netFace.Name, "docker0") {
 			addresses, err := netFace.Addrs()
 			if err != nil {
 				logging.Error("ProcessLocal: %+v", err.Error())

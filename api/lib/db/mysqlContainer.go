@@ -163,7 +163,7 @@ func StartMySQLContainer(dbName, dbUser, dbPassword, dbPort string) (testContain
 		_ = cleanup()
 		return nil, fmt.Errorf("timeout waiting for container")
 	}
-	logging.Debug1("Container is running")
+	logging.Debug("Container is running")
 	testContainer = &MySQLContainer{
 		ID: cntnr.ID,
 		Connection: ConnectionParams{

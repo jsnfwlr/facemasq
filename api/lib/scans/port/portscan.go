@@ -49,7 +49,7 @@ func init() {
 		PortScan = true
 	}
 
-	//logging.System("%v timeout", 2000*time.Millisecond)
+	//logging.Info("%v timeout", 2000*time.Millisecond)
 }
 
 func Scan(scanID int64, scanAll bool) (err error) {
@@ -62,7 +62,7 @@ func Scan(scanID int64, scanAll bool) (err error) {
 		}
 		var ports []models.Port
 		for _, scan := range addresses {
-			logging.Debug2("Scanning %s", scan.IPv4)
+			logging.Debug("Scanning %s", scan.IPv4)
 			result := ScanAddress(scan.IPv4)
 			for _, result := range result.Ports {
 				ports = append(ports, models.Port{AddressID: int64(scan.AddressID), ScanID: scanID, Port: result.Number, Protocol: result.Protocol})
@@ -86,7 +86,7 @@ func Discover(scanAll bool) (devices []scans.AddressToPortScan, err error) {
 	if scanAll {
 		sql = `SELECT addresses.id AS address_id, ipv4 FROM addresses JOIN interfaces ON interfaces.id = addresses.interface_id JOIN devices ON devices.id = interfaces.device_id WHERE devices.is_online = true;`
 	}
-	logging.Debug2(sql)
+	logging.Debug(sql)
 	err = db.Conn.NewRaw(sql).Scan(db.Context, &devices)
 	if err != nil {
 		if err.Error() != "sql: no rows in result set" {
@@ -103,7 +103,7 @@ func Discover(scanAll bool) (devices []scans.AddressToPortScan, err error) {
 
 func ScanPort(protocol, ipv4 string, portNum int64) portDetails {
 	address := fmt.Sprintf("%s:%d", ipv4, portNum)
-	logging.Debug2("Scanning %s", address)
+	logging.Debug("Scanning %s", address)
 	conn, err := net.DialTimeout(protocol, address, time.Duration(timeOut)*time.Millisecond)
 	port := portDetails{
 		Number:   portNum,
@@ -134,7 +134,7 @@ func ScanAddress(ipv4 string) (scan addressPortRecord) {
 		for _, portNum := range portList {
 			port := ScanPort(protocol, ipv4, portNum)
 			if port.State == "open" {
-				logging.Debug1("%s has port %d open", ipv4, portNum)
+				logging.Debug("%s has port %d open", ipv4, portNum)
 				scan.Ports = append(scan.Ports, port)
 			}
 		}

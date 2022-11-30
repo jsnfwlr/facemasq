@@ -4,6 +4,7 @@ go 1.19
 
 require (
 	github.com/BurntSushi/toml v1.0.0
+	github.com/RackSec/srslog v0.0.0-20180709174129-a4725f04ec91
 	github.com/auth0/go-jwt-middleware v1.0.1
 	github.com/docker/docker v20.10.18+incompatible
 	github.com/docker/go-connections v0.4.0
@@ -20,6 +21,7 @@ require (
 	github.com/opencontainers/image-spec v1.0.2
 	github.com/pkg/errors v0.9.1
 	github.com/rs/cors v1.8.2
+	github.com/rs/zerolog v1.28.0
 	github.com/stretchr/testify v1.8.0
 	github.com/uptrace/bun v1.1.8
 	github.com/uptrace/bun/dialect/mysqldialect v1.1.8
@@ -58,7 +60,7 @@ require (
 	github.com/mattn/go-isatty v0.0.16 // indirect
 	github.com/mattn/go-sqlite3 v1.14.15 // indirect
 	github.com/moby/term v0.0.0-20220808134915-39b0c02b01ae // indirect
-	github.com/modern-go/concurrent v0.0.0-20180228061459-e0a39a4cb421 // indirect
+	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/morikuni/aec v1.0.0 // indirect
 	github.com/mostlygeek/arp v0.0.0-20170424181311-541a2129847a // indirect

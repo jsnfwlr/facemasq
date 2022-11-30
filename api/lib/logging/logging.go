@@ -2,107 +2,58 @@ package logging
 
 import (
 	"fmt"
-	"io"
+	"log/syslog"
 	"os"
 	"reflect"
-	"runtime"
-	"strconv"
-	"strings"
-	"text/template"
-	"time"
 
+	"facemasq/lib/files"
 	"facemasq/lib/utils"
+
+	"github.com/pkg/errors"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/pkgerrors"
 )
 
-var Verbosity int
-
-var logger = New("", "")
-
-const (
-	ALWAYS                 = iota // 1
-	WARN                          // 2
-	NOTICE                        // 3
-	INFORM                        // 4
-	DEBUG1                        // 5
-	DEBUG2                        // 6
-	DEBUG3                        // 7
-	SYSTEM                 = ALWAYS
-	ERROR                  = ALWAYS
-	FATAL                  = ALWAYS
-	PANIC                  = ALWAYS
-	defaultTemplate        = "[{{ .Class }}] {{ .Timestamp }} | {{ .TLA }} | {{ .Location }} | {{ .Message }}\n"
-	defaultTimestampFormat = time.RFC3339
-)
-
-type Logger interface {
-	SetTemplate(string) error
-	SetTimestampFormat(string) error
-	SetStdout(io.WriteCloser)
-	SetStderr(io.WriteCloser)
-	GetTemplate() *template.Template
-	GetTimestampFormat() string
-	GetStdout() io.WriteCloser
-	GetStderr() io.WriteCloser
-	Debug1(interface{}, ...interface{})
-	Debug2(interface{}, ...interface{})
-	Debug3(interface{}, ...interface{})
-	Warning(interface{}, ...interface{})
-	Notice(interface{}, ...interface{})
-	Info(interface{}, ...interface{})
-
-	System(interface{}, ...interface{})
-	Error(interface{}, ...interface{})
-	Fatal(interface{}, ...interface{})
-	Panic(interface{}, ...interface{})
-}
-
-type Default struct {
-	template        *template.Template
-	timestampFormat string
-	stdOut          io.WriteCloser
-	stdErr          io.WriteCloser
-}
-
-type messenger struct {
-	Class     string
-	Timestamp string
-	TLA       string
-	Location  string
-	Message   string
-}
+var stdOut, stdErr zerolog.Logger
 
 func init() {
-	var err error
-	Verbosity, err = strconv.Atoi(os.Getenv("VERBOSE"))
-	if err != nil {
-		Verbosity = 0
-	}
-	fmt.Printf("Log Verbosity set to %d\n", Verbosity)
-}
+	zerolog.ErrorStackMarshaler = pkgerrors.MarshalStack
+	zerolog.TimeFieldFormat = "2006-01-02T15:04:05.000"
 
-func New(tmpl, timestampFormat string) (logger Logger) {
-	if timestampFormat == "" {
-		timestampFormat = defaultTimestampFormat
-	}
-	logger = &Default{
-		template:        setTemplate(tmpl),
-		timestampFormat: timestampFormat,
-		stdOut:          os.Stdout,
-		stdErr:          os.Stderr,
-	}
-	return
-}
+	conOut := zerolog.ConsoleWriter{Out: os.Stdout, TimeFormat: "2006-01-02T15:04:05.000"}
+	conErr := zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: "2006-01-02T15:04:05.000"}
 
-func setTemplate(tmpl string) (parsed *template.Template) {
-	var err error
-	if tmpl == "" {
-		tmpl = defaultTemplate
-	}
-	parsed, err = template.New("set").Parse(defaultTemplate)
+	sysOut, err := syslog.Dial("tcp", "192.168.0.44:514", syslog.LOG_EMERG|syslog.LOG_ERR|syslog.LOG_INFO|syslog.LOG_CRIT|syslog.LOG_WARNING|syslog.LOG_NOTICE|syslog.LOG_DEBUG, "faceMasq")
 	if err != nil {
 		panic(err)
 	}
-	return
+	// plainOut := os.Stdout
+	// plainErr := os.Stderr
+
+	dir, err := files.GetDir("logs")
+	if err != nil {
+		panic(err)
+	}
+
+	outFile := fmt.Sprintf("%[2]s%[1]c%[3]s", os.PathSeparator, dir, "facemasq.log")
+	fmt.Println(outFile)
+	fileOut, err := os.OpenFile(outFile, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0600)
+	if err != nil {
+		panic(err)
+	}
+
+	multiOut := zerolog.MultiLevelWriter(conOut, fileOut, sysOut)
+	multiErr := zerolog.MultiLevelWriter(conErr, fileOut, sysOut)
+
+	stdOut = zerolog.New(multiOut).With().Timestamp().Caller().Logger()
+	stdErr = zerolog.New(multiErr).With().Timestamp().Caller().Logger()
+	SetLevel(zerolog.InfoLevel)
+
+}
+
+func SetLevel(level zerolog.Level) {
+	zerolog.SetGlobalLevel(level)
+
 }
 
 func prepareMessage(arg0 interface{}, args ...interface{}) (msg string) {
@@ -118,162 +69,30 @@ func prepareMessage(arg0 interface{}, args ...interface{}) (msg string) {
 	return
 }
 
-func (logger *Default) SetTemplate(tmpl string) (err error) {
-	if tmpl == "" {
-		tmpl = defaultTemplate
-	}
-	logger.template, err = template.New("set").Parse(tmpl)
-	return
+func Trace(arg0 interface{}, args ...interface{}) {
+	stdOut.Trace().Msg(prepareMessage(arg0, args...))
 }
 
-func (logger *Default) SetTimestampFormat(timestampFormat string) (err error) {
-	logger.timestampFormat = timestampFormat
-	if logger.timestampFormat == "" {
-		logger.timestampFormat = defaultTimestampFormat
-	}
-	return
+func Debug(arg0 interface{}, args ...interface{}) {
+	stdOut.Debug().Msg(prepareMessage(arg0, args...))
 }
 
-func (logger *Default) SetStdout(stdOut io.WriteCloser) {
-	logger.stdOut = stdOut
+func Info(arg0 interface{}, args ...interface{}) {
+	stdOut.Info().Msg(prepareMessage(arg0, args...))
 }
 
-func (logger *Default) SetStderr(stdErr io.WriteCloser) {
-	logger.stdErr = stdErr
+func Warning(arg0 interface{}, args ...interface{}) {
+	stdOut.Warn().Msg(prepareMessage(arg0, args...))
 }
 
-func (logger *Default) GetTemplate() *template.Template {
-	return logger.template
+func Error(arg0 interface{}, args ...interface{}) {
+	stdErr.Error().Err(errors.New(prepareMessage(arg0, args...))).Msg("")
 }
 
-func (logger *Default) GetTimestampFormat() string {
-	return logger.timestampFormat
+func Fatal(arg0 interface{}, args ...interface{}) {
+	stdErr.Fatal().Err(errors.New(prepareMessage(arg0, args...))).Msg("")
 }
 
-func (logger *Default) GetStdout() io.WriteCloser {
-	return logger.stdOut
-}
-
-func (logger *Default) GetStderr() io.WriteCloser {
-	return logger.stdErr
-}
-
-func (logger *Default) Debug(arg0 interface{}, args ...interface{}) {
-	if Verbosity >= DEBUG1 {
-		logger.output("debug  ", prepareMessage(arg0, args...), 2)
-	}
-}
-
-func (logger *Default) Debug1(arg0 interface{}, args ...interface{}) {
-	if Verbosity >= DEBUG1 {
-		logger.output("debug  ", prepareMessage(arg0, args...), 2)
-	}
-}
-
-func (logger *Default) Debug2(arg0 interface{}, args ...interface{}) {
-	if Verbosity >= DEBUG2 {
-		logger.output("debug  ", prepareMessage(arg0, args...), 2)
-	}
-}
-
-func (logger *Default) Debug3(arg0 interface{}, args ...interface{}) {
-	if Verbosity >= DEBUG3 {
-		logger.output("debug  ", prepareMessage(arg0, args...), 2)
-	}
-}
-
-func (logger *Default) Info(arg0 interface{}, args ...interface{}) {
-	if Verbosity >= INFORM {
-		logger.output("info   ", prepareMessage(arg0, args...), 2)
-	}
-}
-
-func (logger *Default) Warning(arg0 interface{}, args ...interface{}) {
-	if Verbosity >= WARN {
-		logger.output("warning", prepareMessage(arg0, args...), 2)
-	}
-}
-
-func (logger *Default) Notice(arg0 interface{}, args ...interface{}) {
-	if Verbosity >= INFORM {
-		logger.output("notice ", prepareMessage(arg0, args...), 2)
-	}
-}
-
-func (logger *Default) System(arg0 interface{}, args ...interface{}) {
-	if Verbosity >= SYSTEM {
-		logger.output("system ", prepareMessage(arg0, args...), 2)
-	}
-}
-
-func (logger *Default) Error(arg0 interface{}, args ...interface{}) {
-	if Verbosity >= ERROR {
-		logger.output("error  ", prepareMessage(arg0, args...), 2)
-	}
-}
-
-func (logger *Default) Panic(arg0 interface{}, args ...interface{}) {
-	if Verbosity >= PANIC {
-		logger.output("panic  ", prepareMessage(arg0, args...), 2)
-	}
-	panic("...")
-}
-
-func (logger *Default) Fatal(arg0 interface{}, args ...interface{}) {
-	if Verbosity >= FATAL {
-		logger.output("fatal  ", prepareMessage(arg0, args...), 2)
-	}
-	os.Exit(1)
-}
-
-func (logger *Default) output(class, message string, depth int) {
-	if logger.timestampFormat == "" {
-		logger.timestampFormat = defaultTimestampFormat
-	}
-	if logger.template.Name() != "set" {
-		logger.template = template.Must(template.New("set").Parse(defaultTemplate))
-	}
-	output(class, message, depth, logger.timestampFormat, logger.template, logger.stdOut, logger.stdErr)
-
-}
-
-func output(class, message string, depth int, timestampFormat string, tmpl *template.Template, stdOut, errOut io.WriteCloser) {
-	if timestampFormat == "" {
-		timestampFormat = defaultTimestampFormat
-	}
-	if tmpl == nil {
-		tmpl = template.Must(template.New("set").Parse(defaultTemplate))
-	}
-
-	_, file, line, _ := runtime.Caller(depth)
-
-	root, err := getAppRoot()
-	if err != nil {
-		root = ""
-	}
-
-	file = strings.Replace(file, root, "", -1)
-
-	msg := messenger{
-		Class:     class,
-		Timestamp: time.Now().Format(timestampFormat),
-		Location:  fmt.Sprintf("%s:%d", file, line),
-		TLA:       "000",
-		Message:   message,
-	}
-	switch class {
-	case "error", "panic", "fatal":
-
-		_ = tmpl.Execute(errOut, msg)
-	default:
-		_ = tmpl.Execute(stdOut, msg)
-	}
-}
-
-func getAppRoot() (rootDir string, err error) {
-	rootDir, err = os.Getwd()
-	if err != nil {
-		return
-	}
-	return
+func Panic(arg0 interface{}, args ...interface{}) {
+	stdErr.Panic().Err(errors.New(prepareMessage(arg0, args...))).Msg("")
 }

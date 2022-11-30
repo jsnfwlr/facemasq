@@ -10,6 +10,14 @@ import (
 	"os"
 )
 
+type MsgBody struct {
+	Message  string
+	Priority int64
+	Title    string
+}
+
+const ExtensionName = "Gotify Notifications"
+
 var GotifyURL, GotifyKey string
 var EnableGotify bool
 
@@ -24,14 +32,8 @@ func init() {
 
 }
 
-type MsgBody struct {
-	Message  string
-	Priority int64
-	Title    string
-}
-
-func LoadExtension(manager *extensions.Manager) (err error) {
-
+func LoadExtension(manager *extensions.ExtensionManager) (extensionName string, err error) {
+	extensionName = ExtensionName
 	manager.RegisterListeners([]extensions.Listener{
 		{Kind: `notification:send:.*`, Listener: SendMessage},
 	})

@@ -1,5 +1,3 @@
-//go:build extensions
-
 package main
 
 import (
@@ -7,18 +5,19 @@ import (
 	"facemasq/lib/extensions"
 	"facemasq/lib/logging"
 	"log"
+	"testing"
 	"time"
 )
 
-func main() {
+func TestLoadExtensions(t *testing.T) {
 	var err error
-	extensions.Extensions, err = extensions.LoadPlugins()
+	extensions.Manager, err = extensions.LoadPlugins()
 	if err != nil {
 		log.Fatalf("%v", err)
 	}
-	routes := extensions.Extensions.GetRoutes()
+	routes := extensions.Manager.GetRoutes()
 	for r := range routes {
-		logging.System(routes[r].Name)
+		logging.Info(routes[r].Name)
 	}
 
 	eventList, err := events.List()
@@ -27,14 +26,14 @@ func main() {
 	}
 
 	for e := range eventList {
-		logging.System(eventList[e])
+		logging.Info(eventList[e])
 	}
 
-	extensions.Extensions.GetCoordinator().Listen("device:after:change", func(e events.Event) {
-		logging.System("main: %+v", e)
+	extensions.Manager.GetCoordinator().Listen("device:after:change", func(e events.Event) {
+		logging.Info("main: %+v", e)
 	})
 
-	err = extensions.Extensions.GetCoordinator().Emit(events.Event{Kind: "device:after:change"})
+	err = extensions.Manager.GetCoordinator().Emit(events.Event{Kind: "device:after:change"})
 	if err != nil {
 		logging.Error("Error with event: %v", err)
 	}

@@ -6,8 +6,6 @@ import (
 	"os"
 	"strings"
 
-	"facemasq/lib/logging"
-
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -22,7 +20,7 @@ func init() {
 		salt = os.Getenv("PASSWORDSALT")
 	}
 	if salt == "" {
-		logging.Fatal("A password salt is required. See https://jsnfwlr.github.io/facemasq/errors/#PasswordSalt for more details")
+		panic("A password salt is required. See https://jsnfwlr.github.io/facemasq/errors/#PasswordSalt for more details")
 	}
 }
 

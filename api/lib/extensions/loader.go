@@ -12,36 +12,42 @@ import (
 	"facemasq/lib/events"
 )
 
-type Manager struct {
+type ExtensionManager struct {
 	routes      []RouteDefinition
 	listeners   []Listener
 	coordinator events.Manager
+	Extensions  []Extension
 }
 
-var Extensions *Manager
+type Extension struct {
+	Name     string
+	Filename string
+}
+
+var Manager *ExtensionManager
 
 type Loader interface {
-	LoadExtension(*Manager) (err error)
+	LoadExtension(*ExtensionManager) (extensionName string, err error)
 }
 
 // LoadPlugins loads plugins from the directory with the given path, looking for
 // all .so files in there. It creates a new PluginManager and registers the
 // plugins with it.
-func LoadPlugins() (*Manager, error) {
+func LoadPlugins() (Manager *ExtensionManager, err error) {
 	path, err := files.GetDir("extensions")
 	if err != nil {
-		return nil, err
+		return
 	}
 
 	files, err := os.ReadDir(path)
 	if err != nil {
-		return nil, err
+		return
 	}
 	var extension *plugin.Plugin
 	var symLoader plugin.Symbol
+	var extensionName string
 
-	manager := newManager()
-	var pluginsLoaded []string
+	Manager = newManager()
 	for f := range files {
 		if !files[f].IsDir() && strings.HasSuffix(files[f].Name(), ".so") {
 			fullpath := filepath.Join(path, files[f].Name())
@@ -54,62 +60,62 @@ func LoadPlugins() (*Manager, error) {
 
 			symLoader, err = extension.Lookup("LoadExtension")
 			if err != nil {
-				logging.Error("Could not load %s: %+v", files[f].Name(), err)
+				logging.Error("Could not find LoadExtension for %s: %+v", files[f].Name(), err)
 				continue
 			}
 
-			loader := symLoader.(func(*Manager) error)
-			err = loader(manager)
+			loader := symLoader.(func(*ExtensionManager) (string, error))
+			extensionName, err = loader(Manager)
 			if err != nil {
 				logging.Error("Could not load %s: %+v", files[f].Name(), err)
 				continue
 			}
-			logging.System("Loaded extension %s", files[f].Name())
-			pluginsLoaded = append(pluginsLoaded, files[f].Name())
+			logging.Info("Loaded extension: %s", extensionName)
+
+			Manager.Extensions = append(Manager.Extensions, Extension{Name: extensionName, Filename: files[f].Name()})
 		}
 	}
-	Extensions = manager
 
-	logging.System("%d listeners registered", len(manager.listeners))
-	for l := range manager.listeners {
-		manager.coordinator.Listen(manager.listeners[l].Kind, manager.listeners[l].Listener)
+	logging.Info("%d listeners registered", len(Manager.listeners))
+	for l := range Manager.listeners {
+		Manager.coordinator.Listen(Manager.listeners[l].Kind, Manager.listeners[l].Listener)
 	}
 
-	for p := range pluginsLoaded {
-		err = manager.coordinator.Emit(events.Event{Kind: fmt.Sprintf("plugin:loaded:%s", pluginsLoaded[p])})
+	for p := range Manager.Extensions {
+		err = Manager.coordinator.Emit(events.Event{Kind: fmt.Sprintf("plugin:loaded:%s", Manager.Extensions[p])})
 		if err != nil {
 			logging.Error("Error with event: %v", err)
 		}
 	}
-	return manager, nil
+	return
 }
 
-func newManager() *Manager {
-	manager := &Manager{}
-	manager.coordinator = events.DefaultManager()
-	return manager
+func newManager() *ExtensionManager {
+	return &ExtensionManager{
+		coordinator: events.DefaultManager(),
+	}
 }
 
-func (manager *Manager) RegisterRoutes(routes []RouteDefinition) {
+func (manager *ExtensionManager) RegisterRoutes(routes []RouteDefinition) {
 	manager.routes = append(manager.routes, routes...)
 }
 
-func (manager *Manager) RegisterListeners(listeners []Listener) {
-	logging.Debug3("Registering event listeners")
+func (manager *ExtensionManager) RegisterListeners(listeners []Listener) {
+	logging.Debug("Registering event listeners")
 	for l := range listeners {
-		logging.System("%s", listeners[l].Kind)
+		logging.Info("%s", listeners[l].Kind)
 	}
 	manager.listeners = append(manager.listeners, listeners...)
 }
 
-func (manager *Manager) GetRoutes() (routes []RouteDefinition) {
+func (manager *ExtensionManager) GetRoutes() (routes []RouteDefinition) {
 	return manager.routes
 }
 
-func (manager *Manager) GetListeners() (listeners []Listener) {
+func (manager *ExtensionManager) GetListeners() (listeners []Listener) {
 	return manager.listeners
 }
 
-func (manager *Manager) GetCoordinator() (coordinator events.Manager) {
+func (manager *ExtensionManager) GetCoordinator() (coordinator events.Manager) {
 	return manager.coordinator
 }

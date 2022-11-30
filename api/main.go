@@ -1,5 +1,3 @@
-//go:build !extensions
-
 package main
 
 import (
@@ -12,15 +10,15 @@ import (
 )
 
 func main() {
-	logging.System("Running faceMasq as a daemon")
+	logging.Info("Running faceMasq as a daemon")
 
 	err := db.Connect()
 	if err != nil {
 		logging.Panic(err)
 	}
-	logging.System("Connected: %+v", db.DBEngine)
+	logging.Info("Connected: %+v", db.DBEngine)
 
-	extensions.Extensions, err = extensions.LoadPlugins()
+	_, err = extensions.LoadPlugins()
 	if err != nil {
 		logging.Fatal("%v", err)
 	}
@@ -28,7 +26,7 @@ func main() {
 	network.ShowNetworkSummary()
 
 	if network.Target != "" {
-		logging.System("Active Net scan running every %v", iprange.Frequency)
+		logging.Info("Active Net scan running every %v", iprange.Frequency)
 		iprange.Schedule()
 	}
 

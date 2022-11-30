@@ -16,3 +16,4 @@ build/*.tar.gz
 /extensions
 **/experiments
 env.sh
+logs/**

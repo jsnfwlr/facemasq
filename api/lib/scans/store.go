@@ -92,7 +92,7 @@ func (records DeviceRecords) Store() (err error) {
 
 	ipv4, mac := records.GroupParams()
 
-	logging.Debug1("Updating %d Interfaces", len(mac))
+	logging.Debug("Updating %d Interfaces", len(mac))
 	_, err = db.Conn.NewUpdate().Model((*models.Interface)(nil)).Set("last_seen = ?", records[0].LastSeen).Where("mac IN (?)", bun.In(mac)).Exec(db.Context)
 	// _, err = db.Conn.NewUpdate().Model((*models.Interface)(nil)).Set("last_seen = ?, deleted_at = NULL", records[0].LastSeen).Where("mac IN (?)", bun.In(mac)).Exec(db.Context)
 	if err != nil {
@@ -101,7 +101,7 @@ func (records DeviceRecords) Store() (err error) {
 		return
 	}
 
-	logging.Debug1("Updating %d Addresses", len(ipv4))
+	logging.Debug("Updating %d Addresses", len(ipv4))
 	_, err = db.Conn.NewUpdate().Table("addresses").Set("last_seen = ?", records[0].LastSeen).Where("ipv4 IN (?)", bun.In(ipv4)).Where("interface_id IN (SELECT id FROM interfaces WHERE mac IN (?))", bun.In(mac)).Exec(db.Context)
 	// _, err = db.Conn.NewUpdate().Table("addresses").Set("last_seen = ?, deleted_at = NULL", records[0].LastSeen).Where("ipv4 IN (?)", bun.In(ipv4)).Where("interface_id IN (SELECT id FROM interfaces WHERE mac IN (?))", bun.In(mac)).Exec(db.Context)
 	if err != nil {
@@ -109,7 +109,7 @@ func (records DeviceRecords) Store() (err error) {
 		return
 	}
 
-	logging.Debug1("Updating %d History", len(ipv4))
+	logging.Debug("Updating %d History", len(ipv4))
 	var history []models.History
 	err = db.Conn.NewRaw(`SELECT id AS address_id, ? AS scan_id, 0 as is_port_scan FROM addresses WHERE ipv4 IN (?) AND interface_id IN (SELECT id FROM interfaces WHERE mac IN (?));`, records[0].ScanID, bun.In(ipv4), bun.In(mac)).Scan(db.Context, &history)
 	if err != nil {
@@ -138,7 +138,7 @@ func (record *DeviceRecord) CreateDevice() (err error) {
 
 	vendor, err := macvendor.Lookup(record.MAC)
 	if err != nil {
-		logging.Debug3("could not lookup vendor for MAC Address (%s): %v", record.MAC, err)
+		logging.Debug("could not lookup vendor for MAC Address (%s): %v", record.MAC, err)
 		err = nil
 	}
 	if vendor != "" {

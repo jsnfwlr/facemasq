@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"facemasq/lib/db"
-	"facemasq/lib/logging"
 	"facemasq/models"
 )
 
@@ -46,7 +45,6 @@ func TestBulkStore(t *testing.T) {
 			MAC:      "00:00:00:00:00:00:00:02",
 		},
 	}
-	logging.Verbosity = 2
 	err = results.Store()
 	if err != nil {
 		t.Error(err)

@@ -23,7 +23,7 @@ func init() {
 func Run() (err error) {
 	var rootDir string
 	rootDir, _ = files.GetAppRoot()
-	logging.System("Starting API server at localhost:%s from  %s", Port, rootDir)
+	logging.Info("Starting API server at localhost:%s from  %s", Port, rootDir)
 
 	server := negroni.New()
 	router := BuildRoutes()

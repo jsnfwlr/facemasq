@@ -297,13 +297,11 @@ func GetSpecificAddressConnectivityData(addressID int64, connTime string) (conne
 }
 
 func GetDeviceChildren(devicePK int64) (children DeviceChildren, err error) {
-	logging.Verbosity = 3
 	err = db.Conn.NewRaw(`SELECT GROUP_CONCAT(interfaces.id) as interfaces, GROUP_CONCAT(addresses.id) as addresses FROM devices JOIN interfaces ON devices.id = interfaces.device_id JOIN addresses on interfaces.id = addresses.interface_id WHERE devices.id = ?`, devicePK).Scan(db.Context, &children)
 	return
 }
 
 func GetIntefaceChildren(interfacePK int64) (children string, err error) {
-	logging.Verbosity = 3
 	err = db.Conn.NewRaw(`SELECT GROUP_CONCAT(addresses.id) as addresses FROM devices JOIN addresses on interfaces.id = addresses.interface_id WHERE interfaces.id = ?`, interfacePK).Scan(db.Context, &children)
 	return
 }

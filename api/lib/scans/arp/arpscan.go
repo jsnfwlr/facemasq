@@ -143,7 +143,7 @@ func readARP(handle *pcap.Handle, iface *net.Interface, stop chan struct{}) {
 		var packet gopacket.Packet
 		select {
 		case <-stop:
-			logging.System("Stopping ARP Scan")
+			logging.Info("Stopping ARP Scan")
 			return
 		case packet = <-in:
 			arpLayer := packet.Layer(layers.LayerTypeARP)
@@ -182,7 +182,7 @@ func readARP(handle *pcap.Handle, iface *net.Interface, stop chan struct{}) {
 				MAC:      strings.ToUpper(net.HardwareAddr(arp.SourceHwAddress).String()),
 			}
 			record.Store()
-			logging.Debug1("Updating %v (%v) via ARP\n", record.IPv4, record.MAC)
+			logging.Debug("Updating %v (%v) via ARP\n", record.IPv4, record.MAC)
 		}
 	}
 }

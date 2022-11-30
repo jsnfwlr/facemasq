@@ -28,7 +28,7 @@ func StartSQLiteContainer(filename string) (testContainer *SQLiteContainer, err 
 		}
 		return nil
 	}
-	logging.Debug1("Dummy container is running %s", dbFile)
+	logging.Debug("Dummy container is running %s", dbFile)
 
 	testContainer = &SQLiteContainer{
 		ID: filename,

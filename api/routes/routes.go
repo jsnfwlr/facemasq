@@ -62,7 +62,7 @@ func BuildRoutes() (router Router) {
 
 	// For now, plugin routes go last, to prevent them over riding the built in routes.
 	// This may change in the future, but will require some sort of plugin security, with user confirmation and signed binaries
-	routes = append(routes, extensions.Extensions.GetRoutes()...)
+	routes = append(routes, extensions.Manager.GetRoutes()...)
 
 	for r := range routes {
 		if handlerFunc, ok := routes[r].Handler.(func(http.ResponseWriter, *http.Request)); ok {

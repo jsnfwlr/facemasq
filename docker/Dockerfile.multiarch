@@ -1,17 +1,22 @@
 # syntax=docker/dockerfile:1
+ARG PLATFORMS="linux/amd64 linux/arm64"
 
 FROM --platform=$BUILDPLATFORM crazymax/goxx:1.19 AS godeps
+ARG PLATFORMS
 ARG TARGETPLATFORM
 ARG TARGETARCH
 ARG TARGETOS
-RUN --mount=type=cache,sharing=private,target=/var/cache/apt --mount=type=cache,sharing=private,target=/var/lib/apt/lists goxx-apt-get install -y binutils gcc g++ pkg-config make wget ca-certificates tzdata flex bison libpcap-dev
-RUN mkdir -p /dist/api /build/api /build/i18n
+RUN --mount=type=cache,sharing=private,target=/var/cache/apt --mount=type=cache,sharing=private,target=/var/lib/apt/lists export GOXX_SKIP_APT_PORTS=1; goxx-apt-get update; TARGETPLATFORM=$TARGETPLATFORM goxx-apt-get install -y binutils gcc g++ pkg-config make wget ca-certificates tzdata flex bison libpcap-dev
+RUN mkdir -p /dist/api /build/api /build/i18n /dist/logs /dist/extensions
 WORKDIR /build/api
 COPY ./i18n /build/i18n
 COPY ./api /build/api
 COPY ./upgrades /dist/upgrades
 COPY ./templates /dist/templates
-RUN --mount=type=cache,target=/root/.cache --mount=type=cache,target=/go/pkg/mod CGO_ENABLED=1 goxx-go build -ldflags "-linkmode external -extldflags -static" --tags "linux sqlite_foreign_keys=1" -o /dist/api/facemasq .
+RUN go env -w CGO_ENABLED=1
+RUN --mount=type=cache,target=/root/.cache --mount=type=cache,target=/go/pkg/mod goxx-go build -ldflags "-linkmode external -extldflags -static" --tags "linux sqlite_foreign_keys=1" -o /dist/api/facemasq .
+RUN find ./extensions -maxdepth 1 -type d | grep "\/.*\/" | xargs -n 1 -I {} bash -c 'echo ${TARGETPLATFORM}; goxx-go build -buildmode=plugin {}'
+#RUN mv *.so /dist/extensions
 RUN chmod +x /dist/api/facemasq
 
 FROM --platform=$BUILDPLATFORM node:16 as vuedeps

@@ -147,7 +147,7 @@ func StartPostgreSQLContainer(dbName, dbUser, dbPassword, dbPort string) (testCo
 		err = fmt.Errorf("timeout waiting for postgres")
 		return
 	}
-	logging.Debug1("Container is running")
+	logging.Debug("Container is running")
 	testContainer = &PostgreSQLContainer{
 		ID: cntnr.ID,
 		Connection: ConnectionParams{
