@@ -11,7 +11,7 @@ import (
 
 func TestLoadExtensions(t *testing.T) {
 	var err error
-	extensions.Manager, err = extensions.LoadPlugins()
+	extensions.Manager, err = extensions.LoadExtensions()
 	if err != nil {
 		log.Fatalf("%v", err)
 	}

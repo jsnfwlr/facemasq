@@ -3,7 +3,7 @@ package extensions
 import "testing"
 
 func TestLoadingExtensions(t *testing.T) {
-	manager, err := LoadPlugins()
+	manager, err := LoadExtensions()
 	if err != nil {
 		t.Fatalf("%v", err)
 	}

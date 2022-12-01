@@ -4,7 +4,6 @@ go 1.19
 
 require (
 	github.com/BurntSushi/toml v1.0.0
-	github.com/RackSec/srslog v0.0.0-20180709174129-a4725f04ec91
 	github.com/auth0/go-jwt-middleware v1.0.1
 	github.com/docker/docker v20.10.18+incompatible
 	github.com/docker/go-connections v0.4.0

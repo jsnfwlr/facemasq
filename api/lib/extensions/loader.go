@@ -17,6 +17,7 @@ type ExtensionManager struct {
 	listeners   []Listener
 	coordinator events.Manager
 	Extensions  []Extension
+	numRoutes   int
 }
 
 type Extension struct {
@@ -30,10 +31,10 @@ type Loader interface {
 	LoadExtension(*ExtensionManager) (extensionName string, err error)
 }
 
-// LoadPlugins loads plugins from the directory with the given path, looking for
+// LoadExtensions loads extensions from the directory with the given path, looking for
 // all .so files in there. It creates a new PluginManager and registers the
 // plugins with it.
-func LoadPlugins() (Manager *ExtensionManager, err error) {
+func LoadExtensions() (manager *ExtensionManager, err error) {
 	path, err := files.GetDir("extensions")
 	if err != nil {
 		return
@@ -54,13 +55,15 @@ func LoadPlugins() (Manager *ExtensionManager, err error) {
 
 			extension, err = plugin.Open(fullpath)
 			if err != nil {
-				logging.Error("Could not load %s: %+v", files[f].Name(), err)
+				logging.Error("Could not inspect %s: %+v", files[f].Name(), err)
+				err = nil
 				continue
 			}
 
 			symLoader, err = extension.Lookup("LoadExtension")
 			if err != nil {
 				logging.Error("Could not find LoadExtension for %s: %+v", files[f].Name(), err)
+				err = nil
 				continue
 			}
 
@@ -68,6 +71,7 @@ func LoadPlugins() (Manager *ExtensionManager, err error) {
 			extensionName, err = loader(Manager)
 			if err != nil {
 				logging.Error("Could not load %s: %+v", files[f].Name(), err)
+				err = nil
 				continue
 			}
 			logging.Info("Loaded extension: %s", extensionName)
@@ -75,8 +79,7 @@ func LoadPlugins() (Manager *ExtensionManager, err error) {
 			Manager.Extensions = append(Manager.Extensions, Extension{Name: extensionName, Filename: files[f].Name()})
 		}
 	}
-
-	logging.Info("%d listeners registered", len(Manager.listeners))
+	logging.Info("%d listeners registered | %d routes registered", len(Manager.listeners), len(Manager.routes))
 	for l := range Manager.listeners {
 		Manager.coordinator.Listen(Manager.listeners[l].Kind, Manager.listeners[l].Listener)
 	}
@@ -87,6 +90,7 @@ func LoadPlugins() (Manager *ExtensionManager, err error) {
 			logging.Error("Error with event: %v", err)
 		}
 	}
+	manager = Manager
 	return
 }
 
@@ -97,6 +101,7 @@ func newManager() *ExtensionManager {
 }
 
 func (manager *ExtensionManager) RegisterRoutes(routes []RouteDefinition) {
+	manager.numRoutes = manager.numRoutes + len(routes)
 	manager.routes = append(manager.routes, routes...)
 }
 
@@ -110,6 +115,10 @@ func (manager *ExtensionManager) RegisterListeners(listeners []Listener) {
 
 func (manager *ExtensionManager) GetRoutes() (routes []RouteDefinition) {
 	return manager.routes
+}
+
+func (manager *ExtensionManager) HasRoutes() bool {
+	return (manager.numRoutes > 0)
 }
 
 func (manager *ExtensionManager) GetListeners() (listeners []Listener) {

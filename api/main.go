@@ -7,9 +7,25 @@ import (
 	"facemasq/lib/network"
 	"facemasq/lib/scans/iprange"
 	"facemasq/routes"
+	"flag"
+	"time"
 )
 
+var Sleep bool
+
+func init() {
+	flag.BoolVar(&Sleep, "sleep", false, "Just sleep, don't start any goroutines")
+
+	flag.Parse()
+}
+
 func main() {
+	if Sleep {
+		logging.Info("Running faceMasq as a sleeper")
+		for {
+			time.Sleep(time.Hour * 24)
+		}
+	}
 	logging.Info("Running faceMasq as a daemon")
 
 	err := db.Connect()
@@ -18,7 +34,7 @@ func main() {
 	}
 	logging.Info("Connected: %+v", db.DBEngine)
 
-	_, err = extensions.LoadPlugins()
+	_, err = extensions.LoadExtensions()
 	if err != nil {
 		logging.Fatal("%v", err)
 	}

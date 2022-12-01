@@ -1,23 +1,32 @@
 # syntax=docker/dockerfile:1
-ARG PLATFORMS="linux/amd64 linux/arm64"
-
+ARG PLATFORMS="linux/386 linux/amd64 linux/arm64"
+# linux/arm/v5 linux/arm/v6 linux/arm/v7 linux/mips linux/mipsle linux/mips64 linux/mips64le linux/ppc64le linux/riscv64 linux/s390x windows/386 windows/amd64
 FROM --platform=$BUILDPLATFORM crazymax/goxx:1.19 AS godeps
+
 ARG PLATFORMS
 ARG TARGETPLATFORM
 ARG TARGETARCH
 ARG TARGETOS
-RUN --mount=type=cache,sharing=private,target=/var/cache/apt --mount=type=cache,sharing=private,target=/var/lib/apt/lists export GOXX_SKIP_APT_PORTS=1; goxx-apt-get update; TARGETPLATFORM=$TARGETPLATFORM goxx-apt-get install -y binutils gcc g++ pkg-config make wget ca-certificates tzdata flex bison libpcap-dev
-RUN mkdir -p /dist/api /build/api /build/i18n /dist/logs /dist/extensions
+# make wget
+RUN --mount=type=cache,sharing=private,target=/var/cache/apt --mount=type=cache,sharing=private,target=/var/lib/apt/lists goxx-apt-get install -y ca-certificates tzdata flex bison libpcap-dev
+RUN mkdir -p /build/api /build/i18n /dist/api /dist/logs /dist/extensions
+RUN <<EOT
+export GOXX_SKIP_APT_PORTS=1
+goxx-apt-get update
+for p in $PLATFORMS; do
+  TARGETPLATFORM=$p goxx-apt-get install -y binutils gcc g++ pkg-config
+done
+EOT
 WORKDIR /build/api
 COPY ./i18n /build/i18n
 COPY ./api /build/api
 COPY ./upgrades /dist/upgrades
 COPY ./templates /dist/templates
-RUN go env -w CGO_ENABLED=1
-RUN --mount=type=cache,target=/root/.cache --mount=type=cache,target=/go/pkg/mod goxx-go build -ldflags "-linkmode external -extldflags -static" --tags "linux sqlite_foreign_keys=1" -o /dist/api/facemasq .
-RUN find ./extensions -maxdepth 1 -type d | grep "\/.*\/" | xargs -n 1 -I {} bash -c 'echo ${TARGETPLATFORM}; goxx-go build -buildmode=plugin {}'
-#RUN mv *.so /dist/extensions
+RUN --mount=type=cache,target=/root/.cache --mount=type=cache,target=/go/pkg/mod CGO_ENABLED=1 goxx-go build --tags "linux sqlite_foreign_keys=1" -ldflags "-linkmode external -extldflags -static" -o /dist/api/facemasq .
+RUN --mount=type=cache,target=/root/.cache --mount=type=cache,target=/go/pkg/mod find ./extensions -maxdepth 1 -type d | grep "\/.*\/" | xargs -n 1 -I {} bash -c 'CGO_ENABLED=1 goxx-go build --tags "linux" -buildmode=plugin {}'
+RUN mv *.so /dist/extensions
 RUN chmod +x /dist/api/facemasq
+RUN chmod +x /dist/extensions/*
 
 FROM --platform=$BUILDPLATFORM node:16 as vuedeps
 RUN curl -f https://get.pnpm.io/v6.16.js | node - add --global pnpm
