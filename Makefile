@@ -4,7 +4,7 @@ CURRENTVERSION != npm version | jq -r .facemasq
 ARCH != go env GOARCH
 IMAGENAME != docker info | sed -r "/Username:/!d;s|.*: (.*)|\1/facemasq|"
 
-.PHONY: all tag-alpha tag-beta tag-rc tag-release tag-git api-vet api-test api-coverage api-test-tests api container-release container-dev container-basic web-test web-coverage web docs docs-run
+.PHONY: all tag-alpha tag-beta tag-rc tag-release tag-git api-vet api-test api-coverage api-test-tests api container-release container-dev container-basic web-test web-coverage web docs docs-run docs-gen
 .DEFAULT: all
 
 #DEFAULT
@@ -30,13 +30,13 @@ tag-release:
 tag-git:
 	@git push dev --all
 
-# API - run vet, tests or coverage generation against the API code
+# API - generate coverage for, vet, test, run, or build the API code
+api-coverage:
+	@rm data/test.sqlite data/test2.sqlite; cd api; go test -v --tags "full" ./... -covermode=count -coverpkg=./... -coverprofile ../dist/coverage.out; go tool cover -html ../dist/coverage.out -o ../dist/coverage.html
 api-vet:
 	@cd api; go vet -tags test ./...
 api-test:
 	@cd api; go test ./...
-api-coverage:
-	@rm data/test.sqlite data/test2.sqlite; cd api; go test -v --tags "full" ./... -covermode=count -coverpkg=./... -coverprofile ../dist/coverage.out; go tool cover -html ../dist/coverage.out -o ../dist/coverage.html
 api-test-db: 					# API - run unit-tests against mysql, pgsql, and sqlite
 	@cd api; go test -tags database ./...
 api-test-testing:			# API - run unit-tests to ensure the functions used to facilitate testing are working
@@ -53,16 +53,16 @@ api: api-test api-extensions 				# API - build local version
 
 # CONTAINER - build various versions of the container
 container-release:
-	docker buildx build --platform linux/arm64,linux/amd64 -t $(IMAGENAME):dev -t $(IMAGENAME):$(CURRENTVERSION) --push -f docker/Dockerfile.multiarch .
+	docker buildx build --platform linux/arm64,linux/amd64 -t $(IMAGENAME):dev -t $(IMAGENAME):$(CURRENTVERSION) --push -f docker/multiarch.Dockerfile .
 container-dev:
-	docker buildx build --platform linux/arm64,linux/amd64 -t $(IMAGENAME):dev --push -f docker/Dockerfile.multiarch .
+	docker buildx build --platform linux/arm64,linux/amd64 -t $(IMAGENAME):dev --push -f docker/multiarch.Dockerfile .
 container-basic:
-	docker build -t $(IMAGENAME):basic-$(ARCH) -t $(IMAGENAME):basic-$(ARCH)-$(CURRENTVERSION) -f docker/Dockerfile .
+	docker build -t $(IMAGENAME):basic-$(ARCH) -t $(IMAGENAME):basic-$(ARCH)-$(CURRENTVERSION) -f docker/local.Dockerfile .
 
-# WEB - testing
-web-test:
-	@echo "No Testing Yet"
+# WEB - generate coverage for, test, run, or build the web UI code
 web-coverage:
+	@echo "No Testing Yet"
+web-test:
 	@echo "No Testing Yet"
 web-dev:              # WEB - start dev server
 	cd web; pnpm run dev
@@ -74,3 +74,4 @@ docs:
 	pnpm run docs:build
 docs-run:
 	pnpm run docs:dev
+docs-gen:

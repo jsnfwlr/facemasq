@@ -37,13 +37,9 @@ type Request struct {
 }
 
 type Response struct {
-	Original   *http.Response
-	Body       string
-	Cookies    string
-	Cookie     *http.Cookie
-	Jar        *http.CookieJar
-	StatusCode int
-	Header     *http.Header
+	*http.Response
+	Body    string
+	Cookies string
 }
 
 // URLParams is a map of strings, with a string key, used to store the parameters of the request url
@@ -69,6 +65,19 @@ func Prepare() (client *APIClient) {
 		Engine: http.Client{
 			Jar: jar,
 		},
+	}
+	return
+}
+
+func parseResponse(httpResponse *http.Response) (response *Response, err error) {
+	var body []byte
+	defer httpResponse.Body.Close()
+	body, err = io.ReadAll(httpResponse.Body)
+	if err != nil {
+		return
+	}
+	response = &Response{
+		Body: string(body),
 	}
 	return
 }
@@ -145,8 +154,9 @@ func (request *Request) build() (action *http.Request, err error) {
 }
 
 // Do creates a http.Request from an Request and executes the request,
-func (client *APIClient) Do(request *Request) (response *http.Response, err error) {
+func (client *APIClient) Do(request *Request) (response *Response, err error) {
 	var action *http.Request
+	var httpResponse *http.Response
 	request.Cookies = append(request.Cookies, client.LooseCookies...)
 	action, err = request.build()
 	if err != nil {
@@ -154,26 +164,21 @@ func (client *APIClient) Do(request *Request) (response *http.Response, err erro
 		return
 	}
 
-	response, err = client.Engine.Do(action)
+	httpResponse, err = client.Engine.Do(action)
 	if err != nil {
 		err = errors.Wrap(err, "Encountered error while executing request.")
 		return
 	}
-	if response.StatusCode > 299 {
-		err = errors.New(http.StatusText(response.StatusCode))
+	if httpResponse.StatusCode > 299 {
+		err = errors.New(http.StatusText(httpResponse.StatusCode))
 		return
 	}
-	return
-}
-
-func ParseBody(response *http.Response) (contents string, err error) {
-	var body []byte
-	defer response.Body.Close()
-	body, err = io.ReadAll(response.Body)
+	response, err = parseResponse(httpResponse)
 	if err != nil {
+		err = errors.Wrap(err, "Encountered error while parseing response.")
 		return
 	}
-	contents = string(body)
+
 	return
 }
 

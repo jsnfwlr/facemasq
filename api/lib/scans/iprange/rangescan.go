@@ -60,7 +60,7 @@ func Schedule() {
 }
 
 func Scan(scanID int64) (records scans.DeviceRecords, err error) {
-	macvendor.TooManyRequests = false
+	macvendor.TooManyRequests = time.Now()
 	lastSeen := time.Now().Format("2006-01-02 15:04:05")
 
 	// Get details of local interfaces

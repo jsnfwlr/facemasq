@@ -2,6 +2,7 @@ package logging
 
 import (
 	"fmt"
+	"io"
 	"log/syslog"
 	"os"
 	"reflect"
@@ -15,38 +16,40 @@ import (
 )
 
 var stdOut, stdErr zerolog.Logger
+var AllowTestLogging = false
+var SysLog, FileLog bool
 
 func init() {
+	var sysOut *syslog.Writer
+	var fileOut *os.File
+	var err error
 	zerolog.ErrorStackMarshaler = pkgerrors.MarshalStack
 	zerolog.TimeFieldFormat = "2006-01-02T15:04:05.000"
 
 	conOut := zerolog.ConsoleWriter{Out: os.Stdout, TimeFormat: "2006-01-02T15:04:05.000"}
 	conErr := zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: "2006-01-02T15:04:05.000"}
 
-	sysOut, err := syslog.Dial("tcp", "192.168.0.44:514", syslog.LOG_EMERG|syslog.LOG_ERR|syslog.LOG_INFO|syslog.LOG_CRIT|syslog.LOG_WARNING|syslog.LOG_NOTICE|syslog.LOG_DEBUG, "faceMasq")
-	if err != nil {
-		panic(err)
-	}
-	// plainOut := os.Stdout
-	// plainErr := os.Stderr
-
-	dir, err := files.GetDir("logs")
-	if err != nil {
-		panic(err)
+	if SysLog {
+		sysOut, err = syslog.Dial("tcp", "192.168.0.44:514", syslog.LOG_EMERG|syslog.LOG_ERR|syslog.LOG_INFO|syslog.LOG_CRIT|syslog.LOG_WARNING|syslog.LOG_NOTICE|syslog.LOG_DEBUG, "faceMasq")
+		if err != nil {
+			panic(err)
+		}
 	}
 
-	outFile := fmt.Sprintf("%[2]s%[1]c%[3]s", os.PathSeparator, dir, "facemasq.log")
-	fmt.Println(outFile)
-	fileOut, err := os.OpenFile(outFile, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0600)
-	if err != nil {
-		panic(err)
+	if FileLog {
+		dir, err := files.GetDir("logs")
+		if err != nil {
+			panic(err)
+		}
+		fileOut, err = os.OpenFile(fmt.Sprintf("%[2]s%[1]c%[3]s", os.PathSeparator, dir, "facemasq.log"), os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0600)
+		if err != nil {
+			panic(err)
+		}
 	}
 
-	multiOut := zerolog.MultiLevelWriter(conOut, fileOut, sysOut)
-	multiErr := zerolog.MultiLevelWriter(conErr, fileOut, sysOut)
+	stdOut = zerolog.New(zerolog.MultiLevelWriter(conOut, fileOut, sysOut)).With().Timestamp().CallerWithSkipFrameCount(utils.Ternary(utils.IsTest(), 3, 0).(int)).Logger()
+	stdErr = zerolog.New(zerolog.MultiLevelWriter(conErr, fileOut, sysOut)).With().Timestamp().CallerWithSkipFrameCount(utils.Ternary(utils.IsTest(), 3, 0).(int)).Logger()
 
-	stdOut = zerolog.New(multiOut).With().Timestamp().Caller().Logger()
-	stdErr = zerolog.New(multiErr).With().Timestamp().Caller().Logger()
 	SetLevel(zerolog.InfoLevel)
 
 }
@@ -54,6 +57,12 @@ func init() {
 func SetLevel(level zerolog.Level) {
 	zerolog.SetGlobalLevel(level)
 
+}
+
+func Init(writerOut io.Writer, writerErr io.Writer, timeFormat string) {
+	zerolog.TimeFieldFormat = timeFormat
+	stdOut = zerolog.New(writerOut).With().Timestamp().CallerWithSkipFrameCount(utils.Ternary(utils.IsTest(), 3, 0).(int)).Logger()
+	stdErr = zerolog.New(writerErr).With().Timestamp().CallerWithSkipFrameCount(utils.Ternary(utils.IsTest(), 3, 0).(int)).Logger()
 }
 
 func prepareMessage(arg0 interface{}, args ...interface{}) (msg string) {
@@ -70,7 +79,9 @@ func prepareMessage(arg0 interface{}, args ...interface{}) (msg string) {
 }
 
 func Trace(arg0 interface{}, args ...interface{}) {
-	stdOut.Trace().Msg(prepareMessage(arg0, args...))
+	if AllowTestLogging || !utils.IsTest() {
+		stdOut.Trace().Msg(prepareMessage(arg0, args...))
+	}
 }
 
 func Debug(arg0 interface{}, args ...interface{}) {
@@ -78,7 +89,9 @@ func Debug(arg0 interface{}, args ...interface{}) {
 }
 
 func Info(arg0 interface{}, args ...interface{}) {
-	stdOut.Info().Msg(prepareMessage(arg0, args...))
+	if AllowTestLogging || !utils.IsTest() {
+		stdOut.Info().Msg(prepareMessage(arg0, args...))
+	}
 }
 
 func Warning(arg0 interface{}, args ...interface{}) {
