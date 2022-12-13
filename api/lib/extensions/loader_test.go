@@ -1,14 +1,15 @@
 package extensions
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/uptrace/bunrouter"
+)
 
 func TestLoadingExtensions(t *testing.T) {
-	manager, err := LoadExtensions()
+	router := bunrouter.New()
+	_, err := LoadExtensions(router)
 	if err != nil {
 		t.Fatalf("%v", err)
-	}
-	routes := manager.GetRoutes()
-	for r := range routes {
-		t.Log(routes[r].Name)
 	}
 }

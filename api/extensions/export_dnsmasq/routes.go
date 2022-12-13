@@ -2,14 +2,15 @@ package main
 
 import (
 	"facemasq/extensions/export_dnsmasq/handlers"
-	"facemasq/lib/extensions"
+
+	"github.com/uptrace/bunrouter"
 )
 
-func getRoutes() []extensions.RouteDefinition {
-	return []extensions.RouteDefinition{
-		{Path: `/export/dnsmasq/dhcp`, Handler: handlers.WriteDHCPConfig, Methods: "GET", Name: "WriteDHCPConfigGet"},
-		{Path: `/export/dnsmasq/dhcp`, Handler: handlers.WriteDHCPConfig, Methods: "PUT", Name: "WriteDHCPConfigPut"},
-		{Path: `/export/dnsmasq/dns`, Handler: handlers.WriteDNSConfig, Methods: "GET", Name: "WriteDNSConfigGet"},
-		{Path: `/export/dnsmasq/dns`, Handler: handlers.WriteDNSConfig, Methods: "PUT", Name: "WriteDNSConfigPut"},
-	}
+func getRoutes(router *bunrouter.Router) {
+	router.WithGroup("/export/dnsmasq", func(group *bunrouter.Group) {
+		group.GET("/dhcp", handlers.WriteDHCPConfig) //"WriteDHCPConfigGet"
+		group.PUT("/dhcp", handlers.WriteDHCPConfig) // "WriteDHCPConfigPut"
+		group.GET("/dns", handlers.WriteDNSConfig)   // "WriteDNSConfigGet"
+		group.PUT("/dns", handlers.WriteDNSConfig)   // "WriteDNSConfigPut"
+	})
 }

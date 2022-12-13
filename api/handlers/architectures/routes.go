@@ -1,10 +1,12 @@
 package architectures
 
-import "facemasq/lib/extensions"
+import (
+	"github.com/uptrace/bunrouter"
+)
 
-func GetRoutes() (routes []extensions.RouteDefinition) {
-	routes = []extensions.RouteDefinition{
-		{Path: `/api/architectures`, Handler: Save, Methods: "POST", Name: "SaveArchitecture"},
-		{Path: `/api/architectures/{ID:[0-9]+}`, Handler: Delete, Methods: "DELETE", Name: "DeleteArchitecture"}}
-	return
+func GetRoutes(router *bunrouter.Router) {
+	router.WithGroup("/api/architectures", func(group *bunrouter.Group) {
+		group.POST(``, Save)         // "SaveArchitecture"
+		group.DELETE(`/:ID`, Delete) // "DeleteArchitecture"
+	})
 }

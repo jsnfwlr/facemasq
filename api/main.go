@@ -34,7 +34,8 @@ func main() {
 	}
 	logging.Info("Connected: %+v", db.DBEngine)
 
-	_, err = extensions.LoadExtensions()
+	router := routes.Init()
+	_, err = extensions.LoadExtensions(router.Bun)
 	if err != nil {
 		logging.Fatal("%v", err)
 	}
@@ -46,7 +47,7 @@ func main() {
 		iprange.Schedule()
 	}
 
-	err = routes.Run()
+	router.Run()
 	if err != nil {
 		logging.Fatal("%v", err)
 	}

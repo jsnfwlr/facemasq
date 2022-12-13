@@ -1,10 +1,11 @@
 package trends
 
-import "facemasq/lib/extensions"
+import (
+	"github.com/uptrace/bunrouter"
+)
 
-func GetRoutes() (routes []extensions.RouteDefinition) {
-	routes = []extensions.RouteDefinition{
-		{Path: `/api/trends/connections`, Handler: GetConnectionTrends, Methods: "GET", Name: "GetConnectionTrends"},
-	}
-	return
+func GetRoutes(router *bunrouter.Router) {
+	router.WithGroup("/api/trends", func(group *bunrouter.Group) {
+		group.GET(`/connections`, GetConnectionTrends) // "GetConnectionTrends"
+	})
 }

@@ -1,24 +1,21 @@
 package locations
 
 import (
+	"errors"
 	"facemasq/lib/db"
 	"facemasq/lib/formats"
-	"facemasq/lib/logging"
 	"facemasq/lib/translate"
 	"facemasq/models"
 	"net/http"
-	"strconv"
 
-	"github.com/gorilla/mux"
+	"github.com/uptrace/bunrouter"
 )
 
-func Save(out http.ResponseWriter, in *http.Request) {
+func Save(out http.ResponseWriter, in bunrouter.Request) (err error) {
 	var input models.Location
-	err := formats.ReadJSONBody(in, &input)
+	err = formats.ReadJSONBody(in, &input)
 	if err != nil {
-		translation := translate.Message("SaveLocationError", "Unable to save Location")
-		logging.Error("%s: %v", translation, err)
-		http.Error(out, translation, http.StatusInternalServerError)
+		err = errors.New(translate.Message("SaveLocationError", "Unable to save Location"))
 		return
 	}
 
@@ -28,22 +25,20 @@ func Save(out http.ResponseWriter, in *http.Request) {
 		_, err = db.Conn.NewInsert().Model(&input).Exec(db.Context)
 	}
 	if err != nil {
-		translation := translate.Message("SaveLocationError", "Unable to save Location")
-		logging.Error("%s: %v", translation, err)
-		http.Error(out, translation, http.StatusInternalServerError)
+		err = errors.New(translate.Message("SaveLocationError", "Unable to save Location"))
 		return
 
 	}
 	formats.WriteJSONResponse(input, out, in)
+	return
 }
 
-func Delete(out http.ResponseWriter, in *http.Request) {
+func Delete(out http.ResponseWriter, in bunrouter.Request) (err error) {
 	var input models.Location
-	id, err := strconv.ParseInt(mux.Vars(in)["ID"], 10, 64)
+	var id int64
+	id, err = in.Params().Int64("ID")
 	if err != nil {
-		translation := translate.Message("DeleteLocation", "Unable to delete Location")
-		logging.Error("%s: %v", translation, err)
-		http.Error(out, translation, http.StatusInternalServerError)
+		err = errors.New(translate.Message("DeleteLocation", "Unable to delete Location"))
 		return
 
 	}
@@ -51,10 +46,9 @@ func Delete(out http.ResponseWriter, in *http.Request) {
 
 	_, err = db.Conn.NewDelete().Model(&input).WherePK().Exec(db.Context)
 	if err != nil {
-		translation := translate.Message("DeleteLocation", "Unable to delete Location")
-		logging.Error("%s: %v", translation, err)
-		http.Error(out, translation, http.StatusInternalServerError)
+		err = errors.New(translate.Message("DeleteLocation", "Unable to delete Location"))
 		return
 	}
 	formats.WriteJSONResponse(input, out, in)
+	return
 }

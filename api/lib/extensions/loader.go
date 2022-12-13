@@ -10,10 +10,12 @@ import (
 	"strings"
 
 	"facemasq/lib/events"
+
+	"github.com/uptrace/bunrouter"
 )
 
 type ExtensionManager struct {
-	routes      []RouteDefinition
+	Router      *bunrouter.Router
 	listeners   []Listener
 	coordinator events.Manager
 	Extensions  []Extension
@@ -34,7 +36,7 @@ type Loader interface {
 // LoadExtensions loads extensions from the directory with the given path, looking for
 // all .so files in there. It creates a new PluginManager and registers the
 // plugins with it.
-func LoadExtensions() (manager *ExtensionManager, err error) {
+func LoadExtensions(router *bunrouter.Router) (manager *ExtensionManager, err error) {
 	path, err := files.GetDir("extensions")
 	if err != nil {
 		return
@@ -48,7 +50,7 @@ func LoadExtensions() (manager *ExtensionManager, err error) {
 	var symLoader plugin.Symbol
 	var extensionName string
 
-	Manager = newManager()
+	Manager = newManager(router)
 	for f := range files {
 		if !files[f].IsDir() && strings.HasSuffix(files[f].Name(), ".so") {
 			fullpath := filepath.Join(path, files[f].Name())
@@ -79,7 +81,7 @@ func LoadExtensions() (manager *ExtensionManager, err error) {
 			Manager.Extensions = append(Manager.Extensions, Extension{Name: extensionName, Filename: files[f].Name()})
 		}
 	}
-	logging.Info("%d listeners registered | %d routes registered", len(Manager.listeners), len(Manager.routes))
+	logging.Info("%d listeners registered | %d routes registered", len(Manager.listeners), 0)
 	for l := range Manager.listeners {
 		Manager.coordinator.Listen(Manager.listeners[l].Kind, Manager.listeners[l].Listener)
 	}
@@ -94,16 +96,17 @@ func LoadExtensions() (manager *ExtensionManager, err error) {
 	return
 }
 
-func newManager() *ExtensionManager {
+func newManager(router *bunrouter.Router) *ExtensionManager {
 	return &ExtensionManager{
 		coordinator: events.DefaultManager(),
+		Router:      router,
 	}
 }
 
-func (manager *ExtensionManager) RegisterRoutes(routes []RouteDefinition) {
-	manager.numRoutes = manager.numRoutes + len(routes)
-	manager.routes = append(manager.routes, routes...)
-}
+// func (manager *ExtensionManager) RegisterRoutes(routes []RouteDefinition) {
+// 	manager.numRoutes = manager.numRoutes + len(routes)
+// 	manager.routes = append(manager.routes, routes...)
+// }
 
 func (manager *ExtensionManager) RegisterListeners(listeners []Listener) {
 	logging.Debug("Registering event listeners")
@@ -113,8 +116,8 @@ func (manager *ExtensionManager) RegisterListeners(listeners []Listener) {
 	manager.listeners = append(manager.listeners, listeners...)
 }
 
-func (manager *ExtensionManager) GetRoutes() (routes []RouteDefinition) {
-	return manager.routes
+func (manager *ExtensionManager) GetRoutes(router *bunrouter.Router) {
+
 }
 
 func (manager *ExtensionManager) HasRoutes() bool {

@@ -4,14 +4,11 @@ go 1.19
 
 require (
 	github.com/BurntSushi/toml v1.0.0
-	github.com/auth0/go-jwt-middleware v1.0.1
 	github.com/docker/docker v20.10.18+incompatible
 	github.com/docker/go-connections v0.4.0
 	github.com/go-co-op/gocron v1.11.0
 	github.com/go-sql-driver/mysql v1.5.0
-	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/google/gopacket v1.1.17
-	github.com/gorilla/mux v1.8.0
 	github.com/gorilla/websocket v1.5.0
 	github.com/jackc/pgx/v4 v4.17.2
 	github.com/json-iterator/go v1.1.12
@@ -28,6 +25,7 @@ require (
 	github.com/uptrace/bun/dialect/sqlitedialect v1.1.8
 	github.com/uptrace/bun/driver/sqliteshim v1.1.8
 	github.com/uptrace/bun/extra/bundebug v1.1.8
+	github.com/uptrace/bunrouter v1.0.19
 	github.com/urfave/negroni/v3 v3.0.0
 	github.com/volatiletech/null v8.0.0+incompatible
 	golang.org/x/crypto v0.0.0-20220722155217-630584e8d5aa
@@ -40,7 +38,6 @@ require (
 	github.com/docker/distribution v2.8.1+incompatible // indirect
 	github.com/docker/go-units v0.5.0 // indirect
 	github.com/fatih/color v1.13.0 // indirect
-	github.com/form3tech-oss/jwt-go v3.2.2+incompatible // indirect
 	github.com/friendsofgo/errors v0.9.2 // indirect
 	github.com/gofrs/uuid v4.2.0+incompatible // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect

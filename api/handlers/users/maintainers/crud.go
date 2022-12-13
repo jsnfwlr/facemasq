@@ -3,22 +3,21 @@ package maintainers
 import (
 	"facemasq/lib/db"
 	"facemasq/lib/formats"
-	"facemasq/lib/logging"
 	"facemasq/lib/translate"
 	"facemasq/models"
 	"net/http"
-	"strconv"
 
-	"github.com/gorilla/mux"
+	"github.com/pkg/errors"
+	"github.com/uptrace/bunrouter"
 )
 
-func Save(out http.ResponseWriter, in *http.Request) {
+func Save(out http.ResponseWriter, in bunrouter.Request) (err error) {
 	var input models.Maintainer
-	err := formats.ReadJSONBody(in, &input)
+	err = formats.ReadJSONBody(in, &input)
 	if err != nil {
-		translation := translate.Message("SaveMaintainerError", "Unable to save Maintainer")
-		logging.Error("%s: %v", translation, err)
-		http.Error(out, translation, http.StatusInternalServerError)
+		err = errors.New(translate.Message("SaveMaintainerError", "Unable to save Maintainer"))
+		// logging.Error("%s: %v", translation, err)
+		// http.Error(out, translation, http.StatusInternalServerError)
 		return
 	}
 
@@ -28,33 +27,29 @@ func Save(out http.ResponseWriter, in *http.Request) {
 		_, err = db.Conn.NewInsert().Model(&input).Exec(db.Context)
 	}
 	if err != nil {
-		translation := translate.Message("SaveMaintainerError", "Unable to save Maintainer")
-		logging.Error("%s: %v", translation, err)
-		http.Error(out, translation, http.StatusInternalServerError)
+		err = errors.New(translate.Message("SaveMaintainerError", "Unable to save Maintainer"))
 		return
 
 	}
 	formats.WriteJSONResponse(input, out, in)
+	return
 }
 
-func Delete(out http.ResponseWriter, in *http.Request) {
+func Delete(out http.ResponseWriter, in bunrouter.Request) (err error) {
 	var input models.Maintainer
-	id, err := strconv.ParseInt(mux.Vars(in)["ID"], 10, 64)
+	var id int64
+	id, err = in.Params().Int64("ID")
 	if err != nil {
-		translation := translate.Message("DeleteMaintainer", "Unable to delete Maintainer")
-		logging.Error("%s: %v", translation, err)
-		http.Error(out, translation, http.StatusInternalServerError)
+		err = errors.New(translate.Message("DeleteMaintainer", "Unable to delete Maintainer"))
 		return
-
 	}
 	input.ID = id
 
 	_, err = db.Conn.NewDelete().Model(&input).WherePK().Exec(db.Context)
 	if err != nil {
-		translation := translate.Message("DeleteMaintainer", "Unable to delete Maintainer")
-		logging.Error("%s: %v", translation, err)
-		http.Error(out, translation, http.StatusInternalServerError)
+		err = errors.New(translate.Message("DeleteMaintainer", "Unable to delete Maintainer"))
 		return
 	}
 	formats.WriteJSONResponse(input, out, in)
+	return
 }

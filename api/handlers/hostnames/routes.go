@@ -1,11 +1,12 @@
 package hostnames
 
-import "facemasq/lib/extensions"
+import (
+	"github.com/uptrace/bunrouter"
+)
 
-func GetRoutes() (routes []extensions.RouteDefinition) {
-	routes = []extensions.RouteDefinition{
-		{Path: `/api/hostname`, Handler: Save, Methods: "POST", Name: "SaveHostname"},
-		{Path: `/api/hostname`, Handler: Delete, Methods: "DELETE", Name: "DeleteHostname"},
-	}
-	return
+func GetRoutes(router *bunrouter.Router) {
+	router.WithGroup("/api/hostname", func(group *bunrouter.Group) {
+		group.POST(``, Save)     // "SaveHostname"
+		group.DELETE(``, Delete) // "DeleteHostname"
+	})
 }

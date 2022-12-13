@@ -1,15 +1,17 @@
 package meta
 
-import "facemasq/lib/extensions"
+import (
+	"github.com/uptrace/bunrouter"
+)
 
-func GetRoutes() (routes []extensions.RouteDefinition) {
-	routes = []extensions.RouteDefinition{
+func GetRoutes(router *bunrouter.Router) {
+	router.WithGroup("/api/setting", func(group *bunrouter.Group) {
+		group.POST(`/:UserID`, SaveUserSetting) // "SaveUserSetting"
+		group.POST(``, SaveAppSetting)          // "SaveAppSetting"
+	})
 
-		{Path: `/api/settings/{userID:[0-9]+}`, Handler: GetUserSettings, Methods: "GET", Name: "GetUserSettings"},
-		{Path: `/api/setting/{userID:[0-9]+}`, Handler: SaveUserSetting, Methods: "POST", Name: "SaveUserSetting"},
-
-		{Path: `/api/settings`, Handler: GetAppSettings, Methods: "GET", Name: "GetAppSettings"},
-		{Path: `/api/setting`, Handler: SaveAppSetting, Methods: "POST", Name: "SaveAppSetting"},
-	}
-	return
+	router.WithGroup("/api/settings", func(group *bunrouter.Group) {
+		group.GET(`/:UserID`, GetUserSettings) // "GetUserSettings"
+		group.GET(``, GetAppSettings)          // "GetAppSettings"
+	})
 }

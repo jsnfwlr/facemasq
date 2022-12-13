@@ -10,7 +10,7 @@ const ExtensionName = "DNSMasq Exporter"
 
 func LoadExtension(manager *extensions.ExtensionManager) (extensionName string, err error) {
 	extensionName = ExtensionName
-	manager.RegisterRoutes(getRoutes())
+	getRoutes(manager.Router)
 	manager.RegisterListeners([]extensions.Listener{
 		{Kind: `device:after:.*`, Listener: ExportOnSave},
 		{Kind: `plugin:loaded:dnsmasq.so`, Listener: AlertOnLoad},

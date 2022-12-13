@@ -2,9 +2,8 @@ package meta
 
 import (
 	"net/http"
-	"strconv"
 
-	"github.com/gorilla/mux"
+	"github.com/uptrace/bunrouter"
 	"github.com/volatiletech/null"
 
 	"facemasq/lib/db"
@@ -13,32 +12,28 @@ import (
 	"facemasq/models"
 )
 
-func GetUserSettings(out http.ResponseWriter, in *http.Request) {
-	userID := mux.Vars(in)["userID"]
+func GetUserSettings(out http.ResponseWriter, in bunrouter.Request) (err error) {
+	userID := in.Params().ByName("userID")
 	var settings []models.Meta
 	sql := `SELECT name, value FROM meta WHERE user_id = ?`
-	err := db.Conn.NewRaw(sql, userID).Scan(db.Context, &settings)
+	err = db.Conn.NewRaw(sql, userID).Scan(db.Context, &settings)
 	if err != nil {
-		logging.Error("error getting settings: %v", err)
-		http.Error(out, "Unable to retrieve data", http.StatusInternalServerError)
+		return
 	}
 	formats.WriteJSONResponse(settings, out, in)
+	return
 }
 
-func SaveUserSetting(out http.ResponseWriter, in *http.Request) {
+func SaveUserSetting(out http.ResponseWriter, in bunrouter.Request) (err error) {
 	var input, check models.Meta
-
-	userID, err := strconv.ParseInt(mux.Vars(in)["userID"], 10, 64)
+	var userID int64
+	userID, err = in.Params().Int64("userID")
 	if err != nil {
-		logging.Error("Unable to parse user_id: %v", err)
-		http.Error(out, "Unable to parse UserID", http.StatusBadRequest)
 		return
 	}
 
 	err = formats.ReadJSONBody(in, &input)
 	if err != nil {
-		logging.Error("Unable to parse Setting: %v", err)
-		http.Error(out, "Unable to parse Setting", http.StatusInternalServerError)
 		return
 	}
 
@@ -54,6 +49,7 @@ func SaveUserSetting(out http.ResponseWriter, in *http.Request) {
 			return
 		}
 		newSetting = true
+		err = nil
 	}
 	if newSetting {
 		_, err = db.Conn.NewInsert().Model(&input).Exec(db.Context)
@@ -61,9 +57,9 @@ func SaveUserSetting(out http.ResponseWriter, in *http.Request) {
 		_, err = db.Conn.NewUpdate().Model(&input).Where(`name = ? and user_id = ?`, input.Name, input.UserID.Int64).Exec(db.Context)
 	}
 	if err != nil {
-		logging.Error("error saving setting: %v", err)
-		http.Error(out, "Unable to store data", http.StatusInternalServerError)
+		return
 	}
 
 	formats.WriteJSONResponse(input, out, in)
+	return
 }

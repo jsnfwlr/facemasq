@@ -1,10 +1,10 @@
 package control
 
 import (
-	"fmt"
 	"mime"
 	"net/http"
 	"os"
+	"path"
 	"path/filepath"
 	"strings"
 
@@ -18,32 +18,45 @@ import (
 	"facemasq/lib/utils"
 	"facemasq/models"
 
-	"github.com/gorilla/mux"
+	"github.com/uptrace/bunrouter"
 )
 
-func Exit(out http.ResponseWriter, in *http.Request) {
+func Exit(out http.ResponseWriter, in bunrouter.Request) (err error) {
 	logging.Info("Remote exit invoked")
 	os.Exit(0)
+	return
 }
 
-func Static(out http.ResponseWriter, in *http.Request) {
-	file := mux.Vars(in)["filename"]
+func Static(out http.ResponseWriter, in bunrouter.Request) (err error) {
+	file := in.Params().ByName("filename")
 	if strings.Contains(file, "i18n") {
 		i18nDir, _ := files.GetDir("i18n")
-		file = fmt.Sprintf("%[2]s%[1]c%[3]s", os.PathSeparator, i18nDir, strings.Replace(file, "i18n/", "web/", -1))
+		file = path.Join(i18nDir, strings.Replace(file, "i18n/", "", -1))
 		logging.Info(file)
 		out.Header().Set("Content-Type", mime.TypeByExtension(strings.TrimRight(filepath.Ext(file), "/")))
-		http.ServeFile(out, in, file)
-	} else if files.FileExists("../web/" + file) {
-		out.Header().Set("Content-Type", mime.TypeByExtension(strings.TrimRight(filepath.Ext(file), "/")))
-		http.ServeFile(out, in, "../web/"+file)
+		http.ServeFile(out, in.Request, file)
 	} else {
-		out.Header().Set("Content-Type", mime.TypeByExtension(strings.TrimRight(filepath.Ext(file), "/")))
-		http.ServeFile(out, in, "../web/index.html")
+		var webDir string
+		webDir, err = files.GetDir("dist/web")
+		if err != nil {
+			webDir, err = files.GetDir("web")
+			if err != nil {
+				return
+			}
+		}
+		if files.FileExists(path.Join(webDir, file)) {
+			out.Header().Set("Content-Type", mime.TypeByExtension(strings.TrimRight(filepath.Ext(file), "/")))
+			http.ServeFile(out, in.Request, path.Join(webDir, file))
+		} else {
+			out.Header().Set("Content-Type", mime.TypeByExtension(strings.TrimRight(filepath.Ext(file), "/")))
+			http.ServeFile(out, in.Request, path.Join(webDir, "index.html"))
+		}
+
 	}
+	return
 }
 
-func State(out http.ResponseWriter, in *http.Request) {
+func State(out http.ResponseWriter, in bunrouter.Request) (err error) {
 	var settings models.Meta
 	details := make(map[string]string)
 
@@ -53,13 +66,12 @@ func State(out http.ResponseWriter, in *http.Request) {
 	details["NetMask"] = network.Target
 	details["FormatHostnames"] = ""
 
-	err := db.Conn.NewSelect().Model(&settings).Where(`name = 'formatHostnames' AND user_id IS NULL`).Scan(db.Context)
+	err = db.Conn.NewSelect().Model(&settings).Where(`name = 'formatHostnames' AND user_id IS NULL`).Scan(db.Context)
 	if err != nil {
-		logging.Error("error getting settings: %v", err)
-		http.Error(out, "Unable to retrieve data", http.StatusInternalServerError)
 		return
 	}
 	details["FormatHostnames"] = settings.Value
 
 	formats.WriteJSONResponse(details, out, in)
+	return
 }

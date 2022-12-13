@@ -1,10 +1,12 @@
 package vlans
 
-import "facemasq/lib/extensions"
+import (
+	"github.com/uptrace/bunrouter"
+)
 
-func GetRoutes() (routes []extensions.RouteDefinition) {
-	routes = []extensions.RouteDefinition{
-		{Path: `/api/vlans`, Handler: Save, Methods: "POST", Name: "SaveVLAN"},
-		{Path: `/api/vlans/{ID:[0-9]+}`, Handler: Delete, Methods: "DELETE", Name: "DeleteVLAN"}}
-	return
+func GetRoutes(router *bunrouter.Router) {
+	router.WithGroup("/api/vlans", func(group *bunrouter.Group) {
+		group.POST(``, Save)         // "SaveVLAN"
+		group.DELETE(`/:ID`, Delete) // "DeleteVLAN"
+	})
 }

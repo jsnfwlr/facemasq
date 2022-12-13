@@ -1,11 +1,12 @@
 package interfaces
 
-import "facemasq/lib/extensions"
+import (
+	"github.com/uptrace/bunrouter"
+)
 
-func GetRoutes() (routes []extensions.RouteDefinition) {
-	routes = []extensions.RouteDefinition{
-		{Path: `/api/interface`, Handler: Save, Methods: "POST", Name: "SaveInterface"},
-		{Path: `/api/interface`, Handler: Delete, Methods: "DELETE", Name: "DeleteInterface"},
-	}
-	return
+func GetRoutes(router *bunrouter.Router) {
+	router.WithGroup("/api/interface", func(group *bunrouter.Group) {
+		group.POST(``, Save)         // "SaveInterface"
+		group.DELETE(`/:ID`, Delete) // "DeleteInterface"
+	})
 }

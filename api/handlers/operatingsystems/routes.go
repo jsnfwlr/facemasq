@@ -1,10 +1,12 @@
 package operatingsystems
 
-import "facemasq/lib/extensions"
+import (
+	"github.com/uptrace/bunrouter"
+)
 
-func GetRoutes() (routes []extensions.RouteDefinition) {
-	routes = []extensions.RouteDefinition{
-		{Path: `/api/operatingSystems`, Handler: Save, Methods: "POST", Name: "SaveOperatingSystem"},
-		{Path: `/api/operatingSystems/{ID:[0-9]+}`, Handler: Delete, Methods: "DELETE", Name: "DeleteOperatingSystem"}}
-	return
+func GetRoutes(router *bunrouter.Router) {
+	router.WithGroup("/api/operatingSystems", func(group *bunrouter.Group) {
+		group.POST(``, Save)         // "SaveOperatingSystem"
+		group.DELETE(`/:ID`, Delete) // "DeleteOperatingSystem"
+	})
 }

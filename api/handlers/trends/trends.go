@@ -7,8 +7,8 @@ import (
 
 	"facemasq/lib/db"
 	"facemasq/lib/formats"
-	"facemasq/lib/logging"
 
+	"github.com/uptrace/bunrouter"
 	"github.com/volatiletech/null"
 )
 
@@ -26,13 +26,14 @@ type Concurrency struct {
 	Time  time.Time `bun:"time"`
 }
 
-func GetConnectionTrends(out http.ResponseWriter, in *http.Request) {
-	durations, err := getConnectionTrends()
+func GetConnectionTrends(out http.ResponseWriter, in bunrouter.Request) (err error) {
+	var durations []TrendWindow
+	durations, err = getConnectionTrends()
 	if err != nil {
-		logging.Error(err.Error())
-		http.Error(out, "Error getting trend data", http.StatusInternalServerError)
+		return
 	}
 	formats.WriteJSONResponse(durations, out, in)
+	return
 }
 
 func getConnectionTrends() (durations []TrendWindow, err error) {

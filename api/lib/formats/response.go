@@ -8,22 +8,23 @@ import (
 	"facemasq/lib/logging"
 
 	jsoniter "github.com/json-iterator/go"
+	"github.com/uptrace/bunrouter"
 )
 
 var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
-func WriteTextResponse(payload string, response http.ResponseWriter, request *http.Request) {
+func WriteTextResponse(payload string, response http.ResponseWriter, request bunrouter.Request) {
 	response.Header().Set("Content-Type", "text/plain")
 	response.Write([]byte(payload))
 }
 
-func WriteJSONResponse(payload interface{}, response http.ResponseWriter, request *http.Request) {
+func WriteJSONResponse(payload interface{}, response http.ResponseWriter, request bunrouter.Request) {
 	json, _ := json.Marshal(payload)
 	response.Header().Set("Content-Type", "application/json")
 	response.Write(json)
 }
 
-func ReadJSONBody(request *http.Request, target interface{}) (err error) {
+func ReadJSONBody(request bunrouter.Request, target interface{}) (err error) {
 	var body []byte
 	body, err = io.ReadAll(request.Body)
 	if err != nil {

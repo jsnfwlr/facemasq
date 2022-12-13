@@ -1,24 +1,21 @@
 package categories
 
 import (
+	"errors"
 	"facemasq/lib/db"
 	"facemasq/lib/formats"
-	"facemasq/lib/logging"
 	"facemasq/lib/translate"
 	"facemasq/models"
 	"net/http"
-	"strconv"
 
-	"github.com/gorilla/mux"
+	"github.com/uptrace/bunrouter"
 )
 
-func Save(out http.ResponseWriter, in *http.Request) {
+func Save(out http.ResponseWriter, in bunrouter.Request) (err error) {
 	var input models.Category
-	err := formats.ReadJSONBody(in, &input)
+	err = formats.ReadJSONBody(in, &input)
 	if err != nil {
-		translation := translate.Message("SaveCategoryError", "Unable to save Category")
-		logging.Error("%s: %v", translation, err)
-		http.Error(out, translation, http.StatusInternalServerError)
+		err = errors.New(translate.Message("SaveCategoryError", "Unable to save Category"))
 		return
 	}
 
@@ -28,22 +25,20 @@ func Save(out http.ResponseWriter, in *http.Request) {
 		_, err = db.Conn.NewInsert().Model(&input).Exec(db.Context)
 	}
 	if err != nil {
-		translation := translate.Message("SaveCategoryError", "Unable to save Category")
-		logging.Error("%s: %v", translation, err)
-		http.Error(out, translation, http.StatusInternalServerError)
+		err = errors.New(translate.Message("SaveCategoryError", "Unable to save Category"))
 		return
 
 	}
 	formats.WriteJSONResponse(input, out, in)
+	return
 }
 
-func Delete(out http.ResponseWriter, in *http.Request) {
+func Delete(out http.ResponseWriter, in bunrouter.Request) (err error) {
 	var input models.Category
-	id, err := strconv.ParseInt(mux.Vars(in)["ID"], 10, 64)
+	var id int64
+	id, err = in.Params().Int64("id")
 	if err != nil {
-		translation := translate.Message("DeleteCategory", "Unable to delete Category")
-		logging.Error("%s: %v", translation, err)
-		http.Error(out, translation, http.StatusInternalServerError)
+		err = errors.New(translate.Message("DeleteCategory", "Unable to delete Category"))
 		return
 
 	}
@@ -51,10 +46,9 @@ func Delete(out http.ResponseWriter, in *http.Request) {
 
 	_, err = db.Conn.NewDelete().Model(&input).WherePK().Exec(db.Context)
 	if err != nil {
-		translation := translate.Message("DeleteCategory", "Unable to delete Category")
-		logging.Error("%s: %v", translation, err)
-		http.Error(out, translation, http.StatusInternalServerError)
+		err = errors.New(translate.Message("DeleteCategory", "Unable to delete Category"))
 		return
 	}
 	formats.WriteJSONResponse(input, out, in)
+	return
 }

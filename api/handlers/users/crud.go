@@ -1,24 +1,21 @@
 package users
 
 import (
+	"errors"
 	"facemasq/lib/db"
 	"facemasq/lib/formats"
-	"facemasq/lib/logging"
 	"facemasq/lib/translate"
 	"facemasq/models"
 	"net/http"
-	"strconv"
 
-	"github.com/gorilla/mux"
+	"github.com/uptrace/bunrouter"
 )
 
-func SaveUser(out http.ResponseWriter, in *http.Request) {
+func SaveUser(out http.ResponseWriter, in bunrouter.Request) (err error) {
 	var input models.User
-	err := formats.ReadJSONBody(in, &input)
+	err = formats.ReadJSONBody(in, &input)
 	if err != nil {
-		translation := translate.Message("SaveUserError", "Unable to save User")
-		logging.Error("%s: %v", translation, err)
-		http.Error(out, translation, http.StatusInternalServerError)
+		err = errors.New(translate.Message("SaveUserError", "Unable to save User"))
 		return
 	}
 
@@ -28,22 +25,21 @@ func SaveUser(out http.ResponseWriter, in *http.Request) {
 		_, err = db.Conn.NewInsert().Model(&input).Exec(db.Context)
 	}
 	if err != nil {
-		translation := translate.Message("SaveUserError", "Unable to save User")
-		logging.Error("%s: %v", translation, err)
-		http.Error(out, translation, http.StatusInternalServerError)
+		err = errors.New(translate.Message("SaveUserError", "Unable to save User"))
 		return
 
 	}
 	formats.WriteJSONResponse(input, out, in)
+	return
 }
 
-func DeleteUser(out http.ResponseWriter, in *http.Request) {
+func DeleteUser(out http.ResponseWriter, in bunrouter.Request) (err error) {
 	var input models.User
-	id, err := strconv.ParseInt(mux.Vars(in)["ID"], 10, 64)
+	var id int64
+	id, err = in.Params().Int64("id")
+
 	if err != nil {
-		translation := translate.Message("DeleteUser", "Unable to delete User")
-		logging.Error("%s: %v", translation, err)
-		http.Error(out, translation, http.StatusInternalServerError)
+		err = errors.New(translate.Message("DeleteUser", "Unable to delete User"))
 		return
 
 	}
@@ -51,10 +47,9 @@ func DeleteUser(out http.ResponseWriter, in *http.Request) {
 
 	_, err = db.Conn.NewDelete().Model(&input).WherePK().Exec(db.Context)
 	if err != nil {
-		translation := translate.Message("DeleteUser", "Unable to delete User")
-		logging.Error("%s: %v", translation, err)
-		http.Error(out, translation, http.StatusInternalServerError)
+		err = errors.New(translate.Message("DeleteUser", "Unable to delete User"))
 		return
 	}
 	formats.WriteJSONResponse(input, out, in)
+	return
 }

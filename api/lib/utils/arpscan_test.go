@@ -1,13 +1,9 @@
 package utils
 
 import (
-	"flag"
-	"fmt"
-	"os"
-	"strings"
 	"testing"
 )
-
+/*
 func init() {
 	flag.VisitAll(func(flagg *flag.Flag) {
 		fmt.Println(flagg.Name)
@@ -25,6 +21,7 @@ func init() {
 	}
 
 }
+*/
 func TestFlags(t *testing.T) {
 	t.Error("Nope")
 }

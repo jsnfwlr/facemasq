@@ -20,13 +20,13 @@ func init() {
 	}
 }
 
-func Run() (err error) {
+func (router *Router) Run() (err error) {
 	var rootDir string
 	rootDir, _ = files.GetAppRoot()
 	logging.Info("Starting API server at localhost:%s from  %s", Port, rootDir)
 
 	server := negroni.New()
-	router := BuildRoutes()
+	router.BuildRoutes()
 
 	if os.Getenv("NETMASK") == "" {
 		corsControl := cors.AllowAll()
@@ -37,7 +37,7 @@ func Run() (err error) {
 		server.Use(negroni.NewLogger())
 	}
 
-	server.UseHandler(router.Mux)
+	server.UseHandler(router.Bun)
 	err = http.ListenAndServe(":"+Port, server)
 	return
 }

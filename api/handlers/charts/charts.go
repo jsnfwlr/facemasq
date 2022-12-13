@@ -9,7 +9,8 @@ import (
 
 	"facemasq/lib/db"
 	"facemasq/lib/formats"
-	"facemasq/lib/logging"
+
+	"github.com/uptrace/bunrouter"
 )
 
 type DevicesOverTime struct {
@@ -27,31 +28,28 @@ func init() {
 	}
 }
 
-func GetDevicesOverTime(out http.ResponseWriter, in *http.Request) {
+func GetDevicesOverTime(out http.ResponseWriter, in bunrouter.Request) (err error) {
 	var series map[string][]DevicesOverTime
-	var err error
 
 	series = make(map[string][]DevicesOverTime)
 
 	series["full"], err = getAddressCountPerScan(time.Duration(-24) * time.Hour)
 	if err != nil {
-		logging.Error("error getting intial chart data: %v", err)
-		http.Error(out, "Unable to retrieve inital chart data", http.StatusInternalServerError)
+		return
 	}
 
 	series["averaged"], err = getAverageAddressCountPerPeriod(time.Duration(-24)*time.Hour, time.Duration(5)*frequency)
 	if err != nil {
-		logging.Error("error getting averaged chart data: %v", err)
-		http.Error(out, "Unable to retrieve averaged chart data", http.StatusInternalServerError)
+		return
 	}
 
 	formats.WriteJSONResponse(series, out, in)
+	return
 }
 
 func getAddressCountPerScan(overallTimeSpan time.Duration) (data []DevicesOverTime, err error) {
 	sql := `SELECT scans.time, Count(histories.address_id) as addresses FROM scans JOIN histories ON histories.scan_id = scans.id WHERE time > ? GROUP BY time ORDER BY time ASC;`
 	err = db.Conn.NewRaw(sql, time.Now().Add(overallTimeSpan).Format("2006-01-02 15:04")).Scan(db.Context, &data)
-
 	return
 }
 

@@ -5,8 +5,9 @@ import (
 
 	"facemasq/lib/db"
 	"facemasq/lib/formats"
-	"facemasq/lib/translate"
 	"facemasq/models"
+
+	"github.com/uptrace/bunrouter"
 )
 
 type Params struct {
@@ -22,58 +23,59 @@ type Params struct {
 	Users            []models.User
 }
 
-func GetAllParams(out http.ResponseWriter, in *http.Request) {
+func GetAllParams(out http.ResponseWriter, in bunrouter.Request) (err error) {
 	var params Params
-	var err error
+
 	err = db.Conn.NewSelect().Model(&params.Categories).Scan(db.Context)
 	if err != nil {
-		http.Error(out, translate.Message("RetrieveCategoryError", "Unable to retrieve Category data"), http.StatusInternalServerError)
+		return
 	}
 
 	err = db.Conn.NewSelect().Model(&params.Statuses).Scan(db.Context)
 	if err != nil {
-		http.Error(out, translate.Message("RetrieveStatusError", "Unable to retrieve Status data"), http.StatusInternalServerError)
+		return
 	}
 
 	err = db.Conn.NewSelect().Model(&params.Locations).Scan(db.Context)
 	if err != nil {
-		http.Error(out, translate.Message("RetrieveLocationError", "Unable to retrieve Location data"), http.StatusInternalServerError)
+		return
 	}
 
 	err = db.Conn.NewSelect().Model(&params.Maintainers).Scan(db.Context)
 	if err != nil {
-		http.Error(out, translate.Message("RetrieveMaintainerError", "Unable to retrieve Maintainer data"), http.StatusInternalServerError)
+		return
 	}
 
 	err = db.Conn.NewSelect().Model(&params.Architectures).Scan(db.Context)
 	if err != nil {
-		http.Error(out, translate.Message("RetrieveArchitectureError", "Unable to retrieve Architecture data"), http.StatusInternalServerError)
+		return
 	}
 
 	err = db.Conn.NewSelect().Model(&params.OperatingSystems).Scan(db.Context)
 	if err != nil {
-		http.Error(out, translate.Message("RetrieveOperatingSystemError", "Unable to retrieve OperatingSystem data"), http.StatusInternalServerError)
+		return
 	}
 
 	err = db.Conn.NewSelect().Model(&params.InterfaceTypes).Scan(db.Context)
 	if err != nil {
-		http.Error(out, translate.Message("RetrieveInterfaceTypeError", "Unable to retrieve InterfaceType data"), http.StatusInternalServerError)
+		return
 	}
 
 	err = db.Conn.NewSelect().Model(&params.DeviceTypes).Scan(db.Context)
 	if err != nil {
-		http.Error(out, translate.Message("RetrieveDeviceTypeError", "Unable to retrieve DeviceType data"), http.StatusInternalServerError)
+		return
 	}
 
 	err = db.Conn.NewSelect().Model(&params.VLANs).Scan(db.Context)
 	if err != nil {
-		http.Error(out, translate.Message("RetrieveVLANError", "Unable to retrieve VLAN data"), http.StatusInternalServerError)
+		return
 	}
 
 	err = db.Conn.NewSelect().Model(&params.Users).Scan(db.Context)
 	if err != nil {
-		http.Error(out, translate.Message("RetrieveUserError", "Unable to retrieve User data"), http.StatusInternalServerError)
+		return
 	}
 
 	formats.WriteJSONResponse(params, out, in)
+	return
 }

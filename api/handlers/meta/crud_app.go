@@ -8,25 +8,25 @@ import (
 	"facemasq/lib/logging"
 	"facemasq/models"
 
+	"github.com/uptrace/bunrouter"
 	"github.com/volatiletech/null"
 )
 
-func GetAppSettings(out http.ResponseWriter, in *http.Request) {
+func GetAppSettings(out http.ResponseWriter, in bunrouter.Request) (err error) {
 	var settings []models.Meta
-	err := db.Conn.NewSelect().Model(&settings).Where(`user_id IS NULL`).Scan(db.Context)
+	err = db.Conn.NewSelect().Model(&settings).Where(`user_id IS NULL`).Scan(db.Context)
 	if err != nil {
 		logging.Error("error getting settings: %v", err)
 		http.Error(out, "Unable to retrieve data", http.StatusInternalServerError)
 	}
 	formats.WriteJSONResponse(settings, out, in)
+	return
 }
 
-func SaveAppSetting(out http.ResponseWriter, in *http.Request) {
+func SaveAppSetting(out http.ResponseWriter, in bunrouter.Request) (err error) {
 	var input, check models.Meta
-	err := formats.ReadJSONBody(in, &input)
+	err = formats.ReadJSONBody(in, &input)
 	if err != nil {
-		logging.Error("Unable to parse Setting: %v", err)
-		http.Error(out, "Unable to parse Setting", http.StatusInternalServerError)
 		return
 	}
 
@@ -38,6 +38,7 @@ func SaveAppSetting(out http.ResponseWriter, in *http.Request) {
 		if err.Error() != "sql: no rows in result set" {
 			return
 		}
+		err = nil
 		newSetting = true
 	}
 	if newSetting {
@@ -46,9 +47,9 @@ func SaveAppSetting(out http.ResponseWriter, in *http.Request) {
 		_, err = db.Conn.NewUpdate().Model(&input).Where(`user_id IS NULL AND name = ?`, input.Name).Exec(db.Context)
 	}
 	if err != nil {
-		logging.Error("error saving setting: %v", err)
-		http.Error(out, "Unable to retrieve data", http.StatusInternalServerError)
+		return
 	}
 
 	formats.WriteJSONResponse(input, out, in)
+	return
 }

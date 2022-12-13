@@ -10,7 +10,8 @@ import (
 
 	"facemasq/lib/db"
 	"facemasq/lib/files"
-	"facemasq/lib/logging"
+
+	"github.com/uptrace/bunrouter"
 )
 
 type DHCP struct {
@@ -21,14 +22,12 @@ type DHCP struct {
 	SortOrder   string
 }
 
-func WriteDHCPConfig(out http.ResponseWriter, in *http.Request) {
+func WriteDHCPConfig(out http.ResponseWriter, in bunrouter.Request) (err error) {
 	var records []DHCP
 	var exportDir string
 	sql := `SELECT interfaces.mac, addresses.ipv4, devices.label, devices.machine_name FROM addresses JOIN interfaces ON interfaces.id = addresses.interface_id JOIN devices ON devices.id = interfaces.device_id WHERE addresses.is_reserved = 1;`
-	err := db.Conn.NewRaw(sql).Scan(db.Context, &records)
+	err = db.Conn.NewRaw(sql).Scan(db.Context, &records)
 	if err != nil {
-		logging.Error("Error getting DHCP Records: %v", err)
-		http.Error(out, "Unable to retrieve DHCP Records", http.StatusInternalServerError)
 		return
 	}
 	contents := ""
@@ -52,11 +51,12 @@ func WriteDHCPConfig(out http.ResponseWriter, in *http.Request) {
 	}
 	exportDir, err = files.GetDir("export")
 	if err != nil {
-		http.Error(out, "Unable to determine where to export the DHCP config file", http.StatusInternalServerError)
+		return
 	}
 
 	err = files.WriteOut(fmt.Sprintf("%[2]s%[1]c%[3]s", os.PathSeparator, exportDir, DHCPFilename), contents)
 	if err != nil {
-		http.Error(out, "Unable to write DHCP config file", http.StatusInternalServerError)
+		return
 	}
+	return
 }

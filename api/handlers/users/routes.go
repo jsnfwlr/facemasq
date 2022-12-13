@@ -1,10 +1,12 @@
 package users
 
-import "facemasq/lib/extensions"
+import (
+	"github.com/uptrace/bunrouter"
+)
 
-func GetRoutes() (routes []extensions.RouteDefinition) {
-	routes = []extensions.RouteDefinition{
-		{Path: `/api/users`, Handler: SaveUser, Methods: "POST", Name: "SaveUser"},
-		{Path: `/api/users/{ID:[0-9]+}`, Handler: DeleteUser, Methods: "DELETE", Name: "DeleteUser"}}
-	return
+func GetRoutes(router *bunrouter.Router) {
+	router.WithGroup("/api/users", func(group *bunrouter.Group) {
+		group.POST(``, SaveUser)         // "SaveUser"
+		group.DELETE(`/:ID`, DeleteUser) // "DeleteUser"
+	})
 }

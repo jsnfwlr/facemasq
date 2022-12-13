@@ -1,10 +1,12 @@
 package maintainers
 
-import "facemasq/lib/extensions"
+import (
+	"github.com/uptrace/bunrouter"
+)
 
-func GetRoutes() (routes []extensions.RouteDefinition) {
-	routes = []extensions.RouteDefinition{
-		{Path: `/api/maintainers`, Handler: Save, Methods: "POST", Name: "SaveMaintainer"},
-		{Path: `/api/maintainers/{ID:[0-9]+}`, Handler: Delete, Methods: "DELETE", Name: "DeleteMaintainer"}}
-	return
+func GetRoutes(router *bunrouter.Router) {
+	router.WithGroup("/api/maintainers", func(group *bunrouter.Group) {
+		group.POST(``, Save)         // "SaveMaintainer"
+		group.DELETE(`/:ID`, Delete) // "DeleteMaintainer"
+	})
 }

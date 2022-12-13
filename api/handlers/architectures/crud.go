@@ -1,24 +1,21 @@
 package architectures
 
 import (
+	"errors"
 	"facemasq/lib/db"
 	"facemasq/lib/formats"
-	"facemasq/lib/logging"
 	"facemasq/lib/translate"
 	"facemasq/models"
 	"net/http"
-	"strconv"
 
-	"github.com/gorilla/mux"
+	"github.com/uptrace/bunrouter"
 )
 
-func Save(out http.ResponseWriter, in *http.Request) {
+func Save(out http.ResponseWriter, in bunrouter.Request) (err error) {
 	var input models.Architecture
-	err := formats.ReadJSONBody(in, &input)
+	err = formats.ReadJSONBody(in, &input)
 	if err != nil {
-		translation := translate.Message("SaveArchitectureError", "Unable to save Architecture")
-		logging.Error("%s: %v", translation, err)
-		http.Error(out, translation, http.StatusInternalServerError)
+		err = errors.New(translate.Message("SaveArchitectureError", "Unable to save Architecture"))
 		return
 	}
 	if input.ID > 0 {
@@ -27,22 +24,19 @@ func Save(out http.ResponseWriter, in *http.Request) {
 		_, err = db.Conn.NewInsert().Model(&input).Exec(db.Context)
 	}
 	if err != nil {
-		translation := translate.Message("SaveArchitectureError", "Unable to save Architecture")
-		logging.Error("%s: %v", translation, err)
-		http.Error(out, translation, http.StatusInternalServerError)
+		err = errors.New(translate.Message("SaveArchitectureError", "Unable to save Architecture"))
 		return
 
 	}
 	formats.WriteJSONResponse(input, out, in)
+	return
 }
 
-func Delete(out http.ResponseWriter, in *http.Request) {
+func Delete(out http.ResponseWriter, in bunrouter.Request) (err error) {
 	var input models.Architecture
-	id, err := strconv.ParseInt(mux.Vars(in)["ID"], 10, 64)
+	id, err := in.Params().Int64("id")
 	if err != nil {
-		translation := translate.Message("DeleteArchitecture", "Unable to delete Architecture")
-		logging.Error("%s: %v", translation, err)
-		http.Error(out, translation, http.StatusInternalServerError)
+		err = errors.New(translate.Message("DeleteArchitecture", "Unable to delete Architecture"))
 		return
 
 	}
@@ -50,10 +44,9 @@ func Delete(out http.ResponseWriter, in *http.Request) {
 
 	_, err = db.Conn.NewDelete().Model(&input).WherePK().Exec(db.Context)
 	if err != nil {
-		translation := translate.Message("DeleteArchitecture", "Unable to delete Architecture")
-		logging.Error("%s: %v", translation, err)
-		http.Error(out, translation, http.StatusInternalServerError)
+		err = errors.New(translate.Message("DeleteArchitecture", "Unable to delete Architecture"))
 		return
 	}
 	formats.WriteJSONResponse(input, out, in)
+	return
 }

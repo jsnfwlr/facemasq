@@ -7,6 +7,8 @@ import (
 	"log"
 	"testing"
 	"time"
+
+	"github.com/uptrace/bunrouter"
 )
 
 func TestLoadExtensions(t *testing.T) {
@@ -15,10 +17,8 @@ func TestLoadExtensions(t *testing.T) {
 	if err != nil {
 		log.Fatalf("%v", err)
 	}
-	routes := extensions.Manager.GetRoutes()
-	for r := range routes {
-		logging.Info(routes[r].Name)
-	}
+	router := bunrouter.New()
+	extensions.Manager.GetRoutes(router)
 
 	eventList, err := events.List()
 	if err != nil {

@@ -1,11 +1,12 @@
 package categories
 
-import "facemasq/lib/extensions"
+import (
+	"github.com/uptrace/bunrouter"
+)
 
-func GetRoutes() (routes []extensions.RouteDefinition) {
-	routes = []extensions.RouteDefinition{
-		{Path: `/api/categories`, Handler: Save, Methods: "POST", Name: "SaveCategory"},
-		{Path: `/api/categories/{ID:[0-9]+}`, Handler: Delete, Methods: "DELETE", Name: "DeleteCategory"},
-	}
-	return
+func GetRoutes(router *bunrouter.Router) {
+	router.WithGroup("/api/categories", func(group *bunrouter.Group) {
+		group.POST(``, Save)         // "SaveCategory"
+		group.DELETE(`/:ID`, Delete) // "DeleteCategory"
+	})
 }

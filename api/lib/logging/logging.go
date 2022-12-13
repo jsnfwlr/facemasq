@@ -5,6 +5,7 @@ import (
 	"io"
 	"log/syslog"
 	"os"
+	"path"
 	"reflect"
 
 	"facemasq/lib/files"
@@ -16,7 +17,7 @@ import (
 )
 
 var stdOut, stdErr zerolog.Logger
-var AllowTestLogging = false
+var AllowTestLogging = true
 var SysLog, FileLog bool
 
 func init() {
@@ -28,7 +29,7 @@ func init() {
 
 	conOut := zerolog.ConsoleWriter{Out: os.Stdout, TimeFormat: "2006-01-02T15:04:05.000"}
 	conErr := zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: "2006-01-02T15:04:05.000"}
-
+	SysLog = true
 	if SysLog {
 		sysOut, err = syslog.Dial("tcp", "192.168.0.44:514", syslog.LOG_EMERG|syslog.LOG_ERR|syslog.LOG_INFO|syslog.LOG_CRIT|syslog.LOG_WARNING|syslog.LOG_NOTICE|syslog.LOG_DEBUG, "faceMasq")
 		if err != nil {
@@ -36,19 +37,20 @@ func init() {
 		}
 	}
 
+	FileLog = true
 	if FileLog {
 		dir, err := files.GetDir("logs")
 		if err != nil {
 			panic(err)
 		}
-		fileOut, err = os.OpenFile(fmt.Sprintf("%[2]s%[1]c%[3]s", os.PathSeparator, dir, "facemasq.log"), os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0600)
+		fileOut, err = os.OpenFile(path.Join(dir, "facemasq.log"), os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0600)
 		if err != nil {
 			panic(err)
 		}
 	}
 
-	stdOut = zerolog.New(zerolog.MultiLevelWriter(conOut, fileOut, sysOut)).With().Timestamp().CallerWithSkipFrameCount(utils.Ternary(utils.IsTest(), 3, 0).(int)).Logger()
-	stdErr = zerolog.New(zerolog.MultiLevelWriter(conErr, fileOut, sysOut)).With().Timestamp().CallerWithSkipFrameCount(utils.Ternary(utils.IsTest(), 3, 0).(int)).Logger()
+	stdOut = zerolog.New(zerolog.MultiLevelWriter(conOut, fileOut, sysOut)).With().Timestamp().CallerWithSkipFrameCount(utils.Ternary(utils.IsTest(), 3, 3).(int)).Logger()
+	stdErr = zerolog.New(zerolog.MultiLevelWriter(conErr, fileOut, sysOut)).With().Timestamp().CallerWithSkipFrameCount(utils.Ternary(utils.IsTest(), 3, 3).(int)).Logger()
 
 	SetLevel(zerolog.InfoLevel)
 

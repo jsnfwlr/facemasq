@@ -1,24 +1,21 @@
 package devicetypes
 
 import (
+	"errors"
 	"facemasq/lib/db"
 	"facemasq/lib/formats"
-	"facemasq/lib/logging"
 	"facemasq/lib/translate"
 	"facemasq/models"
 	"net/http"
-	"strconv"
 
-	"github.com/gorilla/mux"
+	"github.com/uptrace/bunrouter"
 )
 
-func Save(out http.ResponseWriter, in *http.Request) {
+func Save(out http.ResponseWriter, in bunrouter.Request) (err error) {
 	var input models.DeviceType
-	err := formats.ReadJSONBody(in, &input)
+	err = formats.ReadJSONBody(in, &input)
 	if err != nil {
-		translation := translate.Message("SaveDeviceTypeError", "Unable to save DeviceType")
-		logging.Error("%s: %v", translation, err)
-		http.Error(out, translation, http.StatusInternalServerError)
+		err = errors.New(translate.Message("SaveDeviceTypeError", "Unable to save DeviceType"))
 		return
 	}
 
@@ -28,22 +25,20 @@ func Save(out http.ResponseWriter, in *http.Request) {
 		_, err = db.Conn.NewInsert().Model(&input).Exec(db.Context)
 	}
 	if err != nil {
-		translation := translate.Message("SaveDeviceTypeError", "Unable to save DeviceType")
-		logging.Error("%s: %v", translation, err)
-		http.Error(out, translation, http.StatusInternalServerError)
+		err = errors.New(translate.Message("SaveDeviceTypeError", "Unable to save DeviceType"))
 		return
 
 	}
 	formats.WriteJSONResponse(input, out, in)
+	return
 }
 
-func Delete(out http.ResponseWriter, in *http.Request) {
+func Delete(out http.ResponseWriter, in bunrouter.Request) (err error) {
 	var input models.DeviceType
-	id, err := strconv.ParseInt(mux.Vars(in)["ID"], 10, 64)
+	var id int64
+	id, err = in.Params().Int64("ID")
 	if err != nil {
-		translation := translate.Message("DeleteDeviceType", "Unable to delete DeviceType")
-		logging.Error("%s: %v", translation, err)
-		http.Error(out, translation, http.StatusInternalServerError)
+		err = errors.New(translate.Message("DeleteDeviceType", "Unable to delete DeviceType"))
 		return
 
 	}
@@ -51,10 +46,9 @@ func Delete(out http.ResponseWriter, in *http.Request) {
 
 	_, err = db.Conn.NewDelete().Model(&input).WherePK().Exec(db.Context)
 	if err != nil {
-		translation := translate.Message("DeleteDeviceType", "Unable to delete DeviceType")
-		logging.Error("%s: %v", translation, err)
-		http.Error(out, translation, http.StatusInternalServerError)
+		err = errors.New(translate.Message("DeleteDeviceType", "Unable to delete DeviceType"))
 		return
 	}
 	formats.WriteJSONResponse(input, out, in)
+	return
 }

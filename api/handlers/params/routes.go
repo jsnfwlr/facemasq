@@ -1,10 +1,11 @@
 package params
 
-import "facemasq/lib/extensions"
+import (
+	"github.com/uptrace/bunrouter"
+)
 
-func GetRoutes() (routes []extensions.RouteDefinition) {
-	routes = []extensions.RouteDefinition{
-		{Path: `/api/params`, Handler: GetAllParams, Methods: "GET", Name: "GetAllParams"},
-	}
-	return
+func GetRoutes(router *bunrouter.Router) {
+	router.WithGroup("/api/params", func(group *bunrouter.Group) {
+		group.GET(``, GetAllParams) // "GetAllParams"
+	})
 }

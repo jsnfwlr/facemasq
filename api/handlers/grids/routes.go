@@ -1,16 +1,15 @@
 package grids
 
-import "facemasq/lib/extensions"
+import (
+	"github.com/uptrace/bunrouter"
+)
 
-func GetRoutes() (routes []extensions.RouteDefinition) {
-	routes = []extensions.RouteDefinition{
-		{Path: `/api/grids/dosier`, Handler: GetDeviceDosier, Methods: "POST", Name: "GetDeviceDosier"},
-
-		{Path: `/api/grids/alldevices`, Handler: GetAllDevices, Methods: "GET", Name: "GetAllDevices"},
-		{Path: `/api/grids/activedevices`, Handler: GetActiveDevices, Methods: "GET", Name: "GetActiveDevices"},
-		{Path: `/api/grids/unknowndevices`, Handler: GetUnknownDevices, Methods: "GET", Name: "GetUnknownDevices"},
-
-		{Path: `/ws/grids/changed`, Handler: GetRecentlyChangedDevices, Methods: "WS", Name: "WSRecentlyChangedDevices"},
-	}
-	return
+func GetRoutes(router *bunrouter.Router) {
+	router.WithGroup("/api/grids", func(group *bunrouter.Group) {
+		group.POST(`/dosier`, GetDeviceDosier)          // "GetDeviceDosier"
+		group.GET(`/alldevices`, GetAllDevices)         // "GetAllDevices"
+		group.GET(`/activedevices`, GetActiveDevices)   // "GetActiveDevices"
+		group.GET(`/unknowndevices`, GetUnknownDevices) // "GetUnknownDevices"
+	})
+	// 	router.WS(`/ws/grids/changed`, GetRecentlyChangedDevices) // "WSRecentlyChangedDevices"
 }

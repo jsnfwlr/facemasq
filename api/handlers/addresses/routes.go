@@ -1,11 +1,12 @@
 package addresses
 
-import "facemasq/lib/extensions"
+import (
+	"github.com/uptrace/bunrouter"
+)
 
-func GetRoutes() (routes []extensions.RouteDefinition) {
-	routes = []extensions.RouteDefinition{
-		{Path: `/api/address`, Handler: Save, Methods: "POST", Name: "SaveAddress"},
-		{Path: `/api/address`, Handler: Delete, Methods: "DELETE", Name: "DeleteAddress"},
-	}
-	return
+func GetRoutes(router *bunrouter.Router) {
+	router.WithGroup("/api/address", func(group *bunrouter.Group) {
+		group.POST(``, Save)     // "SaveAddress"
+		group.DELETE(``, Delete) // "DeleteAddress"
+	})
 }

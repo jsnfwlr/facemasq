@@ -3,6 +3,7 @@ package logging
 import (
 	"bytes"
 	"fmt"
+	"os"
 	"strings"
 	"testing"
 	"time"
@@ -17,7 +18,7 @@ func TestLoggingLevels(t *testing.T) {
 	AllowTestLogging = true
 	SetLevel(zerolog.TraceLevel)
 
-	firstline := 56
+	firstline := 61
 	tests := []struct {
 		level string
 		line  int
@@ -36,20 +37,24 @@ func TestLoggingLevels(t *testing.T) {
 		// {level: "fatal", line: firstline + 12, fmt: "%s => logged as %s", arg1: "Fatal", arg2: "Fatal", expected: `{"level":"%[1]s","error":"%[4]s","time":"%[2]s","caller":"/home/phalacee/Projects/apps/facemasq/api/lib/logging/logging_test.go:%[3]d"}`},
 		// {Level: "trace", line: 30, fmt: "%s => logged as %s", arg1: "Trace", arg2: "Trace"},
 	}
+	conOut := zerolog.ConsoleWriter{Out: os.Stdout, TimeFormat: "2006-01-02T15:04:05.000"}
 
-	have := bytes.Buffer{}
-	Init(&have, &have, timeFormat)
+	buffOut := bytes.Buffer{}
 
-	defer func(have *bytes.Buffer) {
+	have := zerolog.MultiLevelWriter(conOut, &buffOut)
+
+	Init(have, have, timeFormat)
+
+	defer func(buffOut *bytes.Buffer) {
 		if r := recover(); r != nil {
-			if strings.TrimSuffix(have.String(), "\n") != Want {
-				t.Errorf("Error with %s:\nhave: '%s'\nwant: '%s'\n", "panic", strings.TrimSuffix(have.String(), "\n"), Want)
+			if strings.TrimSuffix(buffOut.String(), "\n") != Want {
+				t.Errorf("Error with %s:\nhave: '%s'\nwant: '%s'\n", "panic", strings.TrimSuffix(buffOut.String(), "\n"), Want)
 			}
 		}
-	}(&have)
+	}(&buffOut)
 
 	for i := range tests {
-		have = bytes.Buffer{}
+		buffOut = bytes.Buffer{}
 		Want = fmt.Sprintf(tests[i].expected, tests[i].level, time.Now().Format(timeFormat), tests[i].line, fmt.Sprintf(tests[i].fmt, tests[i].arg1, tests[i].arg2))
 		switch tests[i].arg1 {
 		case "Trace":
@@ -68,8 +73,8 @@ func TestLoggingLevels(t *testing.T) {
 			Fatal(tests[i].fmt, tests[i].arg1, tests[i].arg2)
 		}
 
-		if strings.TrimSuffix(have.String(), "\n") != Want {
-			t.Errorf("Error with %s:\nhave: '%s'\nwant: '%s'\n", tests[i].level, strings.TrimSuffix(have.String(), "\n"), Want)
+		if strings.TrimSuffix(buffOut.String(), "\n") != Want {
+			t.Errorf("Error with %s:\nhave: '%s'\nwant: '%s'\n", tests[i].level, strings.TrimSuffix(buffOut.String(), "\n"), Want)
 		}
 	}
 }

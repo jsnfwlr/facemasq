@@ -1,11 +1,12 @@
 package statuses
 
-import "facemasq/lib/extensions"
+import (
+	"github.com/uptrace/bunrouter"
+)
 
-func GetRoutes() (routes []extensions.RouteDefinition) {
-	routes = []extensions.RouteDefinition{
-		{Path: `/api/statuses`, Handler: Save, Methods: "POST", Name: "SaveStatus"},
-		{Path: `/api/statuses/{ID:[0-9]+}`, Handler: Delete, Methods: "DELETE", Name: "DeleteStatus"},
-	}
-	return
+func GetRoutes(router *bunrouter.Router) {
+	router.WithGroup("/api/statuses", func(group *bunrouter.Group) {
+		group.POST(`/api/statuses`, Save)         // "SaveStatus"
+		group.DELETE(`/api/statuses/:ID`, Delete) // "DeleteStatus"
+	})
 }

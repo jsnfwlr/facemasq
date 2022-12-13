@@ -1,11 +1,13 @@
 package devices
 
-import "facemasq/lib/extensions"
+import (
+	"github.com/uptrace/bunrouter"
+)
 
-func GetRoutes() (routes []extensions.RouteDefinition) {
-	routes = []extensions.RouteDefinition{
-		{Path: `/api/device`, Handler: Save, Methods: "POST", Name: "SaveDevice"},
-		{Path: `/api/device`, Handler: Delete, Methods: "DELETE", Name: "DeleteDevice"},
-	}
-	return
+func GetRoutes(router *bunrouter.Router) {
+	router.WithGroup("/api/device", func(group *bunrouter.Group) {
+		group.POST(``, Save)         // "SaveDevice"
+		group.DELETE(`/:ID`, Delete) // "DeleteDevice"
+		// group.DELETE(``, Delete) // "DeleteDevice"
+	})
 }
