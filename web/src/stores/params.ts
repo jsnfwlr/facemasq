@@ -73,7 +73,7 @@ export interface Location {
 export interface Maintainer {
   ID: number | null
   Label: string
-  IsInternal: number
+  IsInternal: boolean
   Notes: string | null
   IsLocked: boolean
 }
@@ -447,7 +447,7 @@ export const useParams = defineStore("params", {
     },
 
     NewMaintainer() {
-      this.Maintainers.splice(0, 0, { ID: null, Label: "", Notes: null, IsInternal: 0, IsLocked: false })
+      this.Maintainers.splice(0, 0, { ID: null, Label: "", Notes: null, IsInternal: false, IsLocked: false })
     },
     SaveMaintainer(index: number) {
       const isNew = this.Maintainers[index].ID === null || this.Maintainers[index].ID === 0

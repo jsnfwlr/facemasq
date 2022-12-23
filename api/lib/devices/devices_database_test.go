@@ -3,6 +3,7 @@
 package devices
 
 import (
+	"os"
 	"testing"
 
 	"facemasq/lib/db"
@@ -79,4 +80,17 @@ func TestGetDeviceChildren(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error closing container: %v", err)
 	}
+}
+
+func TestDeviceConnectivity(t *testing.T) {
+	db.DBEngine = "mysql"
+	db.DBConnString = os.Getenv("DBCONNSTR")
+	db.ReInitialise(db.DBConnString)
+	t.Logf("%s", os.Getenv("DBCONNSTR"))
+	err := db.Connect()
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Logf("Connected: %+v", db.DBEngine)
+
 }

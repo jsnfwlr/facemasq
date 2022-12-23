@@ -1,14 +1,17 @@
 package grids
 
 import (
+	"encoding/json"
 	"net/http"
 	"time"
 
 	helper "facemasq/lib/devices"
 	"facemasq/lib/formats"
+	"facemasq/lib/logging"
 	"facemasq/models"
 
-	"github.com/gorilla/websocket"
+	"github.com/gobwas/ws"
+	"github.com/gobwas/ws/wsutil"
 	"github.com/uptrace/bunrouter"
 )
 
@@ -17,11 +20,6 @@ var DefaultConnTime = time.Duration(-60) * time.Minute
 type Investigation struct {
 	AddressID    int64
 	Connectivity []models.Connection
-}
-
-var upgrader = websocket.Upgrader{
-	ReadBufferSize:  1024,
-	WriteBufferSize: 1024,
 }
 
 func GetDeviceDosier(out http.ResponseWriter, in bunrouter.Request) (err error) {
@@ -47,18 +45,7 @@ func GetDeviceDosier(out http.ResponseWriter, in bunrouter.Request) (err error) 
 }
 
 func GetActiveDevices(out http.ResponseWriter, in bunrouter.Request) (err error) {
-	queries := helper.DeviceQueries{
-		Devices:   `SELECT * FROM devices;`,
-		Netfaces:  `SELECT * FROM interfaces ORDER BY is_primary DESC, is_virtual ASC;`,
-		Addresses: `SELECT * FROM addresses WHERE last_seen = (SELECT time FROM scans ORDER BY time DESC LIMIT 1) ORDER BY is_primary DESC, is_virtual ASC;`,
-		Hostnames: `SELECT * FROM hostnames;`,
-		// Devices:   `SELECT * FROM devices;`,
-		// Netfaces:  `SELECT * FROM interfaces ORDER BY is_primary DESC, is_virtual ASC;`,
-		// Addresses: `SELECT * FROM addresses WHERE last_seen = (SELECT time FROM scans ORDER BY time DESC LIMIT 1) ORDER BY is_primary DESC, is_virtual ASC;`,
-		// Hostnames: `SELECT * FROM hostnames;`,
-	}
-
-	activeDevices, err := helper.GetDevices(queries, time.Now().Add(DefaultConnTime).Format("2006-01-02 15:04"), true)
+	activeDevices, err := helper.GetDevices(false, true, time.Now().Add(DefaultConnTime).Format("2006-01-02 15:04"), true)
 	if err != nil {
 		return
 	}
@@ -68,13 +55,7 @@ func GetActiveDevices(out http.ResponseWriter, in bunrouter.Request) (err error)
 }
 
 func GetAllDevices(out http.ResponseWriter, in bunrouter.Request) (err error) {
-	queries := helper.DeviceQueries{
-		Devices:   `SELECT * FROM devices;`,
-		Netfaces:  `SELECT * FROM interfaces ORDER BY is_primary DESC, is_virtual ASC;`,
-		Addresses: `SELECT * FROM addresses ORDER BY interface_id ASC, is_primary DESC, last_seen DESC, is_virtual ASC;`,
-		Hostnames: `SELECT * FROM hostnames;`,
-	}
-	allDevices, err := helper.GetDevices(queries, time.Now().Add(DefaultConnTime).Format("2006-01-02 15:04"), true)
+	allDevices, err := helper.GetDevices(false, false, time.Now().Add(DefaultConnTime).Format("2006-01-02 15:04"), true)
 	if err != nil {
 		return
 	}
@@ -84,14 +65,7 @@ func GetAllDevices(out http.ResponseWriter, in bunrouter.Request) (err error) {
 }
 
 func GetUnknownDevices(out http.ResponseWriter, in bunrouter.Request) (err error) {
-	queries := helper.DeviceQueries{
-		Devices:   `SELECT * FROM devices WHERE status_id = 1;`,
-		Netfaces:  `SELECT * FROM interfaces ORDER BY is_primary DESC, is_virtual ASC;`,
-		Addresses: `SELECT * FROM addresses ORDER BY is_primary DESC, is_virtual ASC;`,
-		Hostnames: `SELECT * FROM hostnames;`,
-	}
-
-	unknownDevices, err := helper.GetDevices(queries, time.Now().Add(DefaultConnTime).Format("2006-01-02 15:04"), true)
+	unknownDevices, err := helper.GetDevices(true, false, time.Now().Add(DefaultConnTime).Format("2006-01-02 15:04"), true)
 	if err != nil {
 		return
 	}
@@ -100,20 +74,58 @@ func GetUnknownDevices(out http.ResponseWriter, in bunrouter.Request) (err error
 	return
 }
 
-// func GetRecentlyChangedDevices(out http.ResponseWriter, in bunrouter.Request) (err error) {
-// 	socket, err := upgrader.Upgrade(out, in, nil)
-// 	if err != nil {
-// 		if _, ok := err.(websocket.HandshakeError); !ok {
-// 			logging.Error(err)
-// 		}
-// 		return
-// 	}
+func GetRecentlyChangedDevices(out http.ResponseWriter, in bunrouter.Request) (err error) {
+	socket, _, _, err := ws.UpgradeHTTP(in.Request, out)
+	if err != nil {
+		logging.Error(err)
+		return
+	}
+	// @TODO: move to channels so events can send data
+	go func() {
+		defer socket.Close()
+		for {
+			msg, op, err := wsutil.ReadClientData(socket)
+			if err != nil {
+				logging.Error(err)
+				break
+			}
+			lastMod, _ := time.Parse("2006-01-02 15:04:05", string(msg))
+			logging.Debug(lastMod)
+			changes, lastSeen, err := helper.GetChangesSince(lastMod, true)
+			if err != nil {
+				logging.Error(err)
+			}
+			reply := make(map[string]interface{})
+			reply["lastMod"] = lastSeen
+			reply["devices"] = changes
+			msg, err = json.Marshal(reply)
+			if err != nil {
+				logging.Error(err)
+			}
+			err = wsutil.WriteServerMessage(socket, op, msg)
+			if err != nil {
+				logging.Error(err)
+				break
+			}
+		}
+	}()
 
-// 	lastMod, _ := time.Parse("2006-01-02 15:04:05", in.FormValue("lastMod"))
+	// lastMod, _ := time.Parse("2006-01-02 15:04:05", in.FormValue("lastMod"))
 
-// 	go helper.Writer(socket, lastMod)
-// 	helper.Reader(socket)
-// }
+	// done := false
+	// for {
+	// 	switch {
+	// 	case <-appDone:
+	// 		done = true
+	// 	case <-appUpdate:
+	// 		go sendMessage(socket, helper.GetChangesSince(&lastMod, true))
+	// 	}
+	// 	if done {
+	// 		break
+	// 	}
+	// }
+	return
+}
 
 /*
 (function() {

@@ -1,8 +1,6 @@
 package routes
 
 import (
-	"github.com/uptrace/bunrouter"
-
 	"facemasq/handlers/addresses"
 	"facemasq/handlers/architectures"
 	"facemasq/handlers/categories"
@@ -23,6 +21,9 @@ import (
 	"facemasq/handlers/users"
 	"facemasq/handlers/users/maintainers"
 	"facemasq/handlers/vlans"
+	"facemasq/lib/httperror"
+
+	"github.com/uptrace/bunrouter"
 )
 
 type Router struct {
@@ -38,31 +39,34 @@ func Init() (router *Router) {
 
 func (router *Router) BuildRoutes() {
 
-	control.GetRoutes(router.Bun)          // Control, UI, State Routes
-	charts.GetRoutes(router.Bun)           // Chart Routes
-	grids.GetRoutes(router.Bun)            // Grid Routes
-	trends.GetRoutes(router.Bun)           // Trend Routes
-	devices.GetRoutes(router.Bun)          // Device Routes
-	interfaces.GetRoutes(router.Bun)       // Interface Routes
-	addresses.GetRoutes(router.Bun)        // Addresse Routes
-	hostnames.GetRoutes(router.Bun)        // Hostname Routes
-	meta.GetRoutes(router.Bun)             // User & App Settings Routes
-	params.GetRoutes(router.Bun)           // Combined Params Routes
-	categories.GetRoutes(router.Bun)       // Category Routes
-	statuses.GetRoutes(router.Bun)         // Status Routes
-	locations.GetRoutes(router.Bun)        // Location Routes
-	maintainers.GetRoutes(router.Bun)      // Maintainer Routes
-	devicetypes.GetRoutes(router.Bun)      // DeviceType Routes
-	architectures.GetRoutes(router.Bun)    // Architecture Routes
-	operatingsystems.GetRoutes(router.Bun) // OperatingSystem Routes
-	vlans.GetRoutes(router.Bun)            // VLAN Routes
-	users.GetRoutes(router.Bun)            // User Routes
-	interfacetypes.GetRoutes(router.Bun)   // InterfaceType Routes
+	router.Bun.WithGroup("/api", func(group *bunrouter.Group) {
+		group.Use(httperror.Handler)
+		charts.GetRoutes(group)              // Chart Routes
+		grids.GetRoutes(group)               // Grid Routes
+		trends.GetRoutes(group)              // Trend Routes
+		devices.GetRoutes(group)             // Device Routes
+		interfaces.GetRoutes(group)          // Interface Routes
+		addresses.GetRoutes(group)           // Addresse Routes
+		hostnames.GetRoutes(group)           // Hostname Routes
+		meta.GetRoutes(group)                // User & App Settings Routes
+		params.GetRoutes(group)              // Combined Params Routes
+		categories.GetRoutes(group)          // Category Routes
+		statuses.GetRoutes(group)            // Status Routes
+		locations.GetRoutes(group)           // Location Routes
+		maintainers.GetRoutes(group)         // Maintainer Routes
+		devicetypes.GetRoutes(group)         // DeviceType Routes
+		architectures.GetRoutes(group)       // Architecture Routes
+		operatingsystems.GetRoutes(group)    // OperatingSystem Routes
+		vlans.GetRoutes(group)               // VLAN Routes
+		users.GetRoutes(group)               // User Routes
+		interfacetypes.GetRoutes(group)      // InterfaceType Routes
+		control.GetRoutes(router.Bun, group) // Control, UI, State Routes
+	})
 
 	// For now, plugin routes go last, to prevent them over riding the built in routes.
 	// This may change in the future, but will require some sort of plugin security, with user confirmation and signed binaries
 	// if extensions.Manager.HasRoutes() {
-	// 	extensions.Manager.GetRoutes(router.Bun)
+	// 	extensions.Manager.GetRoutes(group)
 	// }
 
 	// return

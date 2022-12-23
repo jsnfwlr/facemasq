@@ -6,6 +6,7 @@ import (
 
 	"facemasq/lib/files"
 	"facemasq/lib/logging"
+	"facemasq/lib/utils"
 
 	"github.com/nicksnyder/go-i18n/v2/i18n"
 
@@ -50,11 +51,13 @@ func Start() (err error) {
 }
 
 func Message(id, msg string) (translation string) {
+	defaultMessage := &i18n.Message{
+		ID:   id,
+		Hash: utils.Sha256(msg),
+	}
 	translation = Localiser.MustLocalize(&i18n.LocalizeConfig{
-		DefaultMessage: &i18n.Message{
-			ID:    id,
-			Other: msg,
-		},
+		MessageID:      id,
+		DefaultMessage: defaultMessage,
 	})
 	return
 }

@@ -75,6 +75,10 @@ func initialise(dbConnString string) (err error) {
 	return
 }
 
+func ReInitialise(dbConnString string) (err error) {
+	return initialise(dbConnString)
+}
+
 func Connect() (err error) {
 	var conn *sql.DB
 	var doPrepare bool
@@ -108,6 +112,7 @@ func Connect() (err error) {
 	}
 
 	Conn.AddQueryHook(bundebug.NewQueryHook(
+		bundebug.WithVerbose(true),
 		bundebug.FromEnv("BUNDEBUG"),
 	))
 	doPrepare, err = checkPrepare()

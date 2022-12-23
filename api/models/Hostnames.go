@@ -9,8 +9,8 @@ type Hostnames []Hostname
 type Hostname struct {
 	ID        int64       `bun:",notnull,pk,autoincrement"`
 	Hostname  string      `bun:",type:varchar(256),notnull,unique"`
-	IsDNS     bool        `bun:",type:boolean,nullzero,notnull,default:false"`
-	IsSelfSet bool        `bun:",type:boolean,nullzero,notnull,default:false"`
+	IsDNS     bool        `bun:",type:boolean,notnull,default:false"`
+	IsSelfSet bool        `bun:",type:boolean,notnull,default:false"`
 	Notes     null.String `bun:",type:text"`
 	// CreatedAt time.Time   `bun:",nullzero,notnull,default:current_timestamp"`
 	// DeletedAt time.Time   `bun:",soft_delete,nullzero"`

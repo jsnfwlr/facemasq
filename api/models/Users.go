@@ -16,9 +16,9 @@ type User struct {
 	Label           string      `bun:",type:varchar(64),unique,notnull"`
 	Notes           null.String `bun:",type:text"`
 	AccessLevel     int64       `bun:",nullzero,notnull,default:0"`
-	CanAuthenticate bool        `bun:",type:boolean,nullzero,notnull,default:false"`
-	IsInternal      bool        `bun:",type:boolean,nullzero,notnull,default:false"`
-	IsLocked        bool        `bun:",type:boolean,nullzero,notnull,default:false"`
+	CanAuthenticate bool        `bun:",type:boolean,notnull,default:false"`
+	IsInternal      bool        `bun:",type:boolean,notnull,default:false"`
+	IsLocked        bool        `bun:",type:boolean,notnull,default:false"`
 	// CreatedAt       time.Time   `bun:",nullzero,notnull,default:current_timestamp"`
 	// DeletedAt       time.Time   `bun:",soft_delete,nullzero"`
 	NewPassword null.String `bun:"-"`

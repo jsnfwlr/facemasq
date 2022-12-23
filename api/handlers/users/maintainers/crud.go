@@ -3,6 +3,8 @@ package maintainers
 import (
 	"facemasq/lib/db"
 	"facemasq/lib/formats"
+	"facemasq/lib/httperror"
+	"facemasq/lib/logging"
 	"facemasq/lib/translate"
 	"facemasq/models"
 	"net/http"
@@ -15,8 +17,13 @@ func Save(out http.ResponseWriter, in bunrouter.Request) (err error) {
 	var input models.Maintainer
 	err = formats.ReadJSONBody(in, &input)
 	if err != nil {
-		err = errors.New(translate.Message("SaveMaintainerError", "Unable to save Maintainer"))
-		// logging.Error("%s: %v", translation, err)
+		translation := translate.Message("SaveMaintainerError", "Unable to save maintainer")
+		logging.Error("%s: %v", translation, err)
+
+		err = httperror.HTTPError{
+			Code:    "SaveMaintainerError",
+			Message: "Unable to save Maintainer",
+		}
 		// http.Error(out, translation, http.StatusInternalServerError)
 		return
 	}

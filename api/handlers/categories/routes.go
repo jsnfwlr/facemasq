@@ -4,8 +4,8 @@ import (
 	"github.com/uptrace/bunrouter"
 )
 
-func GetRoutes(router *bunrouter.Router) {
-	router.WithGroup("/api/categories", func(group *bunrouter.Group) {
+func GetRoutes(group *bunrouter.Group) {
+	group.WithGroup("/categories", func(group *bunrouter.Group) {
 		group.POST(``, Save)         // "SaveCategory"
 		group.DELETE(`/:ID`, Delete) // "DeleteCategory"
 	})

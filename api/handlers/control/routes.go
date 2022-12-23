@@ -4,7 +4,7 @@ import (
 	"github.com/uptrace/bunrouter"
 )
 
-func GetRoutes(router *bunrouter.Router) {
+func GetRoutes(router *bunrouter.Router, group *bunrouter.Group) {
 	// webDir, err := files.GetDir("web")
 	// if err != nil {
 	// 	panic(err)
@@ -13,8 +13,6 @@ func GetRoutes(router *bunrouter.Router) {
 	// router.GET(`/`, bunrouter.HTTPHandler(fileServer)) // "ServeUI"
 	router.GET(`/*filename`, Static) // "ServeStatic"
 
-	router.WithGroup("/api", func(group *bunrouter.Group) {
-		group.GET(`/exit`, Exit)   // "APIExit"
-		group.GET(`/state`, State) // "GetStatus"
-	})
+	group.GET(`/exit`, Exit)   // "APIExit"
+	group.GET(`/state`, State) // "GetStatus
 }

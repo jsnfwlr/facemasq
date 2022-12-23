@@ -12,7 +12,7 @@ type VLAN struct {
 	Maskv4   string      `bun:",type:varchar(19),notnull"`
 	Maskv6   string      `bun:",type:varchar(128),notnull"`
 	Notes    null.String `bun:",type:text"`
-	IsLocked bool        `bun:",type:boolean,nullzero,notnull,default:false"`
+	IsLocked bool        `bun:",type:boolean,notnull,default:false"`
 }
 
 func GetVLANSeed() (seed []VLAN) {

@@ -11,9 +11,9 @@ type Interfaces []Interface
 type Interface struct {
 	ID        int64       `bun:",notnull,pk,autoincrement" json:"ID"`
 	MAC       string      `bun:",type:varchar(17),notnull,unique" json:"MAC"`
-	IsPrimary bool        `bun:",type:boolean,nullzero,notnull,default:true" json:"IsPrimary"`
-	IsVirtual bool        `bun:",type:boolean,nullzero,notnull,default:false" json:"IsVirtual"`
-	IsOnline  bool        `bun:",type:boolean,nullzero,notnull,default:false" json:"IsOnline"`
+	IsPrimary bool        `bun:",type:boolean,notnull,default:true" json:"IsPrimary"`
+	IsVirtual bool        `bun:",type:boolean,notnull,default:false" json:"IsVirtual"`
+	IsOnline  bool        `bun:",type:boolean,notnull,default:false" json:"IsOnline"`
 	Label     null.String `bun:",type:varchar(64)" json:"Label"`
 	Notes     null.String `bun:",type:text" json:"Notes"`
 	LastSeen  time.Time   `bun:",nullzero,notnull,default:current_timestamp" json:"LastSeen"`

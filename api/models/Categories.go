@@ -11,7 +11,7 @@ type Category struct {
 	Label    string      `bun:",type:varchar(64),unique,notnull"`
 	Icon     string      `bun:",type:varchar(64),notnull"`
 	Notes    null.String `bun:",type:text"`
-	IsLocked bool        `bun:",type:boolean,nullzero,notnull,default:false"`
+	IsLocked bool        `bun:",type:boolean,notnull,default:false"`
 }
 
 func GetCategorySeed() (seed []Category) {

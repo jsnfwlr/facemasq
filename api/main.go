@@ -6,6 +6,7 @@ import (
 	"facemasq/lib/logging"
 	"facemasq/lib/network"
 	"facemasq/lib/scans/iprange"
+	"facemasq/lib/translate"
 	"facemasq/routes"
 	"flag"
 	"time"
@@ -28,25 +29,38 @@ func main() {
 	}
 	logging.Info("Running faceMasq as a daemon")
 
-	err := db.Connect()
+	// Initialize i18n engine
+	err := translate.Start()
+	if err != nil {
+		logging.Panic(err)
+	}
+
+	// create DB connectio n
+	err = db.Connect()
 	if err != nil {
 		logging.Panic(err)
 	}
 	logging.Info("Connected: %+v", db.DBEngine)
 
+	// Prepare Routes
 	router := routes.Init()
+
+	// Load extensions
 	_, err = extensions.LoadExtensions(router.Bun)
 	if err != nil {
 		logging.Fatal("%v", err)
 	}
 
+	// Output Network summary
 	network.ShowNetworkSummary()
 
+	// Schedule the active ARP request scans if the network.Target is defined
 	if network.Target != "" {
 		logging.Info("Active Net scan running every %v", iprange.Frequency)
 		iprange.Schedule()
 	}
 
+	// Run the API server
 	router.Run()
 	if err != nil {
 		logging.Fatal("%v", err)

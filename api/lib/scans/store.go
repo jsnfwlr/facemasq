@@ -24,13 +24,7 @@ func (records DeviceRecords) GroupParams() (ipv4, mac []string) {
 }
 
 func getDevices() (allDevices []models.Device, err error) {
-	queries := devices.DeviceQueries{
-		Devices:   `SELECT * FROM devices;`,
-		Netfaces:  `SELECT * FROM interfaces ORDER BY is_primary DESC, is_virtual ASC;`,
-		Addresses: `SELECT * FROM addresses ORDER BY interface_id ASC, is_primary DESC, last_seen DESC, is_virtual ASC;`,
-		Hostnames: `SELECT * FROM hostnames;`,
-	}
-	allDevices, err = devices.GetDevices(queries, "", false)
+	allDevices, err = devices.GetDevices(false, false, "", false)
 	return
 }
 

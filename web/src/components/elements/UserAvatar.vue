@@ -26,12 +26,10 @@
   // appStore.saveSetting("avatarType", "https://avatars.dicebear.com/api/avataaars/")
 
   const avatar = computed(() => {
-    if (settings.value.avatarType.includes("gravatar")) {
-      return settings.value.avatarType + md5(account.value.Username) + "?d=" + "https%3A%2F%2Favatars.dicebear.com%2Fapi%2Finitials%2F" + account.value.Username + ".png"
-    } else if (settings.value.avatarType.includes("dicebear")) {
+    if (settings.value.avatarType.includes("dicebear")) {
       return settings.value.avatarType + md5(account.value.Username) + ".svg" // .replace(/[^a-z0-9]+/i, "-") + ".svg"
     }
-    return "-"
+    return settings.value.avatarType + md5(account.value.Username) + "?d=" + "https%3A%2F%2Favatars.dicebear.com%2Fapi%2Finitials%2F" + account.value.Username + ".png"
   })
 </script>
 

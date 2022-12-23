@@ -72,7 +72,7 @@ func ParseConnectivityData(addresses []int64, connections []models.ConnectionGro
 	return
 }
 
-func GetDevices(queries DeviceQueries, connTime string, includeConnectivity bool) (matchedDevices []models.Device, err error) {
+func GetDevices(unknownOnly, activeOnly bool, connTime string, includeConnectivity bool) (matchedDevices []models.Device, err error) {
 	var devices []models.Device
 	var netfaces []models.Interface
 	var addresses []models.Address
@@ -80,22 +80,33 @@ func GetDevices(queries DeviceQueries, connTime string, includeConnectivity bool
 	var connections []models.ConnectionGroup
 	var connectivity map[int64]Connectivity
 
-	err = db.Conn.NewRaw(queries.Devices).Scan(db.Context, &devices)
+	if unknownOnly {
+		err = db.Conn.NewSelect().Model(&devices).Where("status_id = ?", 1).Scan(db.Context)
+	} else {
+		err = db.Conn.NewSelect().Model(&devices).Scan(db.Context)
+	}
 	if err != nil {
 		return
 	}
 
-	err = db.Conn.NewRaw(queries.Netfaces).Scan(db.Context, &netfaces)
+	err = db.Conn.NewSelect().Model(&netfaces).OrderExpr("is_primary DESC, is_virtual ASC").Scan(db.Context)
+	if err != nil {
+		return
+	}
+	if activeOnly {
+		var lastSeen time.Time
+		_ = db.Conn.NewRaw("SELECT time FROM scans ORDER BY time DESC LIMIT 1").Scan(db.Context, &lastSeen)
+
+		err = db.Conn.NewSelect().Model(&addresses).Where("last_seen > ?", lastSeen.Format("2006-01-02 15:04")).Scan(db.Context)
+		logging.Info("Address length: %d", len(addresses))
+	} else {
+		err = db.Conn.NewSelect().Model(&addresses).Scan(db.Context)
+	}
 	if err != nil {
 		return
 	}
 
-	err = db.Conn.NewRaw(queries.Addresses).Scan(db.Context, &addresses)
-	if err != nil {
-		return
-	}
-
-	err = db.Conn.NewRaw(queries.Hostnames).Scan(db.Context, &hostnames)
+	err = db.Conn.NewSelect().Model(&hostnames).Scan(db.Context)
 	if err != nil {
 		return
 	}
@@ -197,6 +208,7 @@ func GetChangesSince(lastSeen time.Time, includeConnectivity bool) (matchedDevic
 		interfaceIDs = append(interfaceIDs, addresses[a].InterfaceID)
 		addressIDs = append(addressIDs, addresses[a].ID)
 	}
+	logging.Debug("%d addresses", len(addresses))
 
 	err = db.Conn.NewSelect().Model(&hostnames).Where("address_id IN (?)", bun.In(addressIDs)).Scan(db.Context)
 	if err != nil {

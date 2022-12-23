@@ -7,8 +7,7 @@ import (
 	"facemasq/lib/files"
 	"facemasq/lib/logging"
 
-	"github.com/rs/cors"
-	"github.com/urfave/negroni/v3"
+	"github.com/uptrace/bunrouter/extra/reqlog"
 )
 
 var Port string
@@ -25,19 +24,17 @@ func (router *Router) Run() (err error) {
 	rootDir, _ = files.GetAppRoot()
 	logging.Info("Starting API server at localhost:%s from  %s", Port, rootDir)
 
-	server := negroni.New()
 	router.BuildRoutes()
 
-	if os.Getenv("NETMASK") == "" {
-		corsControl := cors.AllowAll()
-		server.Use(corsControl)
-	}
-
 	if os.Getenv("VERBOSE") != "" {
-		server.Use(negroni.NewLogger())
+		router.Bun.Use(reqlog.NewMiddleware(
+		// reqlog.WithEnabled(false),
+		// reqlog.FromEnv("BUNDEBUG"),
+		))
 	}
 
-	server.UseHandler(router.Bun)
-	err = http.ListenAndServe(":"+Port, server)
+	handler := http.Handler(router.Bun)
+	handler = CORSHandler{Next: handler}
+	err = http.ListenAndServe(":"+Port, handler)
 	return
 }

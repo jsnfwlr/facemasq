@@ -4,8 +4,8 @@ import (
 	"github.com/uptrace/bunrouter"
 )
 
-func GetRoutes(router *bunrouter.Router) {
-	router.WithGroup("/api/operatingSystems", func(group *bunrouter.Group) {
+func GetRoutes(group *bunrouter.Group) {
+	group.WithGroup("/operatingSystems", func(group *bunrouter.Group) {
 		group.POST(``, Save)         // "SaveOperatingSystem"
 		group.DELETE(`/:ID`, Delete) // "DeleteOperatingSystem"
 	})

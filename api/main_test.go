@@ -13,12 +13,12 @@ import (
 
 func TestLoadExtensions(t *testing.T) {
 	var err error
-	extensions.Manager, err = extensions.LoadExtensions()
+	router := bunrouter.New()
+	extensions.Manager, err = extensions.LoadExtensions(router)
 	if err != nil {
 		log.Fatalf("%v", err)
 	}
-	router := bunrouter.New()
-	extensions.Manager.GetRoutes(router)
+	// extensions.Manager.GetRoutes(router)
 
 	eventList, err := events.List()
 	if err != nil {
