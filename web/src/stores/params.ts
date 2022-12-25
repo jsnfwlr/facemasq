@@ -472,7 +472,7 @@ export const useParams = defineStore("params", {
     },
 
     NewLocation() {
-      this.Locations.splice(0, 0, { ID: null, Label: "", IsCloud: 0, Notes: null, IsLocked: false })
+      this.Locations.splice(0, 0, { ID: null, Label: "", IsCloud: false, Notes: null, IsLocked: false })
     },
     SaveLocation(index: number) {
       const isNew = this.Locations[index].ID === null || this.Locations[index].ID === 0
