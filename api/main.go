@@ -6,8 +6,8 @@ import (
 	"facemasq/lib/logging"
 	"facemasq/lib/network"
 	"facemasq/lib/scans/iprange"
+	"facemasq/lib/server"
 	"facemasq/lib/translate"
-	"facemasq/routes"
 	"flag"
 	"time"
 )
@@ -43,10 +43,10 @@ func main() {
 	logging.Info("Connected: %+v", db.DBEngine)
 
 	// Prepare Routes
-	router := routes.Init()
+	server.Router = server.Init()
 
 	// Load extensions
-	_, err = extensions.LoadExtensions(router.Bun)
+	_, err = extensions.LoadExtensions(server.Router.Bun)
 	if err != nil {
 		logging.Fatal("%v", err)
 	}
@@ -61,7 +61,7 @@ func main() {
 	}
 
 	// Run the API server
-	router.Run()
+	server.Router.Run()
 	if err != nil {
 		logging.Fatal("%v", err)
 	}

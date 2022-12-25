@@ -1,4 +1,4 @@
-package routes
+package server
 
 import (
 	"net/http"
@@ -6,11 +6,10 @@ import (
 
 	"facemasq/lib/files"
 	"facemasq/lib/logging"
-
-	"github.com/uptrace/bunrouter/extra/reqlog"
 )
 
 var Port string
+var Router *RouterConfig
 
 func init() {
 	Port = os.Getenv("PORT")
@@ -19,19 +18,19 @@ func init() {
 	}
 }
 
-func (router *Router) Run() (err error) {
+func (router *RouterConfig) Run() (err error) {
 	var rootDir string
 	rootDir, _ = files.GetAppRoot()
 	logging.Info("Starting API server at localhost:%s from  %s", Port, rootDir)
 
 	router.BuildRoutes()
 
-	if os.Getenv("VERBOSE") != "" {
-		router.Bun.Use(reqlog.NewMiddleware(
-		// reqlog.WithEnabled(false),
-		// reqlog.FromEnv("BUNDEBUG"),
-		))
-	}
+	// // if os.Getenv("VERBOSE") != "" {
+	// // 	router.Bun.Use(reqlog.NewMiddleware(
+	// // 	// reqlog.WithEnabled(false),
+	// // 	// reqlog.FromEnv("BUNDEBUG"),
+	// // 	))
+	// }
 
 	handler := http.Handler(router.Bun)
 	handler = CORSHandler{Next: handler}

@@ -3,8 +3,8 @@ package maintainers
 import (
 	"facemasq/lib/db"
 	"facemasq/lib/formats"
-	"facemasq/lib/httperror"
 	"facemasq/lib/logging"
+	"facemasq/lib/server/httperror"
 	"facemasq/lib/translate"
 	"facemasq/models"
 	"net/http"

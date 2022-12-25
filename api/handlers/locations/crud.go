@@ -4,6 +4,8 @@ import (
 	"errors"
 	"facemasq/lib/db"
 	"facemasq/lib/formats"
+	"facemasq/lib/logging"
+	"facemasq/lib/server/httperror"
 	"facemasq/lib/translate"
 	"facemasq/models"
 	"net/http"
@@ -15,7 +17,13 @@ func Save(out http.ResponseWriter, in bunrouter.Request) (err error) {
 	var input models.Location
 	err = formats.ReadJSONBody(in, &input)
 	if err != nil {
-		err = errors.New(translate.Message("SaveLocationError", "Unable to save Location"))
+		translation := translate.Message("SaveLocationError", "Unable to save location")
+		logging.Error("%s: %v", translation, err)
+
+		err = httperror.HTTPError{
+			Code:    "SaveLocationError",
+			Message: "Unable to save location",
+		}
 		return
 	}
 

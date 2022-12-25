@@ -66,7 +66,7 @@ export interface InterfaceType {
 export interface Location {
   ID: number | null
   Label: string
-  IsCloud: number
+  IsCloud: boolean
   Notes: string | null
   IsLocked: boolean
 }
