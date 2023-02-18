@@ -17,10 +17,11 @@ var Sleep bool
 func init() {
 	flag.BoolVar(&Sleep, "sleep", false, "Just sleep, don't start any goroutines")
 
-	flag.Parse()
 }
 
 func main() {
+	flag.Parse()
+
 	if Sleep {
 		logging.Info("Running faceMasq as a sleeper")
 		for {
@@ -61,7 +62,7 @@ func main() {
 	}
 
 	// Run the API server
-	server.Router.Run()
+	err = server.Router.Run()
 	if err != nil {
 		logging.Fatal("%v", err)
 	}

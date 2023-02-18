@@ -24,3 +24,16 @@ func GetDeviceTypeSeed() (seed []DeviceType) {
 	}
 	return
 }
+
+// var _ bun.BeforeAppendModelHook = (*DeviceType)(nil)
+
+// func (m *DeviceType) BeforeAppendModel(ctx context.Context, query bun.Query) (err error) {
+// 	// switch query.(type) {
+// 	// case *bun.InsertQuery:
+// 	// 	m.CreatedAt = time.Now()
+// 	// case *bun.UpdateQuery:
+// 	// 	m.UpdatedAt = time.Now()
+// 	// }
+
+// 	return
+// }

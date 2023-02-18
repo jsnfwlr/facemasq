@@ -61,6 +61,14 @@ func SetLevel(level zerolog.Level) {
 
 }
 
+func GetLogger() *zerolog.Logger {
+	return &stdOut
+}
+
+func GetErrLogger() *zerolog.Logger {
+	return &stdErr
+}
+
 func Init(writerOut io.Writer, writerErr io.Writer, timeFormat string) {
 	zerolog.TimeFieldFormat = timeFormat
 	stdOut = zerolog.New(writerOut).With().Timestamp().CallerWithSkipFrameCount(utils.Ternary(utils.IsTest(), 3, 0).(int)).Logger()
